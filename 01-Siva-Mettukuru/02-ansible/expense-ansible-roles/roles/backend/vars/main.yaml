@@ -1,0 +1,6 @@
+login_user: root
+login_host: db.shahulahmed.online
+login_password: ExpenseApp@1
+DB_HOST: db.shahulahmed.online
+app_location: /app
+component: backend
