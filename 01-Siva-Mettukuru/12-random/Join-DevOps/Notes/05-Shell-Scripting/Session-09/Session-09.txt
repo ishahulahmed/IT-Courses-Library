@@ -1,0 +1,84 @@
+Session Overview
+-----------------
+a) Shell introduction
+b) Github signup
+c) Repo creation
+d) GitHub token
+e) Committing and pushing changes to GitHub
+f) Quiz
+
+
+In Last few sessions we completed
+Linux
+Expenses Project
+
+Shell Script
+-------------
+We are doing project Manually there are
+3 servers...
+
+What is configuring the server?
+--------------------------------
+installed application runtime --> nodejs [nothing but nodejs]
+downloaded code
+created a directory
+created a user for our application
+unzip the code
+installed node js depenedencies
+created systemctl service
+configured mysql details
+start the server
+These are the steps we did to configure the server. 
+i.e in a plain server we setup and installed our application properly
+
+What does it mean we are configuring our laptop? Installing all those things which are necessary to make our laptop usable is nothing but configuring our laptop.
+Initially we will install the OS.
+Configuring our username and password during installation process
+necessary softwares are installed [like vlc media player, google chrome, zoom, notepad++ etc]
+if we are installing packages means that is nothing but configuring the laptop.
+
+In the same if we are installing all those as described above means is nothing but configuring the server to use the applicaiton inside it.
+
+DB [Configuring]
+-------------------
+install mysql server
+configure password
+start the server
+
+Frontend [Configuring]
+-----------------------
+install nginx
+start nginx
+downloaded the code
+unzipped
+configured backend details
+start the server
+
+here, small project so 3 servers. if it is a big project then 15 servers or more will be there. if it is a big project we manually logging inside and performing configuring the server steps as above. it is complex.
+
+our expense project configuring manually [running those commands manually] --> it took 15 min
+if big project with 20 servers --> 30 min [even if you do fastly atleast 30 min]
+
+if any server crashes or any other problem in the server then we have to immediately create a new server and run those configuring steps properly and clear errors then again you will take 10-15 min.
+
+Deployment
+-----------
+releasing new version
+
+download android latest version
+switch off phone
+install latest version
+start the phone
+
+same way upgrade/releasing/deploying the new application everything is same.
+
+upgrade/releasing/deploying the new application
+------------------------------------------------
+download the 
+
+7:42
+
+
+
+
+

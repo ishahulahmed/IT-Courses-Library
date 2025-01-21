@@ -1,0 +1,570 @@
+Session Overview
+-----------------
+a) MySQL
+b) Backend
+c) Frontend
+d) Public vs private IP
+e) Forward vs Reverse proxy
+
+Launch 3 Instances --> RHEL-9 --> Launch Instance
+use expense-documentation --> https://github.com/daws-78s/expenses-documention
+
+Inside the database server we have schemas. In schemas we have tables.
+you can use Mobaxterm if super putty is not working. due some OS issues for few OS super putty is not working.
+
+even you can use git bash ssh ec2-user@ip-address
+
+Take sudo access and follow expense documentation to install mysql, backend and frontend.
+
+first install db as per documentation [take sudo access sudo su or sudo su -]
+
+systemctl start mysqld
+after starting mysqld using the above command password will empty for mysql server. so we are setting a password for it.
+mysql_secure_installation --set-root-pass ExpenseApp@1 [here username is root and we are setting up the root password as ExpenseApp@1]
+
+we will use following commands during troubleshooting: [to check whethere db is running or not]
+systemctl status mysqld 
+netstat -lntp --> 3306 port should be opened for mysql
+ps -ef | grep mysqld
+
+mysql [just mysql and enter then you will connect to the database if everythign configured correctly]
+show databases;
+exit
+
+Setup Backend as per documentation. Take sudo access first.
+Now, days version releases are coming faster. so, our operating systems are supporting multiple version. we can enable the version which we want and use it and disable other versions which are not needed.
+
+dnf module disable nodejs -y [this will disable the 18 version inside our server siva said] [we know it will disable all the versions]
+
+versions and programming lanaguages these decisions are taken by architects.
+
+we are creating an user for this application only
+useradd expense
+
+curl -o (here -o means output)
+
+curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+here, we are storing the zip file /tmp/backend
+you can use wget also but for flexibility we are using curl here
+
+you don't need to understand node.js development. you need to understand node.js structure.
+we are not windows operating system developers. but, we know how windows works as we know its structure.
+
+In Job Description if there is Java means. it doesn't mean you need to know java. it means you need java structure.
+
+NodeJS Structure
+--------------------
+.js files --> java script files
+package.json -> developers mention the dependencies and thier version
+	        it is a build file also.
+every language will have one build file [pom.xml like in java]
+package.json --> nodejs
+pom.xml --> java
+requirements.txt --> python
+
+all programming languages principles are same even though their languages are different. In those principles these build file etc is also one principle.
+ 
+install the dependencies --> npm install [in which folder you are running this command. it will read the package.json in that folder and install its dependencies]
+
+if dependencies are not downloaded properly our code will not work.
+
+why we need to give priavte-ip? [in backend.service why we give db private-ip]
+if we take a home netowrk there will be a modem and all other devices like laptop, computer and mobile etc are connected to modem wifi.
+
+if you enter facebook.com in your laptop first request will go to the modem. it will check if facebook.com servers in our network.
+do you think facebook.com is in our home? No. so, request needs to go out. so, model will send request to isp (internet service provider). 
+if you give a domain or ip-address which is not in the network (i.e your home network). modem responsibility is simply sending that request to isp from there isp will handle that request.
+
+here, modem will have two interfaces
+1. public 
+2. private
+
+in your command prompt if you give ipconfig [windows cmd]
+Wireless LAN adapter Wi-Fi:
+
+   Connection-specific DNS Suffix  . :
+   IPv4 Address. . . . . . . . . . . : 192.168.0.104  --> this is my ip-address
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.0.1
+
+but if you go into internet and search for what is my ip address
+https://whatismyipaddress.com/ --> it will give your ip information
+My IP Address is:
+IPv4: ? 49.204.197.154
+
+My IP Information:
+ISP: Beam Telecom Pvt Ltd
+City: Akkarampalle
+Region: Andhra Pradesh
+Country: India
+
+192.168.0.104 --> this is private-ip address
+49.204.197.154 --> this is public-ip address this is given by isp
+
+49.204.198.60 --> this is public-ip address shown to siva same used in diagram.
+
+49.204.197.154 --> this is the ip-adress for your entire network [i.e home network and devices connected to that network see diagram]
+
+why we have like this means this is a concept of NAT. (Network Address Translation)
+
+previously, for every sytem there was a ip-address. but, you know what happened Ipv4 got exhausted. so the designers thought if we keep on giving a ip-address for every system our ip-address range will get exhausted.
+
+NAT
+2^32 total IP Address [this is the IPv4 range]
+IPV4 exhausted
+
+So, they started giving one ip-address for an netowrk [like you homenetwork one ip-address]
+So, mobile, laptop, computer everythig ip-address is same i.e 49.204.198.60 as per diagram this is called network address translation.
+if communication is happening with in your network then it will be through private ip-address but if it is going out then communication will happen through public ip-address this is called network address translation.
+
+Default Gateway . . . . . . . . . : 192.168.0.1 [this is the gateway our modem ip]
+  Connection-specific DNS Suffix  . :
+   IPv4 Address. . . . . . . . . . . : 192.168.0.104
+   Subnet Mask . . . . . . . . . . . : 255.255.255.0
+   Default Gateway . . . . . . . . . : 192.168.0.1
+
+In your network configuration, the "Default Gateway" refers to the device that routes traffic from your local network to external networks, such as the internet. In your case, the default gateway is set to 192.168.0.1, which is typically the IP address of your router. When your device needs to send data outside of your local network, it forwards that data to the gateway, which then directs it to its destination.
+
+previously, in IRCTC from ip-address only two tickets can be booked. [i.e in your entire home how many devices also you use only two tickets because all devices are connected to same network modem]
+
+if you are searching internet for example any malicious sites or terrorist sites 49.204.198.60 this ip-address will be logged in your isp [i.e modem-ip address] then they can find out who visited those sites easily.
+
+This ip-address [modem] isp will keep on changing it [don't after how much time]. if you need the same ip-address then we have to pay isp 1000rs extra per month.
+
+systemcl status backed will show failed because you have just given ip-address but no username and password in backend.service file
+we have create database server but no table and schema is created. if you give directly to store how can it store without you creating schema and table.
+if i tell to store in wadrobe it cannot store. we have to tell which shelf to store in that wadrobe as an intruction.
+
+we are running operation from backend to database to store data in db.
+
+mysql-server --> this is server
+mysql --> client
+
+Linux --> Server
+Putty --> SSH client
+
+facebook.com --> http server
+browser --> http client
+
+so, for every server there will be a client software. database admin will create databases they will not give root access to database they will give you some client access. i.e you can connect from other server to this db.
+
+we cannot go and connect directly to the server. we will install a client package in other server from that client we will connect to the main server. 
+so, we are installing mysql client package in our server.
+dnf install mysql -y
+
+after installing mysql client there is file in /app/schema/backend.sql let us see what is there in it
+cat /app/schema/backend.sql
+
+CREATE DATABASE IF NOT EXISTS transactions; [we are creating a db or schema in a server]
+USE transactions; [using that db]
+
+CREATE TABLE IF NOT EXISTS transactions ( [creating table]
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    amount INT,
+    description VARCHAR(255)
+);
+
+CREATE USER IF NOT EXISTS 'expense'@'%' IDENTIFIED BY 'ExpenseApp@1'; [creating an user]
+GRANT ALL ON transactions.* TO 'expense'@'%'; [informing mysql server to give this user previliges]
+FLUSH PRIVILEGES;
+
+expense
+ExpenseApp@1
+these credentials are used by our nodejs application to connect. these username and password we have already configure in our nodejs code
+
+DbConfig.js [this is the cofiguration we set in our code in DbConfig.js file]
+module.exports = Object.freeze({
+    DB_HOST : '',
+    DB_USER : 'expense',
+    DB_PWD : 'ExpenseApp@1',
+    DB_DATABASE : 'transactions'
+});
+
+
+mysql -h 172.31.17.214 -uroot -pExpenseApp@1 < /app/schema/backend.sql
+This mysql commnad is connecting to the 172.31.45.116 [mysql-ip-address] with root username [-u means username we gave it as root] and its password ExpenseApp@1 [-p means password we set it as ExpenseApp@1] anad loading this schema  present in location /app/shema/backend.sql
+
+it is loading that schema means it is running the sql commands present in backend.sql
+
+run this  command 
+mysql -h 172.31.17.214 -uroot -pExpenseApp@1 < /app/schema/backend.sql
+
+after, running this command how to know whether executed or not
+mysql -h 172.31.17.214 -uroot -pExpenseApp@1 [run this command you will get]
+mysql: [Warning] Using a password on the command line interface can be insecure.
+Welcome to the MySQL monitor.  Commands end with ; or \g.
+Your MySQL connection id is 12
+Server version: 8.0.36 Source distribution
+
+Copyright (c) 2000, 2024, Oracle and/or its affiliates.
+
+Oracle is a registered trademark of Oracle Corporation and/or its
+affiliates. Other names may be trademarks of their respective
+owners.
+
+Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+mysql>
+
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| transactions       |
++--------------------+
+5 rows in set (0.00 sec)
+
+mysql> use transactions;
+Reading table information for completion of table and column names
+You can turn off this feature to get a quicker startup with -A
+
+Database changed
+mysql> show tables;
++------------------------+
+| Tables_in_transactions |
++------------------------+
+| transactions           |
++------------------------+
+1 row in set (0.00 sec)
+
+mysql> select * from transactions;
+Empty set (0.00 sec)
+
+so, we have connected to db successfully from our backend server. now we need start our application then our backend service will run.
+systemctl start backend
+systemctl status backend [active]
+
+if, we got a problem like our application is unable to connect to database. we will ping the db-ip-address
+ping 172.31.17.214 [it will ping nonstop]
+ping -c 3 172.31.17.214 [now it will ping 3 times]
+
+3 packets transmitted, 3 received, 0% packet loss, time 2030ms
+0% packet loss means backend server is able to reach database server.
+
+just like to check whether internet is working or not will ping in cmd [windows]
+ping google.com [in cmd this will ping 3 times only]
+
+backend should be able to connect DB server on port no 3306. how to test this?
+telnet <IP-Address> <port-no>
+
+telnet 172.31.29.181 3306
+Trying 172.31.29.181...
+Connected to 172.31.29.181.  [some other lines also like escape character sha2_password will come ignore that these 2 are main]
+
+backend apps usually run on port no 8080
+
+netstat -lntp
+Active Internet connections (only servers)
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      1262/sshd: /usr/sbi
+tcp6       0      0 :::22                   :::*                    LISTEN      1262/sshd: /usr/sbi
+tcp6       0      0 :::8080                 :::*                    LISTEN      14416/node
+
+ps -ef | grep node --> you can see our expense is running
+
+now, backend is finished we will go to frontend.
+
+
+Nginx --> Engine-X (Pronounciation)
+------------------------------------
+http web server
+reverse proxy
+port no --> 80
+
+nginx is a http web server and we will call it as reverse proxy. it runs on port no 80.
+
+if not working check in browser whether it is http or https.
+
+cd /etc/nignx/  --> here all nginx configuration files will be there
+/etc/nginx/nginx.conf --> this is the nginx main config file
+
+if you open this file
+vim nginx.conf
+  server {
+        listen       80;
+        listen       [::]:80;
+        server_name  _;
+        root         /usr/share/nginx/html;  --> this is where we need to keep our frontend website
+
+here, you can see it is listening in port no 80. if you want you can change the port no.
+
+/usr/share/nginx/html --> this is where we need to keep our frontend website
+
+/etc/nginx --> Home directory of nginx
+
+
+
+/var/log/nginx/error.log --> this is the location nginx stores logs
+
+/usr/share/nginx/html --> if you keep index.html. that will be served by default
+
+cd /usr/share/nginx/html/
+vim devops.html
+<h1>Hi, I am Learning DevOps with AWS</h1>
+
+in the browser if you give ip-address you will get the default nginx test page. instead of that give like this in browser
+54.89.160.90/devops.html --> you will get this page
+
+what does this mean? web server means a software that server what ever html and frontend files you write. In this /usr/share/nginx/html/ what ever html file you will place you can access that by 54.89.160.90/page.html. if you remove /page.html and give 54.89.160.90 directly it will server the default page.
+
+remove the default content in html directory and download and extract your application.
+In backend we are connecting backend to db but there is no forward and reverseproxy there because we are not hiding anything. But, when connecting frontend to backend we are using reverse proxy terminology because we are hiding backend implementation from users.
+you  will understand in next few lines
+
+Reverse Proxy
+-------------
+nginx is like a waiter. if waiter want to forward the request to backend this waiter should be aware of chef details.
+so, we should give the frontend site in our nginx backend details. Just like how we gave database details to backend. in the same way backend details should be given to frontend. so, frontned can forward requests to backend.
+
+where should be this given means that is in your configuration file.
+cd /etc/nginx/
+ls -l 
+nginx.conf --> main configuration file
+
+you can edit this nginx.conf file. but this is main configuration. without disturbing this we can keep our extra configuration in conf.d directory in /etc/nginx/conf.d
+include /etc/nginx/conf.d/*.conf; --> this line will be there in main nginx.conf file so that we can includ configuration file without disturbing this main configuration file.
+so, this is a general way. softwares will give extra directories to add configurations [custom-configuration] without disturbing the main configuration.
+
+Creating Nginx Reverse Proxy Configuration
+vim /etc/nginx/default.d/expense.conf
+
+Add the following content: [see documentation]
+proxy_http_version 1.1;
+
+location /api/ { proxy_pass http://172.31.32.178:8080/; }
+
+location /health {
+  stub_status on;
+  access_log off;
+}
+
+location /api/ { proxy_pass http://172.31.32.178:8080/; } --> if anyone gives /api/ then send request to our backend server
+give private backend ip
+
+Backend is called API Tier.
+API Tier means it will query db and give the data to Waiter. Waiter will do extra decoration to this data with HTML + CSS + JS
+Frontend --> Data + HTML + CSS + JS
+
+Now, what is Reverse-Proxy.
+we all use VPN to see OTT contents or IPL Matches etc
+
+what is proxy?
+-----------------
+some one on behalf of you == proxy
+
+In mobile we connect to VPN to see some restricted content.
+If that OTT platform has rule to access requests from US only. Then VPN
+VPN will change our location to US...
+
+In Companies we have VPN. generally CISCO VPN.
+We cannot directly access internet in companies we have something called VPN from which will access internet
+
+Here, existing VPN do the mobile know or the OTT platform --> mobile is aware of VPN
+OTT doesn't know. if they find out they will restrict us.
+This is called Forward Proxy.
+
+Forward Proxy
+----------------
+Forward Proxy clients are aware of VPN, but servers are not aware.
+
+If we are seeing through mobile means who is client and who is server. obiviously, mobile is client and ott platform is server.
+
+in the same way if you are accessing some site from internet [like docker.com, github.com, jenkins.com etc] in your company network. it means internet is not aware of your VPN only you are aware of your vpn.
+
+mobile vpn purpose is to access restricted content
+
+company VPN Purpose is
+----------------------
+restrict the websites [facebook, instagram etc]
+monitor the user requests [monitoring the users] 
+
+people opening facebook.com and instagram.com and doing timepass
+push project code to your github and your aws account servers
+
+Reverse Proxy
+-----------------
+For Example we are connecting to facebook.com. But, facebook.com has many servers inside the facebook network. we don't know how many servers are there in facebook network and to which server we are connecting.
+
+Are you aware of facebook is using proxy? --> No
+
+In Reverse Proxy, clients are not aware of proxy/VPN, only servers are aware.
+
+facebook will keep an nginx, we thing we are sending our requests to facebook.com. but, it is going to nginx server from it is going to the application servers.
+Why we are doing like this because code is running in application server. main code is there in application server that is code to connect to the database.
+if facebook will give us access to the application server code we can see how it is connecting to the database. 
+instead, of that they are giving it to reverse proxy.
+
+In reverse proxy clients are not aware of proxy you don't know where your request is actually going to. you don't know how many servers are there behind this is called reverse proxy.
+
+This is Like Security. You will understand later concepts like SSL Termination
+SSL termination
+Some secure features
+if someone attacks facebook.com. trying to down facebook.com continously running facebook.com by putting it in a loop and running it. for all those thing there will be validations near nginx [ssl termination] to check whether the requests are coming from human, robot or program facebook will take care of few precautions here.
+
+now, we are using reverse proxy in our expense project. nginx is nothing but reverse proxy.
+location /api/ { proxy_pass http://172.31.32.178:8080/; } --> if request comes from /api send it the backend server.
+
+give backend server private-ip address in expense.conf file
+
+after restaring nginx to check whether it is running correctly or not
+systemctl status nginx
+netstat -lntp
+ps -ef | grep nginx
+telent 172.31.18.227 8080
+
+add amount 5000 Food in Expense App
+right click --> inspect --> Network --> All [to show all files and requests] --> you can see in background where request is going if you add something
+Headers
+Request URL: http://54.89.160.90/api/transaction
+Request Method: POST
+Status Code: 200 OK
+Payload
+{amount: "5000", desc: "Food"}
+amount:"5000"
+desc: "Food"
+
+But if you give amount as text not number then it will fail and application will stop. because backend application will be inactive due to wrong input. you can check this by using command systemctl status backend in your backend server. To keep application working. we can put validation in our html code like giving warning if someone enters text to give number not text.
+
+give text in amount and see what happens
+right click --> inspect --> Network --> All [to show all files and requests] --> you can see in background where request is going if you add something
+Request URL:
+http://54.89.160.90/api/transaction
+Request Method:GET
+Status Code: 404 Not Found
+
+Developers have not provided validations for our expense application we are working on it. start the backend if applications stop due to text entered as input in amount column.
+
+http://54.85.211.179/api/transaction --> request going here if 200 movie
+http://54.85.211.179/api/transaction --> request goin gere if 231 travel
+
+this information is getting stored in db. if you want to verify in backend
+mysql -h 172.31.29.181 -uroot -pExpenseApp@1
+mysql> use transactions;
+mysql> show tables;
+mysql> select * from transaction;
+you can see transactions
++----+--------+-------------+
+| id | amount | description |
++----+--------+-------------+
+|  1 |   5000 | Food        |
+|  2 |   200  | movie       |
+|  3 |   231  | travel      |
++----+--------+-------------+
+3 rows in set (0.00 sec)
+
+this the resposne of request in you sent you can see this in Respone tab 
+{
+    "result": [
+        {
+            "id": 1,
+            "amount": 5000,
+            "description": "food"
+        },
+        {
+            "id": 2,
+            "amount": 200,
+            "description": "movie"
+        },
+        {
+            "id": 3,
+            "amount": 231,
+            "description": "travel"
+        }
+    ]
+}
+
+Further, Session we will get JSON and other even youtube i have videos.
+
+here, you need to understand how request is going from frontend to backend and from backend to db. frontend is giving request to backend. backend is performing crud operations on db.
+
+Domain Registering
+-------------------
+domain
+google.com
+facebook.com
+twitter.com
+
+humans have aadhaar cards but we cannot remember numbers we prefer names
+but computers are opposite they prefer numbers not names
+
+To, match these two there is a directory called
+DNS --> Domain name system
+
+DNS is dictionary for domains
+
+google.com = 123.48.55.77
+
+In our channel also we discussed about How DNS work but we will discuss again.
+first we need to buy domain
+
+from provider
+godaddy --> costly
+hostinger --> reasonable
+
+search for hostinger india --> other wise it will show in us dollars
+https://www.hostinger.in/
+
+search your domain in search bar and buy an domain as per your budget. just buy which is cheap cause for practise purpose only.
+give correct address only don't give any wrong address while buying
+
+sometimes hostiger will ask for 5000rs... autopay [for autopay purpose it will show as 5000rs you can login in into your account and cancel it]
+you will pay only max 200rs. no need to worry it is asking 5000rs
+
+after buying the domain
+I should transfer my domain to AWS...
+
+In AWS we have something called Route 53 in that Registered domains we can buy a domain there but cost is very high there. since here it is costly in aws we are registering in hostinger.
+
+why we need to transfer our domain to aws?
+our infrastructure and everything is present in aws. for ip-address updation and automation purpose it will be really useful when it is hosted in route 53 service. so, we need to transer our domain to aws.
+
+Route 53 --> Hosted zones --> Create hosted zone
+Domain name --> daws78s.online
+Type --> Public hosted zone
+Create hosted zone
+
+After doing that it will give some records [name server records --> see Record Type NS] we have to take this and update in hostinger.
+
+Hostinger Click on you domain --> left panel click on DNS/ Nameservers --> Change Nameservers --> paste the 4 nameservers in aws to here in 4 lines --> Save
+Here, we are telling hostinger i don't need your service i just used you for registeration. I want to change the nameservers
+Just like we are porting number airtel to bsnl [registering number at airtel but porting to bsnl]
+porting domain ownership to aws but provider is always hostinger
+aws will charge money 1$ per month
+hostinger will take 24hrs to make changes. but, sometimes within 1hr or 2hrs also it will be done.
+
+After the changes are done in hostinger.
+Create a record in aws
+Record name  --> don't give subdoamin keep it as daws78s.online --> Record type is A-Routes traffic to an IPv4 address and some AWS resources --> value give fronted ip-address --> TTl 1 second --> Routing policy Simple routing --> create records
+
+daws78s.online this the domain we are giving to our project 
+in browser if you put that domain address our expense project will work
+
+Tommorow we will discuss again with full clarity. since our domain will take 1 day to be active. so, completed our project today.
+
+Siva-Artice About How DNS Work
+https://joindevops.medium.com/how-dns-work-30ef4ba6762c#:~:text=Root%20servers%20scans%20the%20domain,address%20configured%20for%20the%20domain.
+
+In backend we created an user expense but for db mysql why no user.
+siva said when you install mysql with dnf install mysql-server automatically an user named mysql is created
+in db you can go and check
+ps -ef | grep mysqld
+mysql    1922      1    0  01:54 ?      00:00:17   /usr/libexec/mysqld  --basedir=/usr
+root     2132   1397    0  03:37 ptx/0  00:00:00   grep  --color=auto mysqld
+
+you can see mysql user in first line. here it is creating user on its own in db.
+
+Outside companies will also have their customised ami's like we have an ami redhat DevOps321
+
+in sshd config file if you give username and password then you can login with username and password no need key.
+
+/etc/sudoers file is a configuration file that controls who can run commands with elevated privileges on a Linux or Unix system. 
+if give in /etc/sudoers no password as all then without password it will give prevliged access to new users.
+
+in configuration file it is given if a user is in wheel group he has to use password.
+if you set wheel also no password then you the users in group also no need to use password.
+
+siva has not explained about wheel group and sshd config file in classes conducted till know This is a question asked at the end of this Session by someone.

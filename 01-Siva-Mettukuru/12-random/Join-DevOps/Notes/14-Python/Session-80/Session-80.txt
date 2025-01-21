@@ -1,0 +1,70 @@
+Power
+------
+a = 10
+print(a**2) # a^2
+
+Comparison operators
+---------------------
+a = 10
+b = 20
+res = a > b
+res_1 = a < b
+res_2 = a != b
+res_3 = a == b
+print(res, res_1, res_2, res_3)
+
+Logical Operators
+-----------------
+# AND, NOT, OR
+a = True
+b = False
+
+res = a and b
+res_1 = a or b
+res_2 = not a
+res_3 = not b
+print(res, res_1, res_2, res_3)
+
+Strings
+--------
+- String Datatype
+- Python is based on Zero indexing
+- for accessing an index [] brackets are used
+- Python has both positive indexing and negative indexing
+- positive indexing starts from 0 
+- negative indexing starts from -1
+a = "sample string"
+a[0] = "s"      a[-1] = "g"
+a[1] = "a"      a[-2] = "n"
+a[2] = "m"      a[-3] = "i"
+a[3] = "p"      a[-4] = "r"
+a[4] = "l"      a[-5] = "t"
+a[5] = "e"      a[-6] = "s"
+a[6] = " "      a[-7] = " "
+a[7] = "s"      a[-8] = "e"
+
+
+Slicing
+--------
+sample_str = "This is a sample string"
+if you want a take a chunk from a string i.e slice from a string
+sample_str[start: end] --> end position not include so end + 1
+sub_str = sample_str[2:7] --> end position not included
+sub_str = sample_str[-1:-4] --> end position not included
+print(sub_str)
+
+a = "sample"
+a[start:end:step-size] --> all 3 are optional
+start -> default 0 -> optional
+end -> default length of string -> optional
+step-size -> default 1 -> optional
+if given b = a[0:7:2] 
+step size 2 so b = sml --> increment index value by 2 (starting index value)
+if given b = a[0:7:1]  --> increment index value by 1 (starting index value)
+step size 1 so b = sample
+
+- len() --> length function to give length of string
+- Each and every datatype in python has several methods that are given by default
+- A method is used for a Class based object [obj.method() in Java]
+- A function is used for any object
+- Data types that are immutable can't be altered after they are defined

@@ -1,0 +1,227 @@
+Session Overview
+----------------
+a) Docker commands
+b) Dockerfile
+c) Dockerfile instructions
+
+
+docker inspect container-id/image-id --> Full Information of that container-id/image-id
+docker logs container-id --> To See Logs
+docker logs -f container-id  --> To See Runnig Logs -f means follow
+
+How to get the terminal access of running container --> docker exec -it container-id bash 
+(-it interactive terminal)
+
+Dockerfile -->it is the declarative way of creating custom images
+
+Shell --> keep all the commands in a file and run it...
+
+Dockerfile --> keep all the instructions a file i.e Dockerfile and build the image.
+
+Docker can build images automatically by reading the instructions from a Dockerfile. A Dockerfile is a text document that contains all the commands a user could call on the command line to assemble an image.
+
+Docker image = BaseOS+ App run time+ system packages and application dependencies + app code
+App run time (like java, node.js, python etc)
+
+docker build -t url/username/image-name:tag path/to/dockerfile
+
+docker build -t url/username/image-name:tag . --> will check for Dockerfile (. represent current directory)
+(building locally no need to give url and username just image name and tag name enough) (docker build -t from:1.0 .)
+(just like in terraform go to the location where the file is locally and run docker build command)
+
+Terraform is alos declarative what we will write we will get that.
+
+FROM
+-----
+from should be the first instruction to represent base os
+FROM image-name:tag
+
+RUN
+-----
+We wil use RUN instruction to install packages and configure them. RUN instruction wll execute at the time of image creation.
+RUN dnf install nginx -y
+
+docker system prune --> Clean Up Unused Data and Cache
+
+
+CMD
+-----
+this instruction will run at the time of container creation.
+
+systemctl start backend --> then only you can access backend application
+
+whatever the instruction you give in image to run as container, should run for infinite time.
+CMD ["executable","param1","param2"]
+
+systemctl will not work in containers and images.
+
+CMD ["nginx", "-g", "daemon off;"]
+Here, nginx is instructed to run in the foreground (daemon off;), which means it runs indefinitely, serving HTTP requests until the container is stopped.
+
+CMD 
+
+docker run -it --> create container and login inside...
+docker exec -it --> go inside runnig container (-it interactive terminal)
+(if you use docker run multiple times multiple containers will be created)
+
+
+ChatGPT CMD
+------------
+The CMD instruction in a Dockerfile specifies the default command to run when a Docker container starts. It does not execute during the creation of the container itself; rather, it dictates what command or process should run inside the container once it is started.
+
+Timing of CMD Instruction:
+
+1) During Container Creation:
+   a) When you build a Docker image using docker build -t image-name ., Docker reads the Dockerfile instructions, including CMD, and prepares an image based   
+      on those instructions.
+   b) At this stage, the CMD instruction is recorded as metadata in the image, indicating what command should be executed when a container is instantiated 
+      from that image.
+
+2) When Container Starts:
+   a) When you run a Docker container from an image (docker run image-name), Docker creates a new container instance based on the image.
+   b) During the startup of the container, Docker uses the CMD instruction to determine the initial command that the container should execute.
+   c) If no command is provided when starting the container (using docker run), Docker defaults to the command specified in CMD of the Dockerfile.
+
+
+In a Dockerfile, you can only have one CMD instruction. This is by design in Docker and reflects how Docker containers are expected to be run: with a single command that defines the primary process for the container.
+
+However, you can achieve similar functionality to running multiple commands by using a shell script or a process manager like Supervisor
+
+
+RUN vs CMD
+-----------
+RUN --> executes at build time means image creation time
+CMD --> only executes at the time of container creation i.e docker run
+
+
+LABEL
+-----
+1000 white covers, label the covers 
+(Bought 1000 white covers from different shoppings if you label those covers you will know easily from where you bought like heritage, more etc)
+(tags and label are filtering purpose)
+
+The LABEL instruction adds metadata to an image. A LABEL is a key-value pair. To include spaces within a LABEL value, use quotes and backslashes as you would in command-line parsing.
+
+Example:
+LABEL "com.example.vendor"="ACME Incorporated"
+LABEL com.example.label-with-value="foo"
+LABEL version="1.0"
+LABEL description="This text illustrates \
+that label-values can span multiple lines."
+
+docker images -f label=course=DevOps
+
+if there are 100's of images in the project then filtering the image we can use label
+
+
+EXPOSE
+------
+expose instruction will let the users know what are the ports used by image/container
+
+docker inspect image-id
+
+How can you push the image to docker-hub
+-----------------------------------------
+url/username/image-name:tag
+
+you can push images to docker hub, nexus, ECR, jfrog,etc.
+
+url=docker.io (url if pushing to docker hub you do not need to specify url by default it will take docker.io)
+
+companies will not push their images to docker hub they will always place their image in ECR or Nexus or JFrog
+
+joindevops/expose:1.0 (username/image-name:tag) (this for pushing to docker here url not needed)
+(if it is nexus then you need to give nexus url)
+
+you need to re-tag before pushing an local image to your remote location
+
+it is necessary to tag your Docker image before pushing it to a Docker registry like Docker Hub or another private registry.
+If you have a Docker image named myapp with version 1.0 and you want to push it to Docker Hub under your username joindevops, you would tag it like this:
+docker tag myapp:1.0 joindevops/myapp:1.0
+Here:
+myapp:1.0 is your local Docker image with the tag 1.0.
+joindevops/myapp:1.0 is the repository on Docker Hub where you want to store this image.
+After tagging, you can then push it to Docker Hub:
+docker push joindevops/myapp:1.0
+
+Why Tagging is Necessary:
+-------------------------
+Without tagging, Docker doesn't know where to push the image or how to identify different versions of the same image. Tags provide the necessary metadata to organize and manage your Docker images effectively, especially when dealing with multiple versions or environments (like development, staging, production).
+Therefore, tagging your Docker images before pushing them to a registry is a fundamental step in Docker image management and distribution.
+
+REPOSITORY           TAG       IMAGE ID       CREATED       SIZE
+myapp                latest    abcdef123456   2 weeks ago   500MB
+myapp                v1.0      123456abcdef   3 weeks ago   490MB
+
+Here, myapp is the repository name. It represents both the image name and potentially a version or tag (latest or v1.0) associated with that image.
+Each row represents a different version (or tag) of the myapp image stored locally.
+
+The REPOSITORY column in docker images output lists the names of Docker repositories where your images are stored locally. It is a crucial part of Docker's terminology to denote where images are located, whether locally on your machine or in remote registries like Docker Hub. Each repository can contain multiple tagged versions of the same image, allowing for versioning and management of Docker images within your environment.
+
+
+
+docker tag label:1.0 joindevops/label:v1.0.0 
+
+docker login (to login into your account)
+docker push joindevops/label:v1.0.0
+docker push joindevops/expose:1.0
+
+
+joindevops/label:v1.0.0
+
+docker tag joindevops/label:v1.0.0 lable.nexus.joindevops.com/sivakumar/label:v1 (for nexus pushing here label.nexus.joindevops.com is nexus url)
+obviously you need authentication before pushing to nexus
+
+docker pull ishahulahmed/label:v1.0.0
+
+Tag vs Version
+--------------
+In Docker terminologies, "tag" and "version" can sometimes be used interchangeably depending on the context, but they technically refer to slightly different concepts:
+
+1) Tag: In Docker, a "tag" is a label applied to a Docker image. It is used to denote different versions or variants of the same base image. Tags are  
+        typically used to differentiate between different builds, versions, or configurations of an image. For example, nginx:latest and nginx:1.19.10 are 
+        different tags of the nginx Docker image.
+
+2) Version: While "version" can refer to the version of the Docker image itself (as denoted by the tag), it can also refer to the version of Docker itself 
+            or the version of an application or package inside the Docker image. For instance, you might have a Docker image tagged nginx:1.19.10, where 
+            1.19.10 is the version of the nginx software included in that image.
+
+In summary, in the Docker context:
+Tag specifically refers to the label applied to a Docker image.
+Version can refer to the version of the Docker image (the tag), the version of the software inside the Docker image, or the version of Docker itself.
+Therefore, while they are related, they are not exactly the same thing but are often used in related contexts within Docker.
+
+ENV
+----
+An environment variable is a dynamic-named value that can affect the way processes behave on a computer system. These variables are part of the operating system's environment in which processes run and interact with the system.
+Examples of Environment Variables:
+PATH: A widely used environment variable that lists directories where executable programs are located. It allows users to run programs without specifying 
+      their full path.
+HOME: Specifies the path to the current user's home directory.
+LANG or LC_ALL: Determines the language and localization settings for the user interface and applications.
+JAVA_HOME: Specifies the installation directory of Java Development Kit (JDK) or Java Runtime Environment (JRE).
+
+In the context of Docker containers, environment variables play a crucial role in configuring applications running within containers. They are often used to pass configuration values, sensitive information (like passwords), or to customize the behavior of the containerized application without changing its code or Docker image.
+
+Overall, environment variables are versatile and essential components of system configuration and application deployment, offering flexibility and control over how software behaves in various computing environments.
+
+The ENV instruction sets the environment variable <key> to the value <value>. This value will be in the environment for all subsequent instructions in the build stage and can be replaced inline in many as well. The value will be interpreted for other environment variables, so quote characters will be removed if they are not escaped. Like command line parsing, quotes and backslashes can be used to include spaces within values.
+
+FROM
+ENV trainer="sivakumar"\
+    course="docker" \
+	duration="100hr"
+
+If the Dockerfile only installs the OS (e.g., FROM ubuntu), but does not install or start any applications or services (RUN apt-get install ... and CMD or ENTRYPOINT instructions), the container might start but immediately exit because there's no active process to keep it running.
+Specify the command to start your application. This is typically done using CMD or ENTRYPOINT.
+
+COPY vs ADD
+-------------
+The COPY instruction copies new files or directories from <src> and adds them to the filesystem of the container at the path <dest>.
+COPY and ADD both are to copy the files from workspace to docker image. but ADD have 2 extra advantages
+
+1. It can directly download content from internet into the image
+2. It can directly untart the files into the image.
+
+
+

@@ -1,0 +1,224 @@
+Session Overview
+-----------------
+a) Jenkins Installation
+b) Freestyle job
+c) Pipeline job
+d) Pipeline structure
+e) Options
+f) Master agent architecture
+g) Parameters
+h) Post section
+
+Launch EC2 Instance --> name jenkins --> Instance type t3.small --> remaining as usual
+
+jenkis.io --> Documentation --> Installing Jenkins --> Linux --> Red Hat/Alma/Rocky
+
+Long Term Support Release
+---------------------------
+Here, I have sudo for every command as per jenkins documentation. but, you can just use sudo su - command and execute commands without out sudo for every command.
+
+sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+
+This is not working may be some OS Issue Siva Said Giving Error as
+--2024-08-26 11:41:26--  https://pkg.jenkins.io/redhat-stable/jenkins.repo
+Resolving pkg.jenkins.io (pkg.jenkins.io)... 146.75.34.133, 2a04:4e42:78::645
+Connecting to pkg.jenkins.io (pkg.jenkins.io)|146.75.34.133|:443... connected.
+GnuTLS: One of the involved algorithms has insufficient security level.
+Unable to establish SSL connection.
+
+So, Siva kept this https://pkg.jenkins.io/redhat-stable/jenkins.repo (go to this url and copy content and use vim) manually in /etc/yum.repos.d/
+cd /etc/yum.repos.d/
+vim jenkins.repo
+[jenkins]
+name=Jenkins-stable
+baseurl=http://pkg.jenkins.io/redhat-stable
+gpgcheck=1
+
+save the above content [with root access only you write content take sudo access sudo vim jenkins.repo]
+
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+sudo yum upgrade (do not run this command as it will take lot of time and not recommended also)
+# Add required dependencies for the jenkins package
+sudo yum install fontconfig java-17-openjdk (java is mandatory) (use -y for auto approve)
+sudo yum install jenkins (-y at the end for auto approve)
+sudo systemctl daemon-reload
+
+Start Jenkins
+--------------
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+sudo systemctl status jenkins
+
+You Can Use Terraform Module or Shell Script to Install Jenkins
+
+In browser your instance public-ip:8080
+44.202.4.110:8080
+You will jenkins sign-in page with path to find your password /var/lib/jenkins/secrets/initialAdminPassword 
+
+cat /var/lib/jenkins/secrets/initialAdminPassword
+de93b0c8fda042d1afce1c8084f7c24e --> password use this to login jenkins
+
+select install suggested plugins
+
+Create First Admin User --> Username-admin --> Password-admin123 --> Confirm Password --> Full name-admin --> E-mail address-shahulahmed1717@gmail.com --> Save and Continue.
+Instance Configuration --> Jenins URL --> it will autmoatically come with your instance url and port. http://35.172.211.64:8080/
+Jenkins is Ready --> Start using jenkins
+
+Since, Already default plugins are added. Jenkis will have some capability.
+
+On Dashboard --> Click on New item -->  Enter an item name- hello-jenkins --> Freestyle project --> Ok
+Freestyle job is a basic job. During initial days of jenkis this freestyle job was popular.
+
+Configure --> General
+General --> Description - Hi, this is my first project --> Build Steps - Execute Shell --> echo "Hello jenkins" --> Save
+a job will have triggers, pre build, build, post build settings --> In Jenkins or in general this process same everywhere like we commonly hear pre production, production, post production.
+
+In jenkis everything is treated as job. job means a piece of work. here, we are creating a job for jenkis that job is to print hello jenkins. it will have this settings
+a) Build Triggers
+b) Pre Build (Build Environment Settings comes under Pre Build)
+c) Build
+d) Post Build
+
+when i clicked on Build Now in hello-jenkis. it worked for me successfuly.
+But, for siva it was not working. there was a notification for him he clicked on change the setting.
+Jenkins took some agents offline because their key health metrics went below a threshold. if you don't want jenkis to do this. change the setting.
+
+Configure Node Monitors --> give tick - Don't mark agents temporarily offile --> give tick - Don't mark agents temporarily offline --> give tick - Don't mark agents temporarily offline --> save
+
+he said this might be new setting. but, this didn't worked out still the issues was there when clicke on Build Now it was showing. Pending - Waiting for next available executor.
+
+he then in instance used,
+systemctl restart jenkins
+systemctl status jenkins
+he logged out of jenkins then logged in giving username-admin and password-admin123
+
+he typed free command in terminal
+free --> The free command in Linux is used to display information about the system's memory usage.
+
+alternatively you can use
+free -h --> Display the output in human-readable format (e.g. KB, MB, GB)
+free -m --> Display the memory usage in megabytes
+free -g --> Display the memory usage in gigabytes
+
+after login the Dash Board for him
+Build Executor Status --> Built-In Node - Status was offline --> After Clicking on Built-In Node
+Status --> there was a warning Disk space is below threshold of 1.00 GiB. Only 849.73 MB out of 853.02 MiB left on /tmp
+
+in terminal
+df -hT
+ 
+in Built-In Node --> Status --> he clicked on Bring this node back online --> Now Build Executor Status in back online.
+
+now, the issue is resolved clicking on Bring this node back online in Built-In Node Status worked
+
+Build Now --> Build History - #1 click on #1 --> Console Output --> you can see Hello jenkis is printed on the console.
+
+
+Freestyle means login into the console and doing our required job. Doing inside the console is nothing but free style.
+
+freestyle disadvantages (disadvantage when we do through console)
+-----------------------------------------------------------------
+1. anyone can login and do the changes, difficult to track what went wrong
+2. difficult to restore
+3. I can't see the history, no versions
+
+scripted way
+-------------
+1. review can be done before do something.
+2. easy to restore
+3. track the changes
+4. maintains the history
+
+Now, most of the people are opting for pipeline jobs not through freestyle jobs.
+
+1 acre --> 1 person do
+100 acres -> He employs resources
+
+distributing the work to diff resources...
+
+Jenkins is a master node.
+
+install agents and distribute the pipelines to the agents...
+
+Agent-1 --> windows environment
+Agent-2 --> Mac environment
+Agent-3 --> Chrome environment
+
+master and slave (Before)
+master and node (Agent) architecture (Now)
+
+1. when work is there, master calls agent and ask them to do work
+2. daily agent comes to master and ask if there is any work
+
+agent should have java jdk kit installed in order to work
+/var/lib/jenkins/ is the home folder of jenkins
+
+ec2-user DevOps321
+
+15min to create application artifact zip/jar
+
+1hr 15min --> application success  (use timeout(time: 30, unit: 'MINUTES') to set time limit)
+
+when one person is performing something on the application, others should stop (use disableConcurrentBuilds() Function)
+
+steps {
+                echo "Hello ${params.PERSON}"
+
+                echo "Biography: ${params.BIOGRAPHY}"
+
+                echo "Toggle: ${params.TOGGLE}"
+
+                echo "Choice: ${params.CHOICE}"
+
+                echo "Password: ${params.PASSWORD}"
+            }
+			
+How to configure github to jenkins webhook
+
+system-1 something happend, we need to inform system-2  (Example ATM Withdrawl System to SMS System)
+when events those can be notified.
+
+when developer pushed code to github, we need to trigger the pipeline
+
+pipeline{
+	agent{
+		label 'java-agent'
+	}
+	options{
+		timeout(time: 30, unit: 'MINUTES')
+	}
+	environment{
+		Greeting = 'Hello World'
+	}
+	parameters{
+	
+	}
+	stages{
+		stage('Build'){
+			steps{
+				sh 'echo this is build'
+			}
+		}
+		stage('Test'){
+			steps{
+				sh 'echo this is build'
+			}
+		}
+	}
+	post{
+		always{
+		
+		}
+		success{
+		
+		}
+		failure{
+		
+		}
+	}
+}
+
+post section is after stages section
+
+19:18

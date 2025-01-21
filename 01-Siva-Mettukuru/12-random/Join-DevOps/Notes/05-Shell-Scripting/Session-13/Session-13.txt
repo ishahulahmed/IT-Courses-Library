@@ -1,0 +1,8 @@
+Session Overview
+-----------------
+a) How to call other scripts
+b) Set parameter
+c) Error handling
+d) Delete old logs
+
+

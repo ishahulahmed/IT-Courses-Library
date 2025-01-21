@@ -1,0 +1,245 @@
+Session Overview
+-----------------
+a) Dockerfile instructions
+b) Docker build
+c) Docker push
+d) Expense project using Docker
+
+
+ChatGPT-1
+----------
+The CMD instruction in a Dockerfile is used to specify the command that should be executed when a Docker container starts based on that image. It defines the primary process that will run in the container. Here are the key reasons why the CMD instruction is important:
+
+1) Primary Process Definition: The CMD instruction sets the command and parameters that will be executed when a container is run from the Docker image. For example, if your Dockerfile has CMD ["python", "app.py"], then when you run a container from this image, it will start by running the Python script app.py.
+
+2) Default Command: If a Dockerfile does not contain an ENTRYPOINT instruction, then CMD becomes the command and arguments used when you run a container from the image. If both CMD and ENTRYPOINT are specified, CMD provides the default arguments for ENTRYPOINT.
+
+3) Flexibility: While there can only be one CMD instruction in a Dockerfile, you can specify the command as an array (CMD ["executable", "param1", "param2"]) or as a string (CMD command param1 param2). This allows for flexibility in defining the command and its arguments.
+
+4) Overridable: The command specified by CMD can be overridden at runtime by providing a different command when starting the container using docker run. For example, you can run docker run myimage /bin/bash to override the CMD and start a shell instead.
+
+5) User-Friendliness: CMD makes it easier to define and manage how your Docker containers behave when started. It encapsulates the default behavior of the container and helps communicate the intended use of the image to users.
+
+In summary, the CMD instruction is essential in Dockerfiles because it specifies the default command to execute when a Docker container runs from the image. It's a key part of defining the container's behavior and ensures consistency in how containers behave across different environments and deployments.
+
+ChatGPT-2
+---------
+If a Dockerfile does not specify either a CMD or ENTRYPOINT instruction, Docker will use the default behavior, which typically leads to the container starting and immediately exiting. This happens because Docker requires at least one command to run when a container starts. Here's what happens in more detail:
+
+1) Container Start: When you run a container from an image that lacks both CMD and ENTRYPOINT, Docker will attempt to start the container.
+
+2) Immediate Exit: Since there is no instruction telling Docker what process or command to run, the container starts up, initializes briefly, and then exits because it has no ongoing process to keep it running.
+
+3) Container Status: After the container exits, you can check its status using docker ps -a. It will likely show as "Exited" with an exit status code (usually 0 unless a command failed).
+
+To avoid the container immediately exiting, you must specify either a CMD or ENTRYPOINT instruction in your Dockerfile. These instructions define the command that Docker should run as the primary process inside the container. They ensure that there is a process running that keeps the container alive and functioning as intended.
+
+If you forget to include CMD or ENTRYPOINT in your Dockerfile and encounter a situation where the container starts and exits immediately, you can modify the Dockerfile to include the appropriate instruction and rebuild the image. This will ensure that the container has a defined command to execute when it starts, allowing it to remain running as intended.
+
+ChatGPT-3
+---------
+The ENTRYPOINT instruction in a Dockerfile specifies the command that will run as the main process inside the container. It differs from CMD in that ENTRYPOINT defines the executable that will run, while CMD provides arguments for that executable.
+
+Here's a breakdown of what ENTRYPOINT does and why it's useful:
+
+Purpose of ENTRYPOINT
+---------------------
+1) Primary Command Definition: ENTRYPOINT sets the main command and parameters that are used when a container is run. This command is the entry point for the container's process.
+
+2) Immutable Command: Unlike CMD, which can be overridden at runtime by providing arguments to docker run, ENTRYPOINT specifies an immutable command. If you specify both ENTRYPOINT and CMD, CMD provides default arguments to ENTRYPOINT.
+
+3) Flexible Use: ENTRYPOINT can be specified as an array of strings or as a string. When specified as an array, it allows for providing a command and its arguments in a form that is more flexible and can handle command-line arguments and options properly.
+
+When to Use ENTRYPOINT
+-----------------------
+Use ENTRYPOINT when:
+
+a) You have a specific script or executable that should always run when the container starts.
+b) You want to enforce a consistent entry point for your container regardless of how it's run.
+c) You want to provide a script that initializes or configures the environment inside the container.
+Using ENTRYPOINT allows you to encapsulate the main functionality of your container and ensures that it behaves predictably across different environments and deployments.
+
+Example Usage
+--------------
+FROM ubuntu:20.04
+COPY ./entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+
+In this example:
+ENTRYPOINT ["/entrypoint.sh"] specifies that /entrypoint.sh script will be executed as the primary command when a container starts.
+The script /entrypoint.sh could contain initialization logic, environment setup, or any other necessary operations to prepare the container environment.
+
+ENTRYPOINT vs CMD
+------------------
+To summarize the difference between ENTRYPOINT and CMD:
+a) ENTRYPOINT sets the command and parameters that will be executed first when a container is run.
+b) CMD provides default arguments for the ENTRYPOINT or can be used alone to specify the command to run if ENTRYPOINT is not specified.
+
+Parameters Vs Arguments
+-----------------------
+a) Parameters are placeholders or predefined variables in functions, commands, or scripts.
+b) Arguments are the actual values passed to these parameters when executing functions, commands, or scripts.
+
+greet.py
+--------
+#!/usr/bin/env python3
+import sys
+
+def greet(name):
+    print(f"Hello, {name}!")
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        greet(sys.argv[1])
+    else:
+        print("Hello, World!")
+
+Dockerfile
+----------
+FROM python:3.9-slim
+
+WORKDIR /app
+COPY greet.py .
+
+# Define the ENTRYPOINT with the script as parameter
+ENTRYPOINT ["python", "greet.py"]
+
+# Default CMD with arguments
+CMD ["World"]
+
+docker build -t greet-app .
+
+docker run greet-app  # Outputs: Hello, World!
+docker run greet-app Alice  # Outputs: Hello, Alice!
+docker run greet-app Bob  # Outputs: Hello, Bob!
+
+
+ENTRYPOINT
+------------
+CMD instruction can be overriden
+same instruction trying to override with ENTRYPOINT is not working
+
+ping google.com to test whether a particular host is reachable across an IP network. -c5 option specifies the count of ping packets to send.
+
+ping -c5 google.com ping -c5 yahoo.com
+you can't override ENTRYPOINT, if you try to do it will go append (append to the command inside in the ENTRYPOINT)
+
+docker ps -a --no-trunc (list of containers with full information no cutting)
+
+CMD vs ENTRYPOINT
+----------------
+you can mix CMD and entrypoint for better results
+
+ping -c5
+
+CMD is used to supply default arguements to ENTRYPOINT, we can always override default args from runtime.
+
+USER
+-----------
+The USER instruction in a Dockerfile is used to specify which user will run commands when building an image or running a container. 
+By default, Docker runs commands as the root user, which can be a security risk, especially when deploying applications on a large scale. 
+
+you should not let containers running with root access
+
+Giving root access to the container is very very bad practise. That is a Security Vulnerability.
+The first best practise is you should not let docker container to run with root access (it is a security vulnerability)
+
+if you are living a room then of double bedroom pg then living room, kitchen this is shared storage similary for containers also storage is shared
+in the main server (host system) all the containers share storage having root access to a container we can easily delete other containers also access to main server (host system) file system on which contanier is present.
+
+ChatGPT
+-------
+Running Docker containers with root access is generally discouraged for several important reasons:
+
+1) Security Risks: Containers that run as root have the same level of access to the host system as the root user. If a container gets compromised or an attacker gains access, they could potentially take control of the entire host system. This is because processes inside a container can interact with the host kernel, and root privileges could allow them to modify host files, escalate privileges, or perform other malicious actions.
+
+2) Principle of Least Privilege: Following the principle of least privilege, processes and containers should only have the minimum permissions necessary to perform their tasks. Running containers as non-root helps limit the potential damage if the container is compromised because they have restricted access to host resources.
+
+3) Container Escapes: Although Docker and container runtimes have security features to isolate containers from the host system, vulnerabilities can still exist. Running containers as non-root reduces the impact of any potential security vulnerabilities or container escapes.
+
+4) Compatibility and Portability: Some Docker images and applications might not function correctly or might have compatibility issues when running as root. Many software packages and services are designed to run with regular user privileges, and running as root could cause unexpected behavior.
+
+5) Best Practices and Community Standards: It's a widely accepted best practice in the Docker community and among security experts to run containers with a non-root user whenever possible. This helps mitigate security risks and aligns with industry standards for secure container deployment.
+
+Mitigating Risks
+-----------------
+If your application or specific use case requires elevated privileges within the container, consider the following approaches to minimize risks:
+
+a) Use Non-Root Users: Always run containers with a non-root user whenever feasible. Docker and other container runtimes support specifying a non-root user in the Dockerfile or at runtime.
+
+b) Drop Capabilities: Docker allows you to drop Linux capabilities to reduce the privileges of the container further. This can be done using the --cap-drop flag when running containers.
+
+c) Use Seccomp Profiles: Seccomp (secure computing mode) can restrict the system calls available to a container, further limiting its capabilities and reducing the impact of any potential compromise.
+
+By adhering to these practices and understanding the implications of running containers with root access, you can significantly enhance the security and stability of your Dockerized applications.
+
+WORKDIR
+--------
+WORKDIR instruction sets the working directory for any subsequent instructions in the Dockerfile, such as RUN, CMD, ENTRYPOINT, COPY, and ADD. It essentially acts like the cd command in a shell.
+
+RUN cd /app this will not work. we cannot move working directory using RUN only WORKDIR
+
+ARG
+-----------
+The ARG instruction in a Dockerfile defines build-time variables that can be passed to the Dockerfile during the build process. These variables allow for parameterizing the Dockerfile, enabling dynamic configuration of the image during creation.
+
+1. ARG can be first instruction in only one case. It can be used to supply the version for FROM instruction
+(docker build -t arg:v1 --build-arg version=8 .)
+
+2. You can have args in Dockerfile, you can supply the values through command through option --build-args
+(docker build -t arg:v1 --build-arg version=8 --build-arg COURSE=Docker --build-arg TRAINER=sivakumar .)
+(--build-arg COURSE=Docker only if in docker file you have given ARG COURSE but no when given ARG COURSE=Docker)
+
+3. You can always have default values to arg and override if required.
+ARG version
+FROM almalinux:${version:-8} 
+ARG COURSE=Docker
+ARG TRAINER=Sivakumar
+arg default values syntax depends on the instruction we are providing
+
+To Know the OS of the System --> cat /etc/*release
+
+ENV vs ARG
+-----------
+1. ENV variables can be accessed both at the time build time and containers
+2. ARG instruction can only be accessed at the time of build or image
+
+How can I access arg inside container?
+ARG Duration=120HRS
+ENV Duration=${Duration}
+ARG can be accessed only at build time. so, you have created an environment variable with same name and ARG is the defualt value and can be overridden which is accessed at ENV ${Duration} as same in container. if you follow this trick you can access ARG inside a container
+docker build -t arg:v1 --build-arg Duration=100HRS .
+
+
+http://daws78s.online
+
+index.html --> nginx welcome page
+(default port 80 and default page index.html for nginx)
+
+ONBUILD
+----------
+The ONBUILD instruction in a Dockerfile is used to defer a set of instructions until a future image is built using the current image as its base. When you include ONBUILD in a Dockerfile, the specified instructions are not executed during the build of the current image but are instead saved for execution in a later build triggered by another Dockerfile that uses the current image as its base.
+
+this is useful as a trigger, if some one is trying to use your image. you can force them to keep somefiles in their workspace or some configuration
+
+MYSQL:8
+---------
+MYSQL:8 (Image Here)
+MySQL developers would have chosen some OS, ubuntu, debian, centos, rhel, etc.
+
+FROM ubuntu:20
+RUN apt install mysql-server
+
+Database is created first. We should load default data. (nothing but backend schema)
+
+When you are working with container we don't worry about underlying os what we care is whether application is properly deployed and running or not.
+when they are releasing official images by taking all security measures do you really want to build an image by downloading and configuring all the ports and other stuff.
+
+we need some defualt data for the database to be active in our expense project we directly loaded the schema from backend using mysql client
+but in real time root access will not be given to istall from backend database team will create jumphosts from there they will install default data into database not from backend or they will directly install default data at the time db installation.
+
+when a container is started for the first time, a new database with the specified name will be created and initialized with the provided configuration variables. Furthermore, it will execute files with extension .sh .sql and .sql.gz that are found in /docker-entrypoint-initdb.d
+
+FROM mysql:8.0
+COPY scripts/*.sql /docker-entrypoint-initdb.d/

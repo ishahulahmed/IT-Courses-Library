@@ -1,0 +1,502 @@
+Volumes in Kubernetes
+----------------------
+Important Photos and Documents
+1. external HD
+   SSD, Pendrive, etc.
+2. Google/Microsoft Drive.
+
+Kubernetes cluster is ephemeral
+Depending upon the traffic Nodes will be created and deleted there is no gurantee for Nodes. (similarly pods inside those nodes)
+So, we will connect to a external to storage to store our files. 
+
+EBS / EFS
+----------
+1. HD should be as near as possible to the computer.
+2. Google drive, can be anywhere in the world. Network is used for file sharing. NFS - Network File Sharing (NFS Protocol used by Google Drive)
+
+EBS --> Elastic Block Storage --> Like Hard Disk
+EFS --> Elastic File Storage --> Like NFS
+
+In Kubernetes, volume provisioning refers to the process of dynamically or statically creating and managing storage resources for use by applications running within a cluster. Volumes in Kubernetes provide persistent storage that is independent of the lifecycle of individual Pods
+
+Two types of Volume Provisioning
+----------------------------------
+1. Static Volume Provisioning
+2. Dynamic Volume Provisioning
+
+Static Volume Provisioning
+---------------------------
+
+EBS
+-----
+Mumbai --> Region
+
+North mumbai --> AZ-1a
+South mumbai --> AZ-1b
+
+EBS Volume and EC2 Instance should be in the same Availability Zone. (like hard-drive and computer at same place). static means we need to take care of everything.
+for anything to work keyboard, mouse etc we need to install drivers.
+aws-ebs-csi-driver
+https://github.com/kubernetes-sigs/aws-ebs-csi-driver
+deploy driver
+kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.33"
+
+1. I need to create the EBS volume
+2. You need to install the drivers. I have to install EBS related drivers in EKS cluster. 
+   (if the cluster needs to connect to the storage you need to install drivers)
+kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.33"
+
+To Check Whether Drivers Installed or Not?
+-------------------------------------------
+kubectl get namespace
+NAME              STATUS   AGE
+default           Active   3h12m
+kube-node-lease   Active   3h12m
+kube-public       Active   3h12m
+kube-system       Active   3h12m
+
+in this administration related namespace is kube-system
+
+kubectl get pods -n kube-system
+NAME                                  READY   STATUS    RESTARTS   AGE
+aws-node-7v2mj                        2/2     Running   0          46m
+aws-node-fwm9p                        2/2     Running   0          48m
+aws-node-p5r6c                        2/2     Running   0          49m
+coredns-586b798467-25cdq              1/1     Running   0          45m
+coredns-586b798467-l7ps8              1/1     Running   0          48m
+ebs-csi-controller-646bdcfb79-5sdkp   6/6     Running   0          5m38s
+ebs-csi-controller-646bdcfb79-xhtr5   6/6     Running   0          5m38s
+ebs-csi-node-hlq29                    3/3     Running   0          5m38s
+ebs-csi-node-t2rmn                    3/3     Running   0          5m38s
+ebs-csi-node-wdq7w                    3/3     Running   0          5m38s
+kube-proxy-6kzdl                      1/1     Running   0          49m
+kube-proxy-dwwn2                      1/1     Running   0          48m
+kube-proxy-s5dc8                      1/1     Running   0          46m
+
+In kubernetes, any functionality you add it will ultimately run as pod. At Low level everything in kubernetes is Pod.
+
+ebs-csi-controller-646bdcfb79-5sdkp   6/6     Running   0          5m38s
+ebs-csi-controller-646bdcfb79-xhtr5   6/6     Running   0          5m38s
+ebs-csi-node-hlq29                    3/3     Running   0          5m38s
+ebs-csi-node-t2rmn                    3/3     Running   0          5m38s
+
+if these pods are running means you have successfully installed your drivers
+
+
+3. Your nodes should have access to connect with EBS volumes. Attach EBSCSI policy to the EC2 instanc role.
+In Kubernetes, if one resource needs to connect to another resource we will give access to them using IAM roles.
+here EC-2 needs to access EBS 
+if we think by default aws ec2-instance has access (we attache a role remember EC2 Instance Policy not Administrator Access). so, it will connect easily to other aws resources. it doesn't happen that way. 
+we need to give access to them specfically to access that aws resource in order to connect. otherwise, if there is direct access. if anyone access to one ec2-instance he can hack the entire aws account.
+aws by default if you need to access from one service to another service you need to attach roles and permission.
+if attached Administrator Access Policy then they will have access all aws service here above for only specific policy attached. 
+AmazonEBSCSIDriverPolicy needs to be attached to role
+pod will run in nodes so volume should be mounted to nodes. so nodes should have access to EBS. not eks master.
+select any node in instances --> security --> click on iam role --> Add Permission --> Attach Policies --> AmazonEBSCSIDriverPolicy
+now for ec2-instances in our eks clusters we have attached a policy so they can connect to EBS Volume.
+
+SAN --> Storage Area Netowrk.
+To Access storage outside of kubernetes you have to have knowledge about SAN. we don't have know about SAN and we don't need that for this purpose kubernetes has created wrappers.
+
+wrappers...
+You can represent EBS volume inside kubernetes with a resource called Persistent Volume. This is equivalent to EBS storage inside kubernetes cluster...
+
+As, a kubernetes engineer we may not have the complete knowledge about how storage works. but, kubernetes is giving us a option to create a resource equivalent to that volume.
+
+Pod cannot go directly and connect to the EBS Volume. Pod and EBS are two different technologies. in order bridge these 2 technologies kubernetes created a resource called persistent volume.
+
+Persistent Volume represents the extrnal volume like EBS Storage.
+
+EBS is just like hard disk. obiviously we have to take ReadWriteOnce in accessMode (i.e at a time only one can read write)
+ReadWriteMany --> Google Drive --> At a time multiple persons can read and access it.
+
+The access modes are:
+
+ReadWriteOnce
+the volume can be mounted as read-write by a single node. ReadWriteOnce access mode still can allow multiple pods to access the volume when the pods are running on the same node. For single pod access, please see ReadWriteOncePod.
+
+ReadOnlyMany
+the volume can be mounted as read-only by many nodes.
+
+ReadWriteMany
+the volume can be mounted as read-write by many nodes.
+
+ReadWriteOncePod
+the volume can be mounted as read-write by a single Pod. Use ReadWriteOncePod access mode if you want to ensure that only one pod across the whole cluster can read that PVC or write to it.
+
+EBS like hard disk we can ReadWriteOnce only server can access at one time not all.
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: ebs-static
+spec:
+  accessModes:
+  - ReadWriteOnce
+  capacity:
+    storage: 100Gi
+  csi:
+    driver: ebs.csi.aws.com
+    fsType: ext4
+    volumeHandle: vol-05bd6e72e1eea5751
+    
+Externally Created Volume here i am manually representing it as Persitent Volume.
+
+PVC --> Persistent Volume Claim. Pods should claim kubernetes cluster I want the volume. Pods can claim through resource called PVC.
+
+Volume --> Physical (Like Money)
+Claim --> Logical (Like Claiming Money)
+
+Persistent Volume Inside the Cluster we need to claim volume from cluster (i.e pods needs to claim volume)
+Drivers are installed inside cluster to connect to EBS.
+
+if we run nginx with root privileges it can access on 80 port. if we run it as normal user then we need change in configuration file port to 8080. since normal user can't run on port 80.
+
+cd k8-resources/storage
+kubectl apply -f 01-ebs-static.yaml
+persitentvolume/ebs-static created
+
+kubectl get pv
+NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+ebs-static   100Gi      RWO            Retain           Available                          <unset>                          69s
+
+1. If your PV is not available (Troubleshooting)
+-------------------------------------------------
+check drivers installed or not
+check your ec2 have the role and permission
+
+only when volume will mount to pod then only our EBS volume status will show inuse.
+
+kubectl apply -f 01-ebs-static.yaml
+persistentvolume/ebs-static unchanged
+persistentvolumeclaim/ebs-static created
+
+kubectl get pvc
+NAME         STATUS   VOLUME       CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+ebs-static   Bound    ebs-static   100Gi      RWO                           <unset>                 54s
+
+status --> Bound
+
+kubectl describe pvc ebs-static
+Name:          ebs-static
+Namespace:     default
+StorageClass:
+Status:        Bound (Bound Means Successfully attached or binded)
+Volume:        ebs-static
+Labels:        <none>
+Annotations:   pv.kubernetes.io/bind-completed: yes
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:      100Gi
+Access Modes:  RWO
+VolumeMode:    Filesystem
+Used By:       <none>
+Events:        <none>
+
+
+kubectl apply -f 01-ebs-static.yaml
+persistentvolume/ebs-static unchanged
+persistentvolumeclaim/ebs-static unchanged
+pod/nginx-static created
+service/nginx-lb created
+
+kubectl get pods
+NAME           READY   STATUS    RESTARTS   AGE
+nginx-static   1/1     Running   0          31s
+
+kubectl describe pod nginx-static
+ Type    Reason                  Age   From                     Message
+  ----    ------                  ----  ----                     -------
+  Normal  Scheduled               104s  default-scheduler        Successfully assigned default/nginx-static to ip-192-168-11-135.ec2.internal
+  Normal  SuccessfulAttachVolume  100s  attachdetach-controller  AttachVolume.Attach succeeded for volume "ebs-static"
+  Normal  Pulling                 95s   kubelet                  Pulling image "nginx"
+  Normal  Pulled                  92s   kubelet                  Successfully pulled image "nginx" in 2.735s (2.735s including waiting). Image size: 70985377 bytes.
+  Normal  Created                 92s   kubelet                  Created container nginx
+  Normal  Started                 92s   kubelet                  Started container nginx
+
+now ebs volume status will in-use (pod is using volume)
+
+kubectl exec -it nginx-static -- bash
+root@nginx-static:/# cd /usr/share/nginx/html/
+root@nginx-static:/usr/share/nginx/html# ls
+lost+found
+root@nginx-static:/usr/share/nginx/html# echo "Hello from EBS static" > index.html
+
+a102b74bb20b44feda860d0cc0757a97-121845490.us-east-1.elb.amazonaws.com (Your Load Balancer DNS)
+now you can see Hello from EBS static
+
+now delete this pod
+kubectl delete pod nginx-static
+pod "nginx-static" deleted
+
+deleted means disconnected --> so volume status again --> Available
+
+now create pod gain
+kubectl apply -f 01-ebs-static.yaml
+persistentvolume/ebs-static unchanged
+persistentvolumeclaim/ebs-static unchanged
+pod/nginx-static created
+service/nginx-lb unchanged
+
+kubectl get pods
+NAME           READY   STATUS    RESTARTS   AGE
+nginx-static   1/1     Running   0          43s
+
+after creating pod --> volume again --> in use
+http://a102b74bb20b44feda860d0cc0757a97-121845490.us-east-1.elb.amazonaws.com/ (access this again you get Hello from EBS static)
+so our volume is working 
+
+if instances are created in 1a, 1b and 1c and volume is in 1c.
+there is no guarantee pod will go to 1c availability zone we can't control that. in these situations we should select node explicitly.
+
+https://kubernetes.io/docs/tasks/configure-pod-container/assign-pods-nodes/
+
+kubectl get nodes --show-labels
+
+NAME                            STATUS   ROLES    AGE   VERSION               LABELS
+ip-192-168-2-139.ec2.internal   Ready    <none>   33m   v1.30.2-eks-1552ad0   alpha.eksctl.io/cluster-name=expense-1,alpha.eksctl.io/nodegroup-name=expense,beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=m5.large,beta.kubernetes.io/os=linux,eks.amazonaws.com/capacityType=SPOT,eks.amazonaws.com/nodegroup-image=ami-0a1207755444805af,eks.amazonaws.com/nodegroup=expense,eks.amazonaws.com/sourceLaunchTemplateId=lt-068a163606db486e2,eks.amazonaws.com/sourceLaunchTemplateVersion=1,failure-domain.beta.kubernetes.io/region=us-east-1,failure-domain.beta.kubernetes.io/zone=us-east-1f,k8s.io/cloud-provider-aws=067c0e6d18e638ea36b4b73b1dc743b8,kubernetes.io/arch=amd64,kubernetes.io/hostname=ip-192-168-2-139.ec2.internal,kubernetes.io/os=linux,node.kubernetes.io/instance-type=m5.large,topology.ebs.csi.aws.com/zone=us-east-1f,topology.k8s.aws/zone-id=use1-az5,topology.kubernetes.io/region=us-east-1,topology.kubernetes.io/zone=us-east-1f
+
+topology.kubernetes.io/zone=us-east-1f
+
+deleting everything
+kubectl delete -f 01-ebs-static.yaml
+persistentvolume "ebs-static" deleted
+persistentvolumeclaim "ebs-static" deleted
+pod "nginx-static" deleted
+service "nginx-lb" deleted
+
+in pod definition adding nodeSelector
+
+nodeSelector:
+    topology.kubernetes.io/zone: us-east-1f
+
+kubectl apply -f 01-ebs-static.yaml
+persistentvolume/ebs-static created
+persistentvolumeclaim/ebs-static created
+pod/nginx-static created
+service/nginx-lb created
+
+kubectl get pods
+NAME           READY   STATUS    RESTARTS   AGE
+nginx-static   1/1     Running   0          26s
+
+This is about static provision of EBS. But, here there are some administrative tasks (Volume Creation etc)
+
+In Kubernetes there are 
+1. Admins (People who manage clusters)
+2. Users 
+
+as a application devops engineer, I will get access to expense namespace.
+
+kubectl api-resources
+NAME                                SHORTNAMES   APIVERSION                        NAMESPACED   KIND
+bindings                                         v1                                true         Binding
+componentstatuses                   cs           v1                                false        ComponentStatus
+configmaps                          cm           v1                                true         ConfigMap
+endpoints                           ep           v1                                true         Endpoints
+events                              ev           v1                                true         Event
+limitranges                         limits       v1                                true         LimitRange
+namespaces                          ns           v1                                false        Namespace
+nodes                               no           v1                                false        Node
+persistentvolumeclaims              pvc          v1                                true         PersistentVolumeClaim
+persistentvolumes                   pv           v1                                false        PersistentVolume
+pods                                po           v1                                true         Pod
+podtemplates                                     v1                                true         PodTemplate
+replicationcontrollers              rc           v1                                true         ReplicationController
+resourcequotas                      quota        v1                                true         ResourceQuota
+secrets                                          v1                                true         Secret
+serviceaccounts                     sa           v1                                true         ServiceAccount
+services                            svc          v1                                true         Service
+mutatingwebhookconfigurations                    admissionregistration.k8s.io/v1   false        MutatingWebhookConfiguration
+validatingadmissionpolicies                      admissionregistration.k8s.io/v1   false        ValidatingAdmissionPolicy
+validatingadmissionpolicybindings                admissionregistration.k8s.io/v1   false        ValidatingAdmissionPolicyBinding
+validatingwebhookconfigurations                  admissionregistration.k8s.io/v1   false        ValidatingWebhookConfiguration
+customresourcedefinitions           crd,crds     apiextensions.k8s.io/v1           false        CustomResourceDefinition
+apiservices                                      apiregistration.k8s.io/v1         false        APIService
+controllerrevisions                              apps/v1                           true         ControllerRevision
+daemonsets                          ds           apps/v1                           true         DaemonSet
+deployments                         deploy       apps/v1                           true         Deployment
+replicasets                         rs           apps/v1                           true         ReplicaSet
+statefulsets                        sts          apps/v1                           true         StatefulSet
+selfsubjectreviews                               authentication.k8s.io/v1          false        SelfSubjectReview
+tokenreviews                                     authentication.k8s.io/v1          false        TokenReview
+localsubjectaccessreviews                        authorization.k8s.io/v1           true         LocalSubjectAccessReview
+selfsubjectaccessreviews                         authorization.k8s.io/v1           false        SelfSubjectAccessReview
+selfsubjectrulesreviews                          authorization.k8s.io/v1           false        SelfSubjectRulesReview
+subjectaccessreviews                             authorization.k8s.io/v1           false        SubjectAccessReview
+horizontalpodautoscalers            hpa          autoscaling/v2                    true         HorizontalPodAutoscaler
+cronjobs                            cj           batch/v1                          true         CronJob
+jobs                                             batch/v1                          true         Job
+certificatesigningrequests          csr          certificates.k8s.io/v1            false        CertificateSigningRequest
+leases                                           coordination.k8s.io/v1            true         Lease
+eniconfigs                                       crd.k8s.amazonaws.com/v1alpha1    false        ENIConfig
+endpointslices                                   discovery.k8s.io/v1               true         EndpointSlice
+events                              ev           events.k8s.io/v1                  true         Event
+flowschemas                                      flowcontrol.apiserver.k8s.io/v1   false        FlowSchema
+prioritylevelconfigurations                      flowcontrol.apiserver.k8s.io/v1   false        PriorityLevelConfiguration
+policyendpoints                                  networking.k8s.aws/v1alpha1       true         PolicyEndpoint
+ingressclasses                                   networking.k8s.io/v1              false        IngressClass
+ingresses                           ing          networking.k8s.io/v1              true         Ingress
+networkpolicies                     netpol       networking.k8s.io/v1              true         NetworkPolicy
+runtimeclasses                                   node.k8s.io/v1                    false        RuntimeClass
+poddisruptionbudgets                pdb          policy/v1                         true         PodDisruptionBudget
+clusterrolebindings                              rbac.authorization.k8s.io/v1      false        ClusterRoleBinding
+clusterroles                                     rbac.authorization.k8s.io/v1      false        ClusterRole
+rolebindings                                     rbac.authorization.k8s.io/v1      true         RoleBinding
+roles                                            rbac.authorization.k8s.io/v1      true         Role
+priorityclasses                     pc           scheduling.k8s.io/v1              false        PriorityClass
+csidrivers                                       storage.k8s.io/v1                 false        CSIDriver
+csinodes                                         storage.k8s.io/v1                 false        CSINode
+csistoragecapacities                             storage.k8s.io/v1                 true         CSIStorageCapacity
+storageclasses                      sc           storage.k8s.io/v1                 false        StorageClass
+volumeattachments                                storage.k8s.io/v1                 false        VolumeAttachment
+cninodes                            cnd          vpcresources.k8s.aws/v1alpha1     false        CNINode
+securitygrouppolicies               sgp          vpcresources.k8s.aws/v1beta1      true         SecurityGroupPolicy
+
+
+
+persistentvolumeclaims              pvc          v1                                true         PersistentVolumeClaim
+persistentvolumes                   pv           v1                                false        PersistentVolume
+
+here 
+persitentvolumes namespaced false so this will come under administration level.
+persistentvolumeclaims namespaced true so this will come under user level
+
+1. Users send email to storage team for creation of volume. AWS storage team will create volume ang give you ID.
+2. Users send email to k8 admin to create pv for them with the ID.
+3. User can claim using PVC.
+
+here there is lot of manual process involved.
+so, to resovle this issues there is dynamic volume provisioning.
+
+Dynamic Volume Provisioning
+----------------------------
+1. You need to install the drivers. I have to install EBS related drivers in EKS cluster. 
+kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.33"
+2. Your nodes should have access to connect with EBS volumes. Attach EBSCSI policy to the EC2 instanc role.
+3. someone on behalf of you should create volume and equivalent PV automatically --> dynamic provisioning that one is storage class 
+
+kubectl get sc (sc = storage class)
+NAME   PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+gp2    kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  6h23m
+
+kubectl api-resources 
+storageclasses                      sc           storage.k8s.io/v1                 false        StorageClass
+
+so admins create sc for every project as best practice.
+
+kubectl apply -f 02-ebs-dynamic.yaml
+storageclass.storage.k8s.io/expense-ebs created
+
+kubectl get sc
+NAME          PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+expense-ebs   ebs.csi.aws.com         Delete          WaitForFirstConsumer   false                  40s
+gp2           kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  6h29m
+
+
+https://kubernetes.io/docs/concepts/storage/persistent-volumes/
+
+ReclaimPolicy - Delete
+-----------------------
+For volume plugins that support the Delete reclaim policy, deletion removes both the PersistentVolume object from Kubernetes, as well as the associated storage asset in the external infrastructure.
+
+if persitent volume claim is deleted (i.e pod is deleted). it will delete PV and External Volume so it is danger.
+
+ReclaimPolicy - Retain
+-----------------------
+The Retain reclaim policy allows for manual reclamation of the resource. When the PersistentVolumeClaim is deleted, the PersistentVolume still exists and the volume is considered "released". But it is not yet available for another claim because the previous claimant's data remains on the volume. An administrator can manually reclaim the volume with the following steps.
+
+a) Delete the PersistentVolume. The associated storage asset in external infrastructure still exists after the PV is deleted.
+b) Manually clean up the data on the associated storage asset accordingly.
+c) Manually delete the associated storage asset.
+
+If you want to reuse the same storage asset, create a new PersistentVolume with the same storage asset definition
+
+reclaimPolicy: Retain (in  02-ebs-dynamic.yaml)
+
+kubectl delete -f 02-ebs-dynamic.yaml
+
+ebs-dynamic-sc.yaml (this is done by administrative team as they create storage class and provide to us)
+
+kubectl apply -f ebs-dynamic-sc.yaml
+storageclass.storage.k8s.io/expense-ebs created
+
+kubectl apply -f 02-ebs-dynamic.yaml
+persistentvolumeclaim/ebs-dynamic created
+pod/nginx-dynamic created
+
+kubectl get pods
+NAME            READY   STATUS    RESTARTS   AGE
+nginx-dynamic   1/1     Running   0          34s
+
+kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                 STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+pvc-28c92ba7-b5d6-4af5-9bb6-680d2bc75997   4Gi        RWO            Retain           Bound    default/ebs-dynamic   expense-ebs    <unset>                          54s
+
+In AWS --> EC2 --> Elastic Bloc Store --> Volumes --> You can see a volume with 4GB is Created
+
+Storage Class takes cares of creating PV and EBS Volume in AWS (i.e 4GB EBS Volume is Created in AWS)
+In Static we need to create PV and EBS Volume (like in previous we created 100GB)
+
+pvc-28c92ba7-b5d6-4af5-9bb6-680d2bc75997 --> this persistent volume is created by storage class
+
+This is Dynamic Volume Provisioning
+
+Static
+--------
+kid --> Mother --> Father --> Money
+Pod --> PVC    --> PV     --> Storage / Volume
+
+Dynamic
+---------
+kid --> Mother --> E-Wallets     --> Money
+Pod --> PVC    --> Storage Class --> Storage
+
+kubectl apply -f 01-ebs-static.yaml
+persistentvolume/ebs-static created
+persistentvolumeclaim/ebs-static created
+pod/nginx-static created
+service/nginx-lb created
+
+kubectl get pods
+NAME            READY   STATUS    RESTARTS   AGE
+nginx-dynamic   1/1     Running   0          15m
+nginx-static    0/1     Pending   0          7s
+
+kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                 STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+ebs-static                                 100Gi      RWO            Retain           Bound    default/ebs-static                   <unset>                          12s
+pvc-28c92ba7-b5d6-4af5-9bb6-680d2bc75997   4Gi        RWO            Retain           Bound    default/ebs-dynamic   expense-ebs    <unset>                          15m
+
+
+for static we need to create volume (100 GB) and for Dynamic storage class will create volume (4GB)
+
+This is Static and Dynamic Volume Provisioning with EBS
+
+EFS --> Elastic File System
+-----------------------------
+EBS vs EFS
+-----------
+1. EBS is like hard disk, volume and instance should be in same AZ-1a
+2. EFS is through NFS protocol, it can be anywhere
+3. EBS volume is static, it cannot increase on its own.
+4. EFS is completely dynamic in storage, it can automatically expand memory.
+5. Which is suitable for DB applications like MySQL? EBS because of less latency
+ 
+application in mumbai, database is in US (here data fetching, updating take lots of time)
+your storage should be as near as application than latency will be less (as db is beside application need not to travel for connecting db operations will be faster)
+
+
+EBS --> Speed (for databases)
+EFS --> AnyWhere Access (images, file sharing etc)
+
+
+
+
+
+
+
+
+
+
+
+

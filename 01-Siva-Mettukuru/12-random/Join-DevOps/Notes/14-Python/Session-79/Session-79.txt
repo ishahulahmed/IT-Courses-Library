@@ -1,0 +1,80 @@
+Python Scripting
+------------------
+1) Variables -> data types 
+2) Conditions
+3) Loops
+4) Functions
+5) Use Cases
+
+- Python, Java, C, C++, C#, Golang etc
+
+- Static Typed Languages: You have to define the data type of the variable before executing the program
+    - int a = 42;
+    - float b = 45.35;
+- Dynamic Typed Languages: The Compiler is intelligent enough to understand the datatype of the variable
+    - a = 42
+    - b = True
+    - c = "DevOps"
+- Immediate Proto Type (POC - Proof of Concept): Python
+- Syntax is very easy to learn
+
+fruits = ["apple", "banana", "cherry"]:
+for fruit in fruits:
+	print(fruit)
+
+- Python is widely used for automation, Deep Learning applications, Natural Language Processing (ChatGPT, Gemini, Github CoPiolot)
+- Web Development (Django)
+
+- Installation of Python: AWS (Cloudshell)
+
+Commenting
+-----------
+- Single Line Comment: # this is a single line comment
+- Multii Line Comment: """ this is a multi-line comment"""
+
+Variables
+----------
+- It is container to store some values inside it.
+- a = 42 
+- Python scripts are saved using .py extension
+
+- Integer
+- Boolean
+- Strings
+- Float
+
+- List
+- Tuple
+- Set 
+- Dictionary
+(These 4 are Python Specific Data Types)
+
+- Python is case-sensitive i.e devops and DevOps are 2 different things
+
+- Naming convention:
+- snake_case
+- snake-case (This is incorrect)
+- camelCase
+- CONSTANTS
+
+- by default division returns a float value
+
+cat ~/.ssh/config
+Host  github.com
+     HostName github.com
+     User git
+     IdentityFile ~/.ssh/github
+
+cd ~/.ssh
+ls -l
+total 22
+-rw-r--r-- 1 shahu 197609   89 Jul 15 15:27 config
+-rw-r--r-- 1 shahu 197609 2655 Jul 15 15:11 github
+-rw-r--r-- 1 shahu 197609  574 Jul 15 15:11 github.pub
+-rw-r--r-- 1 shahu 197609 7479 Jul 15 15:29 known_hosts
+-rw-r--r-- 1 shahu 197609 6743 Jul 15 15:29 known_hosts.old
+
+Enter passphrase for key '/c/Users/shahu/.ssh/github':
+
+Authentication --> Login in an application using username and password
+Authorization --> Performing an action inside an application after authentication

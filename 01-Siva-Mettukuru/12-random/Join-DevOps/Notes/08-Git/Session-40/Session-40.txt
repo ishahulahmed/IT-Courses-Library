@@ -1,0 +1,675 @@
+Session Overview
+------------------
+a) Branching
+b) Merge
+c) Rebase
+d) Merge vs Rebase
+e) Merge conflicts
+
+when you first install git in your local machine. later created few files and want to commit those files to git using
+git add . (it will add to staging area)
+git commit -m "some-message" (here you will get Author identity unknow error)
+Author identity unknown
+
+* Please tell me who you are.
+
+Run
+
+  git config --global user.email "you@example.com"
+  git config --global user.name "Your Name"
+
+to set your account's default identity.
+Omit --global to set the identity only in this repository.
+
+fatal: unable to auto-detect email address (got 'shahu@Shahuls-Laptop.(none)')
+
+You, need to set your user.email and user.name for commiting your changes. Here Your Setting global identiy i.e default identity. you can also set a new author for every repository you created.
+
+Set Author for a Specific Repository (Locally)
+-----------------------------------------------
+If you want to set the author name and email for just one specific repository:
+
+1) Navigate to the repository's directory using your terminal or command prompt.
+
+2) Run the following commands:
+   git config user.name "Your Name"
+   git config user.email "your.email@example.com"
+   This will only affect the repository you're currently in and won't change the settings for any other repositories.
+
+3) To check the current author settings for the repository, you can use:
+   git config user.name
+   git config user.email
+
+4) To check global settings:
+   git config --global user.name
+   git config --global user.email
+
+5) These settings determine the author information for commits you make.
+
+This is just commit author. When you push your changes to remote github. either you can send it through SSH by saving credentials in .ssh folder (using your private key) or window credential manager (it will prompt for credentials for first time and store them in it) will save your github credentials it will push changes to your github account automatically when you type. git push origin main. (you can check in credentials of your github account in windows credential manager).
+
+to see global configuration set 
+cat ~/.gitconfig (in user home directory .gitconfig will have have global author configuration details)
+
+
+till now we were in the main branch adding to the staging area, making local commits and then pushing to the remote repository.
+
+imp file --> duplicate the file
+do the changes
+review the changes
+test the file
+if good, then change in main file
+
+Git --> Single source of truth (Because we can make versions, give reviews and see who has made changes etc)
+
+For Example Research Paper on CICD from Students
+-------------------------------------------------
+Two Options
+
+a) Single paper --> write everything in single paper from all (all students will write in single paper)
+
+b) Multiple papers --> finally colloborate imp points into one paper (all students write in different papers and imp points in one paper)
+
+so, second option is better.
+
+Colloboration --> This is about Collabration. So, if in a project more than one person is working then we should have collabration. In order to have this collaboration we have something called Branching.
+
+Branching
+-----------
+main --> points to Production, direct changes are not at all allowed. 
+through some review process (changes in main brnach only through review process)
+
+main --> feature branch
+
+do changes in feature branch --> get reviews --> run some tests --> scan the code
+
+feature --> main (merge feature branch into main branch if everything is proper)
+
+everyone should create one branch for any change... (in a project everyone should create one branch)
+
+in projects you have to give proper message for commits
+
+
+git log --oneline (you will get log in one line)
+587b8b9 (HEAD -> main, origin/main) started first with plain dosa
+
+git log (will give full information)
+commit 587b8b994a78d9bdc7ca3220c13eed11c097a1c7 (HEAD -> main, origin/main)
+Author: ishahulahmed <shahulahmed1717@gmail.com>
+Date:   Mon Sep 9 16:55:49 2024 +0530
+
+    started first with plain dosa
+
+
+587b8b994a78d9bdc7ca3220c13eed11c097a1c7 --> SHA Code --> this is a algorithm --> 40 chars 
+(no matter how much big file we will give SHA algorithm will create a 40 charchters code)
+
+git - the stupid content tracker (content tracker means that's a key value pair)
+(value is the source code (code in the repository) we wrote and key is the 40 charchters SHA Algorithm code (commit id) assigned to it depending up on the value key will change)
+
+key --> value
+
+4bd656fd136438832b47ed66a211797afc53b3fb (key) --> current code in the workspace (value)
+
+echo "Hello World" | git hash-object --stdin --> prints sha code on the screen for this content  (here echo "hello World" is input to second command)
+(here for Hello World content you will same id anywhere if content changes id will change)
+(git using this SHA algorithm verifies whether content is changed or not according to content id will be generated)
+i.e based on the content algorithm will be created if same content same algorithm if content changes new algorithm.
+
+git cat-file <commit id> -p --> print the info about sha code
+
+git cat-file 587b8b994a78d9bdc7ca3220c13eed11c097a1c7 -p
+tree 351063b583ef21f853aab68a3b71e0c3a386ca3c
+author ishahulahmed <shahulahmed1717@gmail.com> 1725881149 +0530
+committer ishahulahmed <shahulahmed1717@gmail.com> 1725881149 +0530
+
+started first with plain dosa
+
+Our dosa business has been successful and growing from now on direct changes in main branch is not allowed. We should be very careful before doing any change in our project.
+
+goto repository settings --> Click on Branches --> Click on Add classic branch protection rule 
+Branch name pattern --> main (input) --> click on check-box Require a pull request before merging (automatically under this Require approvals option will be enabled) --> Click on Create
+
+from now on in main branch no one can push directly.
+
+from now for any small change we have to create a branch make chages in it then merge with main branch.
+
+git checkout -b --> create new branch and change the workspace into new branch 
+git checkout -b karam-dosa
+Switched to a new branch 'karam-dosa'
+
+new branch means till now the code which is already existing we are duplicating it and putting it into new branch.
+
+git log --oneline
+587b8b9 (HEAD -> karam-dosa, origin/main, main) started first with plain dosa
+(SHA Code will be same since no changes were made in the code only new branch created and it's first commit-id will be the last commit-id of main branch  
+ because that is where from we are starting)
+
+git add .; git commit -m "added karam to dosa"; git push origin karam-dosa (making changes in new branch)
+git add .; git commit -m "added oil to karam dosa"; git push origin karam-dosa
+
+git log --oneline
+2052f25 (HEAD -> karam-dosa, origin/karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 (origin/main, main) started first with plain dosa
+
+now, we want to merge this changes in main branch.
+since we have added protection to main branch. we need to pull the changes to our main branch using pull request.
+
+Pull requests --> New pull request --> Compare Changes base:main <-- compare: karam-dosa i.e karam-dosa branch to main branch changes we are pulling --> Create pull request --> Again if you want add description and press Create pull request.
+
+it will say Atleast 1 approving review is required by reviewers with write access.
+
+this changes any of our team member will have to review to review first go to settings of the repository --> Collaborators --> Add people (to add as collabrator he used his other account) (give the person write access inorder to give review an invite will be sent to him he has to accept)
+
+if he accepts the invite --> he will get access to repository --> then he needs to go to pull requests column --> review changes and accept.
+he can even give comments i.e he can give comment or review even on a particular line --> recommendations --> reject changes.
+
+Other Person --> Pull requests --> Add your review --> Review changes --> Approve (option selection) --> submit review --> Merge Pull request --> confirm merge.
+
+After merging you can delete the branch. (in projects people generally are afraid to delete branches as they do not have a sufficient knowledge. delete only if you have full fledeged knowledge)
+
+if you are the owner of the repo and you only created the branch directly on the repository itself it will show Compare & pull request.
+(Above process is for other than owner i.e different account holder and even owner can also do the process)
+
+After merging pull request in github you need to reflect those changes in your local repository (that is you need to pull those changes in local repository also)
+git checkout main
+git pull 
+
+git log --oneline (in main branch after pulling those changes locally)
+14f5301 (HEAD -> main, origin/main) Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+git cat-file 14f5301  -p
+tree 0dc43a3834281e27368d2a9f88bf4e7550de97a9
+parent 587b8b994a78d9bdc7ca3220c13eed11c097a1c7
+parent 2052f25b4bf85b67cb6bc82049c2322e4c8671b7
+author Shahul Ahmed <134133208+ishahulahmed@users.noreply.github.com> 1725951929 +0530
+committer GitHub <noreply@github.com> 1725951929 +0530
+
+You can see this commit has two parents. one parent is main branch last commit-id and other is feature (karam-dosa) branch last commit-id.
+
+
+whether to know whether a commit is merge commit or normal commit for merge commit there will be two parents for normal commits only one parent.
+the previous commit is the parent to the present commit in normal commit
+
+ChatGPT - Pull Request
+------------------------
+Creating a pull request (PR) for someone else’s repository is a common way to contribute to open-source projects or collaborate on code with others. Here’s a step-by-step guide on how to do it:
+
+ 1. Fork the Repository
+
+    First, you need your own copy of the repository to work on. This is done by forking the original repository.
+    a. Go to the repository’s page on GitHub.
+    b. Click the “Fork” button in the top right corner of the page.
+    c. GitHub will create a copy of the repository under your account.
+
+ 2. Clone Your Fork
+
+    Next, you need to get a local copy of your forked repository on your machine
+    a. Go to your forked repository on GitHub.
+    b. Click the “Code” button and copy the URL (use HTTPS or SSH depending on your preference).
+    c. Open a terminal (or Git Bash) and run the following command:
+       git clone <URL-of-your-fork>
+    d. Navigate to the repository directory:
+       cd <repository-name>
+
+ 3. Create a New Branch
+
+    It’s a good practice to create a new branch for your changes instead of working on the default branch.
+    a. Create and switch to a new branch:
+       git checkout -b <your-branch-name>
+
+ 4. Make Your Changes
+  
+    Edit the code, add features, or fix bugs as needed.
+
+    a. Make your changes to the codebase.
+    b. Stage the changes:
+       git add <changed-files>
+    c. Commit your changes:
+       git commit -m "Description of your changes"
+
+ 5. Push Your Changes
+
+    Push your changes to your forked repository on GitHub
+    a. Push to your branch:
+       git push origin <your-branch-name>
+   
+ 6. Create a Pull Request
+
+    Now, you need to create a pull request from your forked repository.
+    a. Go to your forked repository on GitHub.
+    b. Click on the “Pull Requests” tab.
+    c. Click the “New Pull Request” button.
+    d. Choose the base repository and branch you want to merge your changes into (usually the original repository’s main branch).
+    e. Choose your fork and branch as the head repository and branch.
+    f. Review your changes and add a title and description to explain what you’ve done.
+    g. Click “Create Pull Request.”
+
+ 7. Follow Up
+
+    - Monitor the pull request for any feedback or requests for changes from the repository maintainers.
+    - Make any necessary updates to your PR as requested.
+    - Communicate with the repository maintainers if needed.
+
+And that’s it! You’ve successfully created a pull request to contribute to someone else’s repository.
+
+git remote -v
+The output will show the remote repository URL, which often includes the owner’s username or organization.
+
+Two ways to create repository
+-----------------------------
+1) create a repository in github. clone that into your local system make changes i.e add files and push it to github.
+2) To send an existing content in a folder on your computer to github. navigate to that folder in git bash then    
+   git init
+   git add .
+   git commit -m "commiting locally"
+   git branch -M main (as it will create master branch we want to name as main)
+
+   create a repository in github and copy it's url then 
+   git remote add origin https://github.com/ishahulahmed/git-practise-fun.git (this is main we are now adding remote github repositry url)
+   git push -u origin main
+      	
+   
+Merge 2 types
+--------------
+Merge
+rebase
+
+Merging
+---------
+create another branch
+do the changes in that branch
+raise PR
+get the approval
+then merge it
+
+merge gives us a new merge (commit-id) which has 2 parents, we can clearly see the history
+
+Rebase-Concept
+---------------
+git checkout -b neyyi-karam-dosa (create and move into that branch)
+Switched to a new branch 'neyyi-karam-dosa'
+git add .; git commit -m "added neyyi"; git push origin neyyi-karam-dosa
+
+git log --oneline
+214d798 (HEAD -> neyyi-karam-dosa, origin/neyyi-karam-dosa) added neyyi
+14f5301 (origin/main, main) Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+git add .; git commit -m "added extra karam"; git push origin neyyi-karam-dosa
+git log --oneline
+a215224 (HEAD -> neyyi-karam-dosa, origin/neyyi-karam-dosa) added extra karam
+214d798 added neyyi
+14f5301 (origin/main, main) Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+Same Process Again
+git-dosa --> Pull requests --> New pull request --> base: main <- compare: neyyi-karam-dosa --> Create pull request --> Again press Create pull request (after providing description)
+
+At least 1 person needs to give reviews
+reviewer will see changes --> comments or reviews on specific lines --> finally approve or reject.
+siva started a review on a line of code --> finshed it by Comment (Submit general feedback without explicit approval) type review.
+
+No, one will accept the code that easily. you need to scrutinse the code.
+reviewer --> Add your review --> Review changes --> Approve (Submit feedback and approve merging these changes)
+
+after the review is done by reviewer you can merge the pull request in the owners repository. here reviewers are there just to review and give approve only in the main repository where repository is created in that account we can create a merge commit (or) squash and merge (or) rebase and merge that pull request.
+
+siva opted for Rebase and Merge --> confirm rebase and merge
+
+Rebase
+---------
+rebase --> change the base (All commits are rebased, and the same number of commits are added to the main branch)
+no extra commit (merge will get extra commit)
+commit id are changed (different from branch commit id's)
+no history is preserved, it is rewritten as if it is done in main branch
+looks clean, linear history
+
+Merge vs Rebase
+---------------
+a) Merge will give us extra commit id. Rebase will not give us any extra commit id.
+b) In merging history is preserved. You can check origin and see what happened in the branches.
+c) In rebase history is not preserved. Commit id's are changed. No extra commit id's are created.
+
+When Merge?
+-----------
+single branch --> multiple persons are working --> prefer merge
+if you want to keep the history --> prefer merge
+blindly go for merge, if you are not sure
+
+When Rebase?
+------------
+single branch --> single person --> prefer rebase
+if you dont want history --> prefer rebase
+if you want clean structure --> prefer rebase
+
+after rebase
+git checkout main
+git pull origin main (pulling the changes locally after rebase)
+
+git log --oneline
+3f45f5d (HEAD -> main, origin/main) added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+git branch -d egg-dosa (To delete a branch locally)
+
+conflicts
+----------------
+if git findsout 2 different content in the same line, it can't take decision. people who wrote the code should sit together and resolve conflict.
+
+if main branch is moved forward
+another branch is trying to merge the changes, then conflict will come.
+
+if main branch is moved forward (changes have been made to main branch). another branch is trying to merge the changes into main branch without considering the changes which already took place in the main branch, then conflict will come. this usually happens when the developer is not aware of changes in main branch and trying to push is changes.
+
+confilcting occuring because same line with two different content. (because this developer trying to merge using old main branch but main branch has already moved forward)
+
+
+Two Developers are working at the same time on the main branch
+
+Developer-1
+------------
+git clone https://github.com/ishahulahmed/git-dosa.git
+
+git checkout -b egg-dosa
+Switched to a new branch 'egg-dosa'
+
+git add .; git commit -m "added 2 eggs"; git push origin egg-dosa
+
+git log --oneline
+a394edc (HEAD -> egg-dosa, origin/egg-dosa) added 2 eggs
+3f45f5d (origin/main, main) added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+git add .; git commit -m "added oil"; git push origin egg-dosa
+
+git log --oneline
+d5d4d13 (HEAD -> egg-dosa, origin/egg-dosa) added oil
+a394edc added 2 eggs
+3f45f5d (origin/main, main) added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+Now, Developer-1 thought he has done what it needs to be done and raised a pull request. he is bit faster than developer-2.
+Pull requests --> New pull requests --> base: main <- compare: egg-dosa --> Create pull request --> Again Create pull request (after description)
+
+reviewrs --> Add your review --> Review changes --> Approve (Submit feedback and approve merging these changes).
+go to main repositry --> since approval got from reviewers --> Rebase and merge --> Confirm rebase and merge.
+
+now, successfully merged in main branch.
+
+git checkout main
+git pull
+
+git log --oneline
+4322c8a (HEAD -> main, origin/main) added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+here, rebase so new commit-id's we will get.
+
+Developer-2
+------------
+git clone https://github.com/ishahulahmed/git-dosa.git
+
+git checkout -b karam-egg-dosa
+Switched to a new branch 'karam-egg-dosa'
+
+git add .; git commit -m "removed extra karam"; git push origin karam-egg-dosa
+
+git log --oneline
+5f51811 (HEAD -> karam-egg-dosa, origin/karam-egg-dosa) removed extra karam
+3f45f5d (origin/main, origin/HEAD, main) added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+git add .; git commit -m "added 3 eggs"; git push origin karam-egg-dosa
+
+git log --oneline
+7f03963 (HEAD -> karam-egg-dosa, origin/karam-egg-dosa) added 3 eggs
+5f51811 removed extra karam
+3f45f5d (origin/main, origin/HEAD, main) added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+Developer-2 was slower than Developer-1 now he thought he has also completed and want to create pull request. he don't already developer-1 made changes it is merged into main branch.
+
+now developer-2 will raise pull request since his karam-egg-dosa is also ready for market
+Pull requests --> New Pull requests --> base: main <- compare: karam-egg-dosa --> Can't automatically merge --> but procced to Create pull request
+Create pull request --> Again Create pull request (description)
+You will get below Review required
+This branch has conflicts that must be resolved.
+Conflicting files
+menu.txt
+
+here main branched already moved from 3f45f5d to 4322c8a (this is rebase commit-id). so conflict comes. so we need to resolve.
+in market already egg-dosa is running which this guy don't know. but now he wants to run karam-egg-dosa in market. so there is confict now.  
+
+developer-2 must now first pull the changes in main
+git checkout main
+git pull origin main 
+
+now, he must compare the changes between main and his changes by merging
+
+git checkout karam-egg-dosa
+git rebase main (comparing the main branch changes and his branch changes)
+Auto-merging menu.txt
+CONFLICT (content): Merge conflict in menu.txt
+error: could not apply 5f51811... removed extra karam
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+Could not apply 5f51811... removed extra karam
+
+after rebase you can clearly. see, there is a conflict. now both the developers will sit and decide whose line to accept. in reality this guy only if he feels the other developer code is good he will accept that or if his code is good he will accept his code.
+
+rebase will be done for one by one commit 
+vim menu.txt [make your changes whether extra karam needed or not]
+
+git rebase --continue [this is not needed here i feel he did by mistake]
+menu.txt: needs merge
+You must edit all merge conflicts and then
+mark them as resolved using git add
+
+after doing the changes for first commit then commit those changes locally
+git add .; git commit -m "remove neyyi" [locally not pushed to remote]
+
+now again for other commit
+git rebase --continue [now it will go for second commit of the developer-1 it is comparing dev-1 commits one by one with your file]
+Auto-merging menu.txt
+CONFLICT (content): Merge conflict in menu.txt
+error: could not apply 7f03963... added 3 eggs
+hint: Resolve all conflicts manually, mark them as resolved with
+hint: "git add/rm <conflicted_files>", then run "git rebase --continue".
+hint: You can instead skip this commit: run "git rebase --skip".
+hint: To abort and get back to the state before "git rebase", run "git rebase --abort".
+Could not apply 7f03963... added 3 eggs
+
+vim menu.txt [make your changes whether 3 eggs not]
+commit those changes locally
+git add .; git commit -m "instead of 3 eggs 2 eggs and karam"
+interactive rebase in progress; onto 4322c8a
+Last commands done (2 commands done):
+   pick 5f51811 removed extra karam
+   pick 7f03963 added 3 eggs
+No commands remaining.
+You are currently rebasing branch 'karam-egg-dosa' on '4322c8a'.
+  (all conflicts fixed: run "git rebase --continue")
+
+nothing to commit, working tree clean
+
+you, got this message because all commits have rebased. now again run git rebase --continue for successfully completing the process.
+
+run again
+git rebase --continue
+Successfully rebased and updated refs/heads/karam-egg-dosa.
+
+
+now, if you see commit-id's
+git log --oneline
+298a621 (HEAD -> karam-egg-dosa) remove neyyi
+4322c8a (origin/main, origin/HEAD, main) added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+
+
+you, can see commit-id's of karam-egg-dosa branch have been change from the previous id's.
+
+git push origin karam-egg-dosa [pushing changes to remote but rejected due we wrote the entire history so do force change]
+Warning: Permanently added 'github.com' (ECDSA) to the list of known hosts.
+To github.com:ishahulahmed/git-dosa.git
+ ! [rejected]        karam-egg-dosa -> karam-egg-dosa (non-fast-forward)
+error: failed to push some refs to 'github.com:ishahulahmed/git-dosa.git'
+hint: Updates were rejected because the tip of your current branch is behind
+hint: its remote counterpart. If you want to integrate the remote changes,
+hint: use 'git pull' before pushing again.
+
+git push origin karam-egg-dosa -f [this will work]
+
+Since, you have already created pull request. But, you were not successful in creating pull request because it was showing merge conflicts error.
+now, no need to create new pull request. go to the same pull request. since merge conflicts have been resolved. now you can successfully place your pull request.
+
+
+reviewrs --> Add your review --> Review changes --> Approve (Submit feedback and approve merging these changes).
+go to main repositry --> since approval got from reviewers --> Merge pull request --> Confirm merge.
+
+git checkout main
+git pull
+1f46400 (HEAD -> main, origin/main, origin/HEAD) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa, karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa) added oil to karam dosa
+
+
+git merge main Vs git rebase main
+----------------------------------
+Both 'git merge main' and 'git rebase main' are used to integrate changes from one branch into another, but they do so in different ways.
+
+git merge main
+
+a) Concept: Merges the main branch into your current branch (let’s say you're on a feature branch).
+b) How It Works: It creates a new commit (a merge commit) that combines the changes from main with the changes in your current branch.
+c) History: Preserves the history of both branches, showing the branching and merging points.
+d) Use Case: Useful when you want to maintain the complete history of how the project evolved, including the branch merges.
+e) git checkout feature-branch
+   git merge main
+   
+
+git rebase main
+---------------
+a) Concept: Re-applies your current branch’s changes on top of the main branch, effectively rewriting the commit history.
+b) How It Works: It takes the commits from your current branch and re-applies them one by one on top of the main branch.
+c) History: Creates a linear history, which can make it easier to follow. It does not preserve the branch structure as merge does.
+d) Use Case: Useful for cleaning up the commit history before merging into a shared branch or for keeping your branch up-to-date with the main branch in a linear fashion.
+e) git checkout feature-branch
+   git rebase main
+  
+
+Key Differences
+---------------
+
+a) History: 'merge' retains the history of all branches and their commits, while 'rebase' rewrites history to create a linear progression of commits.
+b) Commit History: merge creates a merge commit that reflects the integration of branches, whereas rebase replays your commits on top of another branch, effectively making it appear as if you started your work from the tip of the main branch.
+c) Conflict Resolution: Both can require resolving conflicts if they arise, but with rebase, you may have to resolve conflicts multiple times, once for each commit being replayed.
+
+Which to Use
+-------------
+- Use merge if you want to preserve the branch history and are okay with having merge commits.
+- Use rebase if you want a cleaner, linear history and are okay with rewriting your branch’s commit history.
+
+It’s often a matter of preference and workflow. For collaborative work, merge is safer to avoid rewriting shared history, while rebase is more commonly used for individual or feature branch management before merging into the main branch.
+
+ChatGpt
+-------
+Here are some common scenarios where merge conflicts might occur:
+
+Different changes to the same part of a file: If both branches modify the same lines of code in a file differently, Git won't know which change to apply, leading to a conflict.
+
+a) File-level conflicts: If files were deleted in one branch but modified in another, Git may not know how to reconcile these differences.
+
+b) Renaming or moving files: Git might struggle to understand that a file in one branch is the same as a file renamed or moved in another branch.
+
+c) Binary files: Git cannot merge binary files (like images or compiled binaries) automatically, so any changes to these files in different branches can cause conflicts.
+
+The number of files itself isn't the primary factor; it's the content and changes within those files that matter. If the changes made in your new branch conflict with changes made in the main branch since they diverged, Git will indicate a conflict when you try to merge the branches back together.
+
+If the content of the files is exactly the same between your branch and the new main branch, and the new main branch has additional files that your branch doesn't have, you typically won't encounter merge conflicts related to those additional files.
+However, there are some considerations to keep in mind:
+
+a) File Deletions: If files were deleted in the new main branch that still exist in your branch (and have been modified), Git will mark these as conflicts because it needs to reconcile the deletion with your changes.
+
+b) Binary Files: If the new files in the main branch are binary files or files that Git cannot merge automatically (like images), you may encounter conflicts.
+
+
+My Example
+-----------
+for example you made a new branch and doing your work but already main branch has moved forward as so many people are collabrating.
+now you want you work to merge with main branch so you raised a pull request but it showing conflicts becuase main branch has already moved forwad
+so first you pull the changes i.e new main branch into your local by using commands
+git checkout main
+git pull origin main
+so changes have been pulled into main
+now change to your branch
+git checkout karam-egg-dosa
+git rebase main
+after using git rebase main it will show conflicts message in your local git in vs code you can see what are the changes and accept or make changes to that file after doing changes in that file use command
+git rebase --continue (it will show 1/2) (after every conflict resoluting commit the changes)
+then commit changes locally using
+git add .; git commit -m "remove neyyi";
+git rebase --continue (it will show 2/2) (use rebase till conflicts are cleared) (after every conflict resolution commit the changes)
+git add .; git commit -m "instead of 3 eggs 2 eggs and karam";
+you will get in git after running above command
+(all conflicts fixed: run "git rebase --continue")
+then use command git rebase --continue you will get
+Successfully rebased and updated refs/heads/karam-egg-dosa
+after accepting or ignoring change few commit id's will be changed according in your existing karam-egg-dosa branch
+after all conflicts resolved push your changes to remote github
+git push origin karam-egg-dosa -f (here we are using -f forcing the chage without -f it will not work since we have already chaged the history due to conflicts)
+now you can raise pull request since conflicts are not showing
+then reiviewers will reiview your code and finally merged to main branch
+
+
+
+
+
+
+

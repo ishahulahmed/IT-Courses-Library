@@ -1,0 +1,271 @@
+Session Overview
+-----------------
+a) Docker compose
+b) Docker volumes
+    i) Unnamed volumes
+   ii) Named volumes
+
+
+docker compose
+---------------
+linux/shell commands --> one by one...
+(A set of linux commands running them squentially one by one (we might miss the squence while running one by one and it is more time taking). we will automate it by putting them into file like shell script)
+
+ansible adhoc commands 
+(Ansible ad-hoc commands are a way to run simple tasks or execute commands on remote machines without needing to create a full playbook)
+ansible -m yum "name=nginx state=installed". solution is playbook (we kept all modules in playbook and used it for running commands)
+(An Ansible playbook is a YAML file used to define a series of tasks that Ansible should perform on a set of hosts. Playbooks are a central feature of Ansible, allowing users to automate configuration management, application deployment, and task orchestration in a clear, structured, and reusable manner.)
+
+SG is the dependency for EC2 (while manual creation of EC2)
+depends on (In terraform we will use depends on)
+(In Terraform, depends_on is a meta-argument used to explicitly specify dependencies between resources or modules.)
+
+resource "aws_security_group" "example_sg" {
+  name        = "example_sg"
+  description = "An example security group"
+
+  # Other security group configurations
+}
+
+resource "aws_instance" "example_instance" {
+  ami           = "ami-0c55b159cbfafe1f0"
+  instance_type = "t2.micro"
+
+  # Ensure the security group is created before the instance
+  security_groups = [aws_security_group.example_sg.name]
+
+  # Explicit dependency to ensure the security group is created first
+  depends_on = [aws_security_group.example_sg]
+}
+
+
+expense --> 3 modules (we have two problems here)
+1. I have to run docker containers manually... (running one command after the another in squence)
+2. components are dependent on each other. (like backend will not work without mysql database)
+
+
+docker create network expense
+
+docker run -d  -p 8080:8080 --name backend --network expense backend (*here for this command we are creating docker compose file)
+(here with increase in command line options it is tough to remember and more prone to errors if there is a mistake. In order to automate such stuff we will use docker compose)
+
+Like Terraform we can set explicit dependencies in docker compose.
+
+Docker Compose is a tool used for defining and managing multi-container Docker applications. It allows you to define and run multi-container Docker applications with a single configuration file and a few simple commands. This makes it easier to manage complex applications composed of multiple interconnected services.
+
+docker compose can be used to extend volumes. it can be used to add dependencies.
+
+docker compose comes installed with docker no need to install separately.
+
+mysql
+backend
+frontend
+
+network: expense
+
+docker compose (it is a yaml file with yaml like syntax used in ansible videos)
+
+- name:
+  vars:
+	course: devops (Global Variable) (Global Variable can be accessed throught the childs)
+  tasks:
+  - name:
+    course: docker (Child Variable)
+  
+  - name:
+  
+ 
+you do not need dependencies for building image but for running containers you might need dependencies. 
+(i.e one container will not run if other container is not running)
+
+Docker Compose can be used to build images as well as to run containers. In fact, Docker Compose is quite versatile and can handle both tasks within the same configuration file.
+
+here in video images were buit manually
+in expense-docker repository command to build images from backend mysql frontend at once
+for i in backend frontend mysql ; do cd $i ; docker build -t $i:v1.0.0 . ; cd .. ; done
+
+image is a static file
+when we run an image it will give us an instance or container. (the running instance of image is nothing but container)
+
+docker compose up -d 
+(-d to run in detach mode i.e in background. up is to up all the containers)
+
+docker compose down
+The docker-compose down command is used to stop and remove the containers, networks, and optionally volumes defined in a Docker Compose configuration file (docker-compose.yaml). 
+
+mysql --> schema creation, user creation
+
+backend 
+
+frontend
+
+when you run docker compose up -d it will create and run all containers but it will take time to create schema creation and user creation so when backend tries to connect to db connection will be refused so put some delay in backend creation
+
+command: sh -c "sleep 20 && node /opt/server/index.js"
+
+Breakdown of the Command
+a) sh -c: This tells the shell to execute the following command string.
+b) "sleep 20 && node /opt/server/index.js":
+    i) sleep 20: This part of the command causes the shell to pause for 20 seconds before executing the next command. This can be useful for ensuring that  
+                 certain conditions are met before starting the main process.
+   ii) &&: This is a logical AND operator that ensures that the second command is only executed if the first command (sleep 20) succeeds.
+  iii) node /opt/server/index.js: This part of the command starts the Node.js application located at /opt/server/index.js.
+
+InvDocker Compose, the command key allows you to override the default command specified in the Docker image's Dockerfile. This is useful for changing the behavior of a container at runtime without altering the Docker image itself.
+
+a) CMD: Provides a default command and arguments for the image. It can be overridden by the command key in Docker Compose.
+     # Dockerfile example
+     CMD ["node", "/opt/server/index.js"]
+b) ENTRYPOINT: Defines the command that will be executed when the container starts. It can be combined with CMD to provide default arguments. The command     
+               key in Docker Compose will override the CMD but not the ENTRYPOINT.
+     # Dockerfile example
+     ENTRYPOINT ["node"]
+     CMD ["/opt/server/index.js"]
+
+Docker Compose Override
+------------------------
+When you specify the command key in a Docker Compose file, it overrides the default command defined by the CMD or ENTRYPOINT in the Docker image. Here’s how it works:
+
+1)Image Definition: The Docker image has a default command set in its Dockerfile.
+
+2) Compose File: When you use Docker Compose, you can override this default command with the command key.
+
+Dockerfile:
+----------
+# Dockerfile
+FROM node:14
+WORKDIR /opt/server
+COPY . .
+CMD ["node", "index.js"]
+
+Docker Compose File:
+---------------------
+version: '3.8'
+services:
+  app:
+    image: my-node-app:latest
+    command: sh -c "sleep 20 && node /opt/server/alternative.js"
+    ports:
+      - "8080:8080"
+
+What is Docker Compose?
+------------------------
+Docker Compose is a tool where you can define all the services that can be up and down at a time. it can create the dependencies between the services. it can declare the networks and volumes.
+
+volumes
+------------
+containers are ephemeral by default, once you remove the container it will remove the data also..
+(ephemeral means temporary)
+
+mysql is stateful application. frontend and backend are stateless applications. so we need to make sure that mysql data is always secured. but containers default nature is it will delete data automatically.
+
+
+"WorkDir": "/var/lib/docker/overlay2/25625f8125b1cef82cc4b6a730ee73581c3877682b08a051386b5dd1b447ff1b/work"
+This where docker docker will store it's work (docker inspect frontend you will get WokDir)
+
+if you remove the conatiner your workdir will also be removed
+
+mkdir nginx-data (create a directory locally (home path) by coming out of expense-docker folder)
+
+docker run -d -p 80:80 -v nginx-data:/usr/share/nginx/html nginx
+(locally present nginx-data folder mounting with container /usr/share/nginx/html location)
+
+docker exec -it container-id
+cd /usr/share/nginx/html
+echo "<h1>this is docker unnamed volume</h1>" > unnamed.html
+exit
+
+docker rm -f container-id
+
+then again run docker run -d -p 80:80 -v nginx-data:/usr/share/nginx/html nginx
+if you try to access your-ip:/hi.html(http://52.90.204.161/hi.html) still it will show hi even though you removed the old container
+the hi.html is not stored in nginx-data local folder you don't know where it stored that is the problem with unnamed volume but every time you run a new container using docker run -d -p 80:80 -v nginx-data:/usr/share/nginx/html nginx and try to access http://52.90.204.161/hi.html it will stipp be present.
+
+in video he was unable to find the location where hi.html is stored and why when adding a file in nginx-data folder for example docker.html we are not getting that file in http://52.90.204.161/docker.html 
+
+what is docker volumes?
+-----------------------
+docker containers by default they are ephemeral they will delete the data once the container is removed. But, you can maintain the data using docker volumes. There are two types of volumes:
+
+1. unnamed volumes. create a directory in linux and mount to container using -v host-path:container-path
+2. named volumes
+
+docker volume (you will get all commands you can with these command)
+for unamed volume you only need to take care docker commands will not work but for named volumes docker commands will work. where it is impleting we don't  know. i.e where it is saving files. siva said no need to know where it is saving also
+
+docker volume create nginx
+docker volume ls
+
+but with docker volume you don't need to create a directory it will only create and directory and manage it. no need to maintain it manually.
+
+docker run -d -p 80:80 -v nginx:/usr/share/nginx/html nginx
+docker exec -it container-id bash
+
+cd /usr/share/nginx/html/
+rm -rf index.html
+echo "this is a named volume" > index.html
+exit
+
+docker rm -f container-id (the container you created previously)
+
+again create a container new container
+docker run -d -p 80:80 -v nginx:/usr/share/nginx/html nginx
+http://52.90.204.161/ (access your site you will get this named volume)
+our file is still present not deleted. due to docker volume we created.
+
+mysql home directory --> /var/lib/mysql
+
+in docker hub you see the documentation of mysql for where to store data? (with experience you will get to know how things work)
+
+if your application taking time then that latency might come from databased to backend or backend to frontend etc
+
+docker exec -it backend bash (connecting to backend to check why latency)
+
+curl http://localhost:8080/transaction
+{"result":[{"id":1,"amount":100,"description":"Food"},{"id":2,"amount":350,"description":"Mutton"},{"id":3,"amount":645,"description":"Biriyani"},{"id":4,"amount":432,"description":"Chicken Pakoda"}]}
+
+curl -o /dev/null -s -w 'Establish Connection: %{time_connect}s\nTTFB: %{time_starttransfer}s\nTotal: %{time_total}s\n' http://localhost:8080/
+Establish Connection: 0.000173s
+TTFB: 0.003543s
+Total: 0.003597s
+(To Know the connection Time)
+
+This is just for knowledge in projects we will use kubernetes volumes not docker volumes.
+
+Infosys Question? As a devops engineer for a new project what requirements will you gather?
+-------------------------------------------------------------------------------------------
+For Example Expense Project
+a) with developers take information what technologies are using in frontend, backend and database.
+b) Where these are in Network
+c) In git what branching strategy are you using?
+d) we will say to developers we have pipe lines already availvalbe we will onboard your project but if you want you use our pipelines we will insert our 
+   jenkins file into your project .
+e) you have to create your project in jenkins, nexus and sonarqube it will get created automatically.
+f) if you are in docker and kubernetes you have to create this network. if your in kubernetes creating namespace
+g) after creating all this in development pipeline triggering their application after triggering development sucess.
+h) till 2 or 3 releases it will be tough.
+i) with developers we have to be continously in co-ordination. branching strategy is important. we need to see which strategy they are using and come to a 
+   common point.
+j) we let developer only to develop the code remaining we will take care including deployment from dev to production
+k) we will first co-ordinate with developers. our ultimate goal should be let developer only to develop the code reaming resposbility i will take care. how 
+   you will take care you need to justify. we will plan application deployment from dev to production. we will use shift left approach. instead of finding 
+   the security defects once after the deployment in production. we will configure the shift left process. we will configure the development pipeline where 
+   unit testing and all other scans like sonar scan, dast scan, sast scan, vulenarbility scan and image scan everything we will configure in the pipeline 
+   itself. once the pipeline is completed developer will automatically get the feedback whether pipeline is sucess or failure. if failure they can resolve 
+   the issues. later, once the application is completed for development environment then we will plan for QA, UAT and higher environments that pipeline also 
+   we wil configure but we no need to build again and again. we will get the artifact from nexus then we will push it to the QA Environment and UAT 
+   Environment. Before, going to production we will setup CR (Change Request) and HIRA (Hazard Identification and Risk Assessment) processes. 
+l) Change Request process should be there. There should be approvals from the development team leader, testing manager and then client approval. once these  
+   all approvals are met we will trigger the deployment from Change Request tool that will automatically trigger jenkins.
+m) Once the devops has been implemented completely. even applications are going dev to prod automatically. we will have a relase every two weeks. we will be 
+   on the standby. we will immediately resolve if there are any infrastructure issues, traffic issues, ports are correctly up or not. we will be monitoring 
+   these infrastructure strength, application strength. whether these are able to handle the traffic.
+
+DevOps means faster releases less defects.
+
+VM      Containers
+legacy	Microservices
+
+we have different platforms like VM and Containers for Deployment.
+VM --> Legacy Applications
+Containers --> Microservices

@@ -1,0 +1,506 @@
+Session Overview
+-----------------
+a) Process Management
+b) Network Management
+c) RDBMS
+d) Expenses project configuration
+e) MySQL
+f) Backend
+
+Write Points What you Learned in Course
+----------------------------------------
+Experience with Linux Server admin activities like user, service, package, network and process management.
+Experience in using Linux editors like vim.
+Experience in using public and private, configuring them to the servers..
+
+Process Management 
+----------------------
+process --> a sequence of steps to follow to complete a task...
+
+Outside, Whatever the business may be IT or Non-IT ticketing system is there.
+
+Why ticketing system? that is a process to serve the customers. 
+
+ticketing system means every order will get one order id /ticket id. customers can easily see the order-id and get the order. end of the days business will also will have an clarity how many orders placed and served on different dates and their values etc.
+
+in the same way linux also process management is important.
+
+in linux/windows (any operations system) everything is process.
+
+Linux creates process id for everything...
+
+PID --> process instance id (Operating Systems tracks Tasks using PID. How many tasks completed and pending)
+
+If a task is big, do you think one process is enough?
+
+We create subtasks...
+
+Acc Manager, Team Manager, Lead, Senior, Junior, Trainee  --> In a Team also we have
+
+Trainee reports to Junior, Junior reports to Senior
+
+here Trainee is child, his parent is Junior
+
+PID, PPID (PID reports to PPID) (Parent Process Instance Id)
+
+ps (used to check the status of active processes on a system and display technical information about them)
+
+ PID TTY          TIME CMD
+1338 pts/0    00:00:00 bash
+1636 pts/0    00:00:00 ps
+
+1338 pts/0    00:00:00 bash --> here bash is nothing but the terminal which we used to connect to the server this process will run till we use terminal to connect to the server.
+
+1636 pts/0    00:00:00 ps --> this is the command which we ran now.
+
+we can clearly see linux will create a pid for even a command and then show us the results. ultimately, linux has to track everything what has happened inside the server.
+
+from this we can understand linux will create process instance id for everything whatever we do.
+
+here, we can see only two process. these two are process from this session. if you want to see everything then the command is
+ps -ef --> all process in linux
+
+UID          PID    PPID  C STIME TTY          TIME CMD
+root           1       0  0 05:23 ?        00:00:01 /usr/lib/systemd/systemd --switched-root --system --deserialize 31
+root           2       0  0 05:23 ?        00:00:00 [kthreadd]
+root           3       2  0 05:23 ?        00:00:00 [rcu_gp]
+root           4       2  0 05:23 ?        00:00:00 [rcu_par_gp]
+root           5       2  0 05:23 ?        00:00:00 [slub_flushwq]
+root           6       2  0 05:23 ?        00:00:00 [netns]
+root           8       2  0 05:23 ?        00:00:00 [kworker/0:0H-events_highpri]
+
+for process with ppid 0 they are the main or parent process. process should start from somewhere not every process will have a parent. ppid 0 means they are the main process. from there every process will have a parent. see using ps -ef only 1st and second will have no parent remaing all process will have a parent.
+
+These are very important. if we are running a service like nginx. application is nothing but a service inside a linux for that also we will have a pid. if pid is there that means service is running. if pid is not there it means service is not running. in trobuleshooting these will be really useful.
+
+foreground and background
+
+foreground process blocks the terminal until it completes
+
+& will take the process into background
+
+for example if you give command
+sleep 20 (you cannot do anything for 20 seconds in terminal because it is running in foreground)
+sleep 20 & (& ampersand will take the process into background)
+
+ps -ef 
+ec2-user    3563    3346  0 07:48 pts/0    00:00:00 sleep 20 [you can see this at the end after 20 seconds this pid will be exited]
+[1]+  Done                    sleep 20 [after finish you will get]
+
+
+how to check from a list of process whether a process is running or not
+ps -ef | grep nginx [ with this command you can see nginx process is running or not]
+
+ps -ef | grep sleep
+ec2-user    3590    3346  0 07:51 pts/0    00:00:00 sleep 20
+ec2-user    3596    3346  0 07:52 pts/0    00:00:00 grep --color=auto sleep [this line is coming due to grep command we used]
+
+ps -ef | grep sleep | grep -v grep [here we are telling to remove grep command in result]
+ec2-user    3633    3346  0 07:55 pts/0    00:00:00 sleep 20
+
+with this command we can grep ngix, java etc.
+
+ps -ef | grep nginx
+
+some times process is runnig but service is stuck.
+when a service stuck, you need to restart
+
+To restart the service kill the existing process, and restart the service....
+
+ps -ef | grep sleep | grep -v grep
+ec2-user    3658    3346  0 08:00 pts/0    00:00:00 sleep 20
+
+kill 3658 [kill pid] [we cannot use parent process instance id] 
+[1]+  Terminated              sleep 20
+
+some times kill will not work then you can kill forcefully
+kill -9 3708 [-9 is for forcefully]
+[1]+  Killed                  sleep 20
+
+for kill we get terminated. for kill -9 we get killed.
+
+kill vs kill -9
+---------------
+kill -> request to end --> graceful termination
+kill -9 --> order to end --> forceful termination
+
+top --> all running process with CPU and RAM
+
+top command will give date dynamically. if will keep on changing and display all the values dynamically.
+
+ctrl + c --> to come out of top
+
+Network management
+-------------------
+netstat command is a network utility that provides information about network connections, routing tables, interface statistics, and more. It's commonly used for troubleshooting and monitoring network performance. netstat means network statistics.
+
+How to check a port is opened or not in linux
+netstat --> This shows all active connections and listening ports.
+netstat -l --> Lists all ports that are currently listening for incoming connections.
+
+netstat -lt --> This command is useful for checking which TCP services are currently running and accepting connections on your machine
+netstat: The network statistics command.
+-l: This option shows only the listening sockets.
+-t: This option specifies that only TCP connections should be displayed.
+
+netstat -ltnp --> listdown the tcp opened ports and their PID (Transmission Control Protocol) (internet works on tcp protocol)
+netstat: The network statistics command.
+-l: Show only listening sockets.
+-n: Display addresses and port numbers in numeric form instead of resolving hostnames and service names.
+-t: Show TCP connections only.
+-p: Show the PID (Process ID) and name of the program to which each socket belongs.
+
+for normal user Process ID will not be shown. if you use sudo netstat -lntp then you can see PID also.
+
+if applications is running means for example nginx is running means which port you should check whether opened or not using netstat -lntp? -- Port no 80
+if port no 80 is opened then you can say nginx is running. in the same way 3306 etc. if port no is not opened means we can say the application is not running. This is also one of trobuleshooting command to check whether application is running or not.
+
+netstat -lntp
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program name
+tcp        0      0 0.0.0.0:22              0.0.0.0:*               LISTEN      -
+tcp6       0      0 :::22                   :::*                    LISTEN      -
+
+above port no 22 is opened means ssh is running.
+
+still there are lot networking trobuleshooting command ping, telnet we will discuss them slowly.
+
+Expenses Project
+-------------------
+when app is getting started [provision of application or starting of the application]
+--------------------------------------------------------------------------------------
+1. DB should be ready [Raw items]
+2. Chef should be ready [Backend]
+3. Waiter [Frontend]
+
+if database is ready then backend can perform some operations on it. if backend is ready then fronted process its requests and get response from backend.
+
+termination of application [closing hotel in the night]
+--------------------------------------------------------
+1. LB
+2. frontend
+3. backend
+4. DB
+
+first waiter we will close then chef will not get new orders. later we will close chef if chef is closed then they will decide whether to throw or keep left over items.
+
+This is the process of starting and termination  of application without errors.
+
+
+from now on we will username and password based not key based. for public servers in projects they will go with key based. for secure environment within the project we will go with username and password.
+
+RHEL9 -> Latest redhat enterprise OS -> in banking companies 
+CentOS 9 -> opensource -> startups use this
+
+RHEL9 == CentOS9
+
+RHEL
+-----
+ec2-user -> username
+DevOps321 -> password
+Browse AMI --> devops-practice --> us-east-1 region (available only here)
+
+CentOS 9
+--------
+centos --> username
+DevOps321 --> password
+Browse AMI --> devops-practice --> us-east-1 region (available only here)
+
+for this ami's key pair is not needed becuase already configured with username and password.
+
+make 3 instance of RHEL 9 for our project in AWS and Launch them.
+
+image = we + our surroundings (in normal photos we take)
+in OS we will install a lot of packages and spend a lot of time to configure that OS. If we take a photo of linux server after installing packages and doing necessary configuration changes is called AMI.
+
+AMI = Bare OS + packages you installed
+use AMI you will get all packages
+
+now a days windows is comming with default packages like antivirus, ms-office etc. what does it mean? windows people are already installing these and converting it into an iso image and giving us that image.
+
+since there is no key. using gitbash
+ssh ec2-user@54.235.225.211
+then it will ask for password DevOps321.
+
+if there are multiple servers then it is difficult to use GitBash. Then we have somehthing called
+putty and super putty
+mobaxterm --> alternative to putty and super putty
+
+Go to https://putty.org/ --> Click Download PuTTY --> 64-bit x86: putty-64bit-0.81-installer.msi 
+after installing putty --> create a session daws-78s --> Connection-Data give ec2-user --> Appearance-Bold-12 Size --> Save Session.
+Load Session --> Give Ip-Address --> You can just enter password and login.
+
+for Putty no new tab option --> So install Super Putty --> Download msi installer
+super putty will ask putty location because super putty will run on top of putty.
+putty.exe Location (Required): C:\Program Files\PuTTY\putty.exe
+
+in some windows super putty will not work. you can use mobaxterm download MobaXterm Home Edition (installer edition)
+
+expense-documentation
+----------------------
+mysql
+-----
+RDBMS --> relational database management system
+Table --> Row and column based data 
+
+USER
+------
+ID	USERNAME	PASSWORD	MobileNumber
+1	joindevops	joindevops321	6281937079
+
+ADDRESS
+-------
+ID	USERID	AddressLine1	AddressLine2	City
+1	1*	sanath nagar	stree3		HYD
+
+* --> primary key and foreign key this is sql concepts he has not explained anything.
+Between Tables there is a relation so it is called Relational Database Managment.
+
+Database will have schemas and schemas will have tables. schema is just like a partion. users schema will have all user related tables. transactions schema will have all transactions related tables.
+
+Database --> Server --> Schema --> Tables
+
+Devlopment or DB Architects will deciede which db to use here they have decided to use mysql in our project. devops persons will not take decision about db.
+
+From RHEL 9 we are using dnf [don't know which version perfectly]
+
+connect to db server --> Take sudo access --> run the commands in mysql documentation.
+
+mysql is heavy software sometimes t2.micro will not work at that time you can go for t3.micro.
+
+how to check whether is service is running or not (here mysql)
+systemctl status mysqld
+netstat -lntp [see whether 3306 port is opened or not]
+ps -ef | grep mysqld | grep -v grep
+
+
+mysql --> 3306 [port for mysql]
+
+username --> root [username for mysql default]
+
+suppose, your db adminstrator now you want to whether it is working properly or not
+mysql [type mysql and enter]
+after this you will get mysql prompt [mysql> ]
+show databases; [write this and press enter] [don't confuse here databases is nothing but schema here]
+exit [to exit]
+
+Backend
+-------------------
+Backend will run CRUD operations on DB
+
+Take Sudo Access sudo su
+dnf module list (It is used to display information about modular packages in DNF)
+Name                   Stream            Profiles                                         Summary
+mariadb                10.11             client, galera, server [d]                       MariaDB Module
+maven                  3.8               common [d]                                       Java project management and project comprehension tool
+nodejs                 18                common [d], development, minimal, s2i            Javascript runtime
+nodejs                 20                common [d], development, minimal, s2i            Javascript runtime
+Hint: [d]efault, [e]nabled, [x]disabled, [i]nstalled
+
+If a stream does not have any marker, it usually means it is not enabled, but it is available for enabling. It could also imply that the stream is in its default state as per the repository's configuration.
+
+ChatGPT
+-------
+In your output, the default designation [d] appears next to the 'common' profile for both streams (18 and 20). Here's how to interpret it:
+
+Understanding the Default
+
+1. Multiple Stream: Each stream can have its own default profile. In this case:
+   - Stream 18 has the common profile as its default.
+   - Stream 20** also has the common profile as its default.
+
+2. Default Profile: The [d] indicates that the common profile is the default for both streams. It doesn't mean that both streams are the same default; rather, they have their own independent defaults.
+
+Selection of Streams
+
+When you enable a specific stream, you will be using that stream's default profile unless you specify otherwise. For example:
+
+- If you enable Stream 18:
+  dnf module enable nodejs:18
+  Then, when you install nodejs, it will use the common profile from Stream 18.
+
+- If you enable Stream 20:
+  dnf module enable nodejs:20
+  
+  Then, the common profile from Stream 20 will be used.
+
+Conclusion
+
+So, while both streams have a common profile marked as default, they are independent of each other. You can choose which stream you want to work with based on your needs. 
+
+
+using documentation run the commands there.
+
+In the documentation it is given dnf module disable nodejs -y [disables both 18 and 20]
+but siva used the command
+dnf module disable nodejs:18 -y [this command also same as above disables both 18 and 20 check dnf module list]
+Name                   Stream            Profiles                                         Summary
+nodejs                 18 [x]            common [d], development, minimal, s2i            Javascript runtime
+nodejs                 20 [x]            common [d], development, minimal, s2i            Javascript runtime
+Hint: [d]efault, [e]nabled, [x]disabled, [i]nstalled
+
+
+the he enabled nodejs:20 same as per documentation. after permoring dnf module enable nodejs:20 if you use dnf module list you can see 20 is enabled.
+Name                   Stream            Profiles                                         Summary
+nodejs                 18                common [d], development, minimal, s2i            Javascript runtime
+nodejs                 20 [e]            common [d], development, minimal, s2i            Javascript runtime
+Hint: [d]efault, [e]nabled, [x]disabled, [i]nstalled
+
+after enabling nodejs:20 then you install nodejs by using dnf install nodejs -y then automatically 20 version will be installed.
+
+Program needs that runtime(Software)
+
+installed nodejs (since our backend application is nodejs we installed nodejs)
+
+usually applications can be run by system/functional/daemon users...
+useradd expense (this is system user)
+
+create a seperate folder for application is a good practice
+
+application is somewhere in internet, developer is giving the location
+https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+
+in further, sessions we will get to know how our application went to that location and who placed our application there.
+
+curl also we can use as wget if we use -o with curl command
+
+ChatGPT
+--------
+The commands you're using are for installing Node.js and its package manager, npm, on a system that uses the DNF package manager (like Fedora or RHEL-based distributions).
+
+1. dnf install nodejs -y:
+   - This command installs Node.js. The '-y' flag automatically answers "yes" to any prompts during the installation process, allowing it to proceed without user intervention.
+
+2. npm install:
+   - After Node.js is installed, this command runs npm (Node Package Manager) to install all the dependencies specified in the 'package.json' file of your current project directory. If you don’t have a 'package.json' file, it won’t install anything.
+
+In summary, you're setting up a Node.js environment and installing any required packages for your project.
+
+cat packages.json
+npm install --> install the libraries/dependencies
+in package.json our developers will write what dependencies are needed. with the command npm install command it will read dependecines in package.json file and install them.
+
+yum install nginx -y --> automatic download and installation
+systemctl start nginx --> runs the service automatically
+
+When you install Nginx using yum install nginx -y, It installs the Nginx service unit file in /usr/lib/systemd/system/nginx.service. You can manage the Nginx service using systemd commands like
+sudo systemctl start nginx
+sudo systemctl enable nginx
+sudo systemctl status nginx
+
+Services like Nginx, Apache, and others usually come with a pre-defined systemd service file included in the package, typically found in /usr/lib/systemd/system/
+
+Service
+--------
+A service is a background process or daemon that runs to provide functionality to the system or to other applications. Examples include web servers (like Nginx), database servers (like MySQL), and many other services.
+
+init
+-----
+The term "init" refers to the initialization system in Unix-like operating systems that is responsible for booting the system and managing system processes. It is the first program started by the kernel during the boot process and has the process ID (PID) of 1.
+
+The init system manages the starting, stopping, and supervision of system services (or daemons) and handles tasks like logging in users, managing system states (like shutting down or rebooting), and controlling the overall system operation.
+
+Different init systems have evolved over time, including:
+a) SysVinit: The traditional init system that uses shell scripts for managing services.
+b) Upstart: An event-based init system that was developed to replace SysVinit.
+c) systemd: A more modern init system that provides parallel service startup, dependency management, and various other features aimed at improving boot times and system management.
+
+Systemd is now widely used in many Linux distributions due to its comprehensive features and efficiency.
+
+systemd
+--------
+systemd is an init system and service manager for Linux operating systems. It is responsible for booting the system, managing services, and handling system resources.
+Features:
+a) Parallel Service Startup: Starts services in parallel, improving boot times.
+b) Service Dependencies: Manages dependencies between services to ensure they start in the correct order.
+c) Socket and D-Bus Activation: Services can be started on demand when needed.
+d) Timers: Replaces cron for scheduling tasks.
+
+systemctl
+----------
+systemctl is a command-line utility used to interact with systemd. It allows you to control and manage services, check their status, and modify system settings.
+
+Common Commands:
+a) systemctl start <service>: Start a service.
+b) systemctl stop <service>: Stop a service.
+c) systemctl status <service>: Check the status of a service.
+d) systemctl enable <service>: Enable a service to start at boot.
+e) systemctl disable <service>: Prevents the service from starting at boot
+f) systemctl restart <service>: Stops and then starts the service again.
+g) systemctl reload <service>: Reloads the service configuration without stopping it (if supported).
+h) systemctl list-units --type=service: Lists all active services.
+i) journalctl -u <service>: Displays logs related to a specific service.
+
+Service Files
+---------------
+Services are defined by unit files, typically located in /etc/systemd/system/ (for user-defined services) or /usr/lib/systemd/system/ (for system-installed services). These files contain configurations specifying how the service should start, stop, and behave.
+
+Summary
+--------
+a) systemd: The underlying system that manages services and the system itself.
+b) systemctl: The command-line tool you use to control systemd and its services.
+
+Think of systemd as the engine running your car and systemctl as the steering wheel you use to control where the car goes.
+
+systemctl service.....
+
+application is manually configured by us, you can't run systemctl commands to start our application....
+
+systemctl will give an option to configure our application as automatic start/stop and restart
+
+/etc/systemd/system --> create your service file in this directory.. [after creating a service file you can use systemctl start/stop and restart]
+
+backend.service --> .service is also mandatory
+
+Format for creating a Service.
+
+[Unit]
+Description=amazon-ssm-agent
+After=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/usr/bin/
+ExecStart=/usr/bin/amazon-ssm-agent
+KillMode=process
+
+# Restart the agent regardless of whether it crashes (and returns a non-zero result code) or if
+# is terminated normally (e.g. via 'kill -HUP').  Delay restart so that the agent is less likely
+# to restart during a reboot initiated by a script. If the agent exits with status 194 (reboot
+# requested), don't restart at all.
+Restart=always
+RestartPreventExitStatus=194
+RestartSec=90
+
+[Install]
+WantedBy=multi-user.target
+
+The above is amazon.ssm_agent.service file sample no need to worry. he just pasted for an idea. our service file description is in expense documentation.
+
+give mysql private ip in backend.service file. this is for security reasons. within the servers communication it is preferred to give private ip.
+
+Developer will tell only which programming language and which version of it. we have to do remaining.
+How to create an application as systemctl service is also our duty.
+application environment and when application should start developers will tell us like
+Environment=DB_HOST="<MYSQL-SERVER-IPADDRESSES>"
+ExecStart=/bin/node /app/index.js
+
+yum search mysql --> you will get all mysql packages installed
+
+daemon --> like devil --> it will run for infinite time.
+
+if you type systemctl start backend --> it will directly go and search in /etc/systemd/system kernel developers configured in this way if someone types this command it will go in this folder --> it starts this ExecStart=/bin/node /app/index.js
+
+java/npm install --> it is configured already (i.e find the particular folder and read package.json and bring the dependencies)
+
+in some os wget is not installed but curl is installed in all so used curl -o not wget.
+
+service/application --> public access this, this should be running
+
+programming language you cannot start and stop
+application you can start and stop [programming language different service different]
+
+:wq --> write and quit
+:wq! --> force write
+:q! --> force
+
+Till backend Service he said. project not completed fully due to time constraint. he said in next session he will complete the project.

@@ -1,0 +1,17 @@
+if the orignal list is affected by performing an operation it is called inplace operation
+
+# Append element to the list
+sample_list = ["Ansible", "Terraform", "Jenkins", "Docker", "K8s"] 
+sample_list.append("Shell") # inplace operation 
+print(sample_list)
+
+
+append --> appends to the end of a existing list as a list. if tried to append more than one element ['apple', 'ball', ['cat, 'dog']] 
+extend --> appends to the end of a existing list as an individual item ['apple', 'ball', 'cat', 'dog']
+
+- To know whether a datatype is mutable or not, perform adding or changing elements to it.
+
+- Immutable datatypes: tuple, strings
+- Mutable datatypes: list, dict, set
+
+

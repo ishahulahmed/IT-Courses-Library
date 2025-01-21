@@ -1,0 +1,248 @@
+Session Overview
+----------------
+a) Physical vs Virtualisation vs containerisation
+b) Docker advantages and features
+c) Installing Docker
+d) Docker commands
+
+
+Linux admin --> intermediate level
+project --> manual installation
+Shell scripting
+Ansible 
+Terraform 
+Jenkins with Terraform Ansible Shell --> Sonar, nexus, SAST, DAST, vulnerability scan, unit testing and functional testing
+
+Containerisation
+----------------
+
+Independent House vs Apartment
+
+
+Independent House
+-------------------
+advantages
+----------
+privacy/security
+more space
+
+disadvantages
+-------------
+expensive
+maintainance
+	electricity
+	water
+	internet
+	gas
+construction time is more --> 6months to 1year
+
+
+Flat in apartment --> 100 flats --> 2 years
+-------------------
+advantages
+-----------
+less maintainance
+less cost
+construction time is less
+pool, garden, play area, etc.
+
+disadvantages
+-------------
+less privacy/security
+
+
+Nest away PG, A room inside flat will be given for rent
+-------------------------------------------------------
+PG
+
+adv
+-----
+no maintainance
+fastest way to occupy/vaccate
+no agreements
+cost very less
+
+disadvantages
+------------
+very less privacy/security
+
+
+2 mem Family --> flat
+8mem family --> independent house
+
+Applications --> Frontend, backend and DB
+
+Monolithic applications
+-----------------------
+
+Enterprise applications (Here Monolithic Enterprise Applications)
+------------------------------------------------------------------
+Frontend and backend are together  --> Jboss, Weblogic, Websphere (Heavy Servers)
+(same java for both frontend and backend or frontend and backend tightly coupled Monolithic Application)
+A small change in any component should go for full release cycle (both frontend and backend since monolithic application)
+
+.ear --> enterprise archive files
+
+Angular JS, React JS (Distributed Application) (Microservices is also a type of distributed architechture but not the same)
+----------------------------------------------------------------------------------------------------------------------------
+Frontend technologies -> Nginx install (if there is a change in only frontend will go for relase cycle not entire vice versa)
+
+java, .NET, Pyton backend technologies --> Tomcat, Jboss
+.war --> Web archive files (Smaller Compared to ear files)
+
+API calls --> GET POST PUT DELETE
+
+Microservices
+---------------------
+User, Cart, Catalogue, Shipping, Payment, etc (Backend MicroServices)
+
+
+independent house == physical server == enterprise applications
+
+1 physical server hosts 1 application
+
+Virtulisation = Distributed applications (flats)
+------------------------------------------------
+a big server can be logically divided into multiple servers... 
+(in 5 cents of land we can built of 100's of flats)
+Hypervisor --> it can host multiple guest servers 
+(if in a physical server if you install hypervisor software i.e virtualization software it can divide that physcial machine into multiple virtual servers)
+
+booting time --> less time (High When Compared with Containierisation)
+cost --> less
+15 Servers in One Physical Server Using Virtualization --> 1 server RHEL, 1 server windows, 1 server ubuntu, 1 Mac
+
+RAM, HD allocate to VM's.
+for each server 2GB RAM, 100GB HD we gave it will block this amout of space -> but actual utilization is 0.5GB RAM, 1GB HD
+so waste of resources here resource utilization is good in virtualization compared to physical servers but still there is wastage of resources
+more overhead in virtualization compared to containersation
+
+security --> VM are isolated from one to another
+
+a clear isolation is there between servers, but it should be confgured properly
+
+Microservices == Containersation (pg in nestway)
+-------------------------------------------------
+You install containersation in VM, Container dont block the resources..
+
+containers can get the resources dynamically. They dont block resources...
+
+resource utilisation is very high
+booting time is verrrrry less - may be in sec
+
+portability
+
+An AMI is a template that contains the software configuration (operating system, application server, and applications) required to launch your instance.
+EC2 (Elastic Compute Cloud) instance in Amazon Web Services (AWS) does indeed run as a virtual machine (VM) on AWS's infrastructure.
+
+AMI --> take one full OS, create VM, install application runtime(Java,NodeJs, python, DotNet), configuration(creation of users, foldres, permissions, etc).download code, run the service
+
+take AMI out of this 
+
+Now with this AMI others can also use this AMI for thier projects. So Portability also increased. You can also use as many times you want. but if you create an new ami every time then there might chance of getting errors.
+
+AMI's are portable because once you created them you can use as many times as you want.
+
+Docker image == Bare minimum OS + App run time + system pacakges and dependencies + App code = Image
+Docker image is portable in nature
+
+Bare minimum OS --> no unnecessary pacakges --> no cat command also 
+
+AMI Image is Bigger it is Full OS But Docker Image is Bare Mininimum OS.
+
+With Decrease in Size Portability Becomes more Easier Since Docker Image is less in size compared AMI it's portablity nature is more compared to AMI.
+
+
+Container
+
+AMI --> Static file
+EC2 instance --> if you run AMI, it can create instance --> Running version of AMI is called instance
+
+Docker image --> static file
+Docker container --> running instance of image is called container
+
+https://joindevops.medium.com/why-containerization-is-popular-how-to-understand-the-advantages-55261a17517c
+
+Install Docker on EC2 Instance
+https://docs.docker.com/engine/install/rhel/
+Go to that site and install docker engine not docker desktop using commands from the above page.
+systemctl enable docker (after starting docker and checking its status)
+
+install docker --> it will create a group called docker
+
+users who are in docker group or root user can only run docker commands...
+
+usermod -aG docker <user-name> (sudo usermod -aG docker ec2-user) (here ec2-user is added to docker group)
+(after adding user to group logout from instance and then login again then you can use docker commands)
+
+docker ps --> list down the running containers
+
+docker images --> list down the images
+
+docker container engine --> Local Repo --> Docker Hub
+
+docker pull nginx (pulls nginx image from docker hub)
+
+group id, artifact id and version (java project in eclipse)
+
+username, image name and version 
+tag or version same
+
+user acccount (username necessary for user images)
+---------------------------------------------------
+joindevops/catalogue:1.0.0
+rameshdevops/catalogue:1.0.0
+
+official image (username not necessary for official images)
+------------------------------------------------------------
+nginx:latest
+nginx:1.13
+nginx:alpine
+
+nginx --> Bare minimum OS (ubuntu/Centos/debian/rhel)+nginx 
+
+nginx:perl
+
+nginx:alpine --> Alpine is OS which is max 10MB
+
+docker create <image>:tag --> this will create container (docker create nginx) (no tag so default latest)
+
+docker ps --> it will show running containers
+docker ps -a --> all containers with any status
+docker start <CID> --> container will start running
+docker stop <CID> --> container will stop running
+
+docker rm <CID> --> To remove a container
+docker rm -f <CID> --> To Forcefully remove container if it is showing error while removing container
+
+docker pull nginx --> pulls an nginx image from docker hub
+docker create nginx --> creates a container using nginx image that container will have container-id. 
+if you this command multiple times multiple containers with different container-ids will be create using nginx image
+docker start container-id --> it will start the respective container
+
+docker run = docker pull + docker create + docker start 
+
+docker rmi <IMAGE ID> --> To Remove a Image
+
+docker rmi `docker images -a -q` (To remove all images at once ` backtick)
+docker rm `docker ps -a -q` (To remove all containers at once)
+docker rm -f `docker ps -a -q` (To remove all containers at once with force)
+
+docker run nginx (it will run in the foreground)
+dockr run -d nginx (it will run in the background -d means detached)
+
+How can you access docker container from internet? 
+
+By enabling the port, we need to open host port that can redirect traffic to container..
+(one system will have 65,535 ports) (so our server will have 65,535 ports and docker container will also have same)
+(But, outsider cannot directly connect to container first he will have to connect to server from server connect to container)
+
+docker run -d -p <host-port>:<container-port> nginx   
+(-d detaced -p port) (docker run -d -p 8000:80 nginx) 
+(container port is fixed host port is as your wish)
+(http://54.198.78.20:8000/ place this in browser you will se niginx welcome page)
+
+
+image has 2 infomration
+- user has to connect host port from there to container port
+- docker container enginer will check first in the local repo for image if not it will go and search in remote repo i.e docker hub

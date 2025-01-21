@@ -1,0 +1,453 @@
+Session Overview
+-----------------
+a) Pod
+     i) Resource
+    ii) Env
+   iii) Labels and annotations
+b) Service
+     i) ClusterIP
+    ii) NodePort
+   iii) LoadBalancer
+c) ReplicaSet
+d) Deployment
+
+
+1. image building
+	develop in vscode
+	push to github
+	pull in workstation
+	build images
+	push to docker hub
+	
+2. login to workstation
+	install docker, kubectl and eksctl
+	either aws configure or attach the role
+	eks.yaml
+	now create cluster through eksctl command
+	kubectl get nodes
+
+3. develop K8 YAML files
+	push to github
+	pull in workstation
+	apply using kubectl command
+
+namespace (namespace is isolate space inside kubernetes cluster like VPC)
+pod (pod can contain multiple containers. containers inside the pod can share same network and then storage space)
+multi container
+
+labels in kubernetes
+---------------------
+Irrespective of any technology you will get labels concept
+Labels is nothing but putting lables in metada
+apiVersion: v1
+kind: Pod
+metadata:
+   name: label-demo
+   labels:
+     environment: production
+     app: nginx
+labels will be helpful in filtering and fuctionality also.
+kubectly apply -f 04-labels.yaml
+kubectl get pods
+kubectl describe pod labels
+
+annotations in kubernetes
+---------------------------
+annotations is alos like labels. but labels have a limit in lenghth. 
+for annotations you can also use special charachters. syntax is also like labels.
+apiVersion: v1
+kind: Pod
+metadata:
+ name: annotations-demo
+ annotations:
+   imageregistry: "https://hub.docker.com/"
+spec:
+ containers:
+ - name: nginx
+   image: nginx:1.12.2
+   ports:
+   - containerPort: 80
+
+kubectly apply -f 05-annotations.yaml
+kubectl get pods
+
+Environment variables in kubernetes
+--------------------------------------
+environment will be in the containers.
+In Kubernetes, environment variables are used to configure containers within pods. They provide a way to inject configuration settings and secrets into containers without hardcoding them into your application code
+kubectl apply -f 06-env.yaml
+kubectl get pods
+kubectl exec -it env-test -- bash (-- space after it)
+env (env enter you will see environment variables)
+exit
+
+resource in kubernetes (resources and its limiting)
+------------------------------------------------------
+In the context of CPU resources, especially in container orchestration environments like Kubernetes, "m" stands for "milli", which represents a thousandth of a CPU unit. 1 CPU is equivalent to 1000 milliCPU (mCPU), where "mCPU" denotes a millithread or millisecond of a CPU core.
+		 		
+1 CPU = 1000m or 1024m
+
+node will allocate first soft limits to the container if it exceeds the max limit then the container will not work. memory will get exhausted.
+
+resources:
+	  # soft limits
+      requests:
+        memory: "64Mi"
+        cpu: "250m"
+      limits:
+        memory: "128Mi"
+        cpu: "500m"
+
+kubectl apply -f 07-resources.yaml
+kubectl get pods
+kubectl describe pod resources 
+		
+if there is a code chage, should I go for build or not? --> yes
+
+code and configuration
+
+will there be only code there will be configuration also.
+
+
+what is configuration?
+db urls, db usernames, passwords, api endpoint, other system urls.
+
+Configuration refers to the settings and options that define how software, systems, or applications behave and operate. It involves specifying parameters and options that control the functionality and performance of software or hardware.
+
+if you put configurations in the code. if i change the end point or username then i need to go into the code to change. instead of doing that we will put in configuration file.
+
+for example parameter store in expense-infra-dev. variables.tf normally when creating security group we need to hardcore vpc id. when we delete and create then vpc id will keep on changing. if you hardcore in the code then you need to come and change everytime in the code.
+
+so, we created a parameter-store (SSM Parameter) so that our code will refer to that parameterstore for value.
+
+keep the key inside code, but value should be out of the code.
+
+if changes, change the value and restart the application. (if you restart the application the code will get the new value)
+
+if you change anthing in code you should go for entire dev to production environment build and release. so, keys we will place inside the code values will be out of the code.
+
+paas --> platform as a service.
+---------------------------------
+platform means it should provide everything.
+
+kubernetes is a platform. ec2 is not a platform
+
+just me telling classes and going is not platform. but, here there is a process recordings uploading, maintaing slack community, taking QA sessions, giving resume service and placement assistance so this is platform.
+
+platform should provide everything what the applicatinon need. 
+
+config map will have values. if you change value in configmap then you can just restart the pod is enough.
+in the same way Secrets. Secrets is nothing but confidential information.
+config map and Secrets both are like configuration. but, configmap is like a plain value and secret is like confidential information.
+
+Kubernetes is called a platform because it provides a unified and comprehensive environment for deploying, managing, and scaling containerized applications. It integrates a variety of components and tools to address different aspects of application management, abstracts infrastructure complexities, and offers extensibility and support for diverse environments. This holistic approach enables organizations to manage their containerized applications efficiently and consistently, which is why Kubernetes is considered a powerful and versatile platform
+
+if change the hardcoded value in code then you need apply pod again but if you maintain config and secrets you can just restart the pod
+configMap --> config means configuration. Map means key value pairs
+
+kubectl apply -f 08-config-map.yaml
+kubectl get configmap
+kubectl describe configmap daws78s
+
+simple it may be any platform not only kubernetes like artificial intelligence or machine learning. platform is nothing but it should provide an environment where you should keep the configurations, secrets all those things.
+
+now pod should refer this values from configmap
+
+kubectl apply -f 09-pod-config.yaml
+kubectl get pods
+kubectl exec -it pod-config -- bash
+env
+exit
+
+There are some fields you cannot update while pod is running then you need delete pod and run again.
+kubectl delete -f 09-pod-config.yaml
+kubectl apply -f 09-pod-config.yaml
+kubectl get pods
+kubectl exec -it pod-config -- bash
+env
+exit
+
+like configMap we will create Secrets and take reference also like configMap
+in secrets.yaml file we will give data as encoded value
+echo "admin" | base64 (in git bash)
+YWRtaW4K (this is encoded value)
+echo "admin123" | base64
+YWRtaW4xMjMK
+
+kubectl apply -f 10-secrets.yaml
+kubectl get secrets
+kubectl appy -f 11-pod-secrets.yaml
+kubectl get pods
+kubectl exec -it pod-secrets -- bash
+env
+exit
+
+
+How can you access pod from outside? --> By Services 
+In docker we Exposed Port (Container port). when we exposed port, since it is a single server we accessed it through host port as host port forwards the request it gets to container port. (-p hos-port:container-port)
+But, kuberentes is platform there are many hosts not one. we can't gurantee where this pod is running. it is not necessary. our intention should be pod is running and application is running. it doesn't matter where it is running. 
+container ip's in docker are ephemeral. ip addresses keep on changing. so, we created a network and gave names to access them which acts like DNS.
+
+same conept here in kubernetes.
+
+Services
+---------
+In Kubernetes, a Service is an abstraction that defines a logical set of Pods and a policy by which to access them. It provides a stable endpoint for accessing a group of Pods, which can be dynamically created and destroyed as the application scales or as Pods fail and are rescheduled.
+
+pods are ephemeral, IP address is temorary, but you can attch this to the service
+
+Service:
+	load balancer
+	service mesh
+Service acts as loadbalancer and service mesh
+
+There are three types of services
+
+1. cluster IP
+2. Node Port
+3. Load Balancer
+
+Cluster IP
+-----------
+request to pod goes through service
+service will not run in node it is just logical. pod is computing. service is not computing. similar to route53 which is also not computing.
+pod can do something but service cannot do anything. service will get attached to pod just like route53.
+when user will hit the service (service-name:port). when service is hit request will be forwarded from service to pod (target port).
+
+if you don't the type of service in yaml file it will be default Cluster IP service
+how service will find a specific pod to communicate that is through labels. service attached to the pod through the labels. labels are acting here as selectors. 
+put multiple labels and bring uniqueness in them.
+serivce like loadbalancer. first you will access service from service request will go to pod. usally loadbalancer will have port. likewise service will also have port. 
+service port and pod port can be different
+
+alias ka='kubectl apply -f' (shortcut for this command)
+ka 12-nginx.yaml
+kubectl get pods
+ka 13-service.yaml
+kubectl get service
+kubectl describe service nginx
+Name:              nginx
+Namespace:         default
+Labels:            <none>
+Annotations:       <none>
+Selector:          component=frontend,environment=dev,name=frontend,project=expense
+Type:              ClusterIP
+IP Family Policy:  SingleStack
+IP Families:       IPv4
+IP:                10.100.23.216
+IPs:               10.100.23.216 (this is service ip address)
+Port:              <unset>  80/TCP
+TargetPort:        80/TCP
+Endpoints:         192.168.53.94:80 (endpoint here is pod ip address)
+Session Affinity:  None
+Events:            <none>
+
+kubectl get pods -o wide 
+(you will get pods ip address)
+NAME          READY   STATUS    RESTARTS   AGE     IP               NODE                             NOMINATED NODE   READINESS GATES
+annotations   1/1     Running   0          5h6m    192.168.40.207   ip-192-168-45-205.ec2.internal   <none>           <none>
+env-test      1/1     Running   0          4h40m   192.168.33.186   ip-192-168-58-180.ec2.internal   <none>           <none>
+labels        1/1     Running   0          5h24m   192.168.37.72    ip-192-168-45-205.ec2.internal   <none>           <none>
+nginx         1/1     Running   0          4m54s   192.168.53.94    ip-192-168-47-166.ec2.internal   <none>           <none>
+pod-config    1/1     Running   0          118m    192.168.39.140   ip-192-168-45-205.ec2.internal   <none>           <none>
+pod-secrets   1/1     Running   0          79m     192.168.32.228   ip-192-168-58-180.ec2.internal   <none>           <none>
+resources     1/1     Running   0          3h50m   192.168.54.91    ip-192-168-47-166.ec2.internal   <none>           <none>
+
+curl http://nginx (command in workstation)
+curl: (6) could not resolve host: nginx
+
+workstation is not part of kubernetes cluster. service can be accessed within the kubernetes cluster.
+kubectl exec -it annotations -- bash (if i am inside the pod what does it mean. it means that i am in the kubernetes cluster)
+curl http://nginx (here you will get html content of nginx)
+cluster ip service is only accessed within the kubernetes cluster
+exit
+
+ChatGPT
+----------
+It sounds like you're trying to access a service within your Kubernetes cluster from a pod, but you're running into issues. Let’s break down the problem and how to troubleshoot it:
+
+1) Understanding Service and Pod Communication:
+   a) A ClusterIP Service in Kubernetes is used to expose a service within the cluster. It assigns a stable IP and DNS name to access a set of Pods (like  
+      your Nginx pods) from other Pods within the same cluster.
+   b) When you use curl http://localhost/ inside a pod (e.g., alma), you are attempting to reach a service on localhost inside the same pod, not the service  
+     running in another pod.
+
+2) Accessing Services from Within a Pod:
+   a) To access the Nginx service from within the alma pod, you should use the service’s DNS name or IP address. Kubernetes provides DNS-based service    
+      discovery for services, so you should be able to use the service name.
+   b) For example, if your service is named my-nginx-service, you should use:
+      curl http://my-nginx-service/
+   c) Make sure to use the service name and not localhost, as localhost refers to the loopback interface of the current pod.
+
+kubectl apply -f 13-service.yaml
+service/nginx created
+
+kubectl get service
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.100.0.1       <none>        443/TCP   18m
+nginx        ClusterIP   10.100.233.223   <none>        80/TCP    8s
+
+kubectl apply -f 14-rough.yaml
+pod/rough created
+
+kubectl get pods
+NAME    READY   STATUS              RESTARTS   AGE
+nginx   1/1     Running             0          86s
+rough   0/1     ContainerCreating   0          5s
+
+kubectl exec -it rough -- bash
+
+[root@rough /]# curl http://localhost/
+curl: (7) Failed to connect to localhost port 80: Connection refused
+
+[root@rough /]# curl http://nginx/
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+
+We can access Cluster IP service inside kubernetes cluster only.
+
+Node Port
+-----------
+Other than kubernetes cluster everything is called Interet to Kubernetes.
+workstation is called internet to kubernetes cluster. cluster means master and servers.
+apart from kubernetes cluster everything is external or internet.
+
+NodePort --> 
+internet --> external
+intranet --> inside
+
+how to access your pod from internet? solution --> Node Port
+
+Cluster IP < Node Port < Load Balancer
+
+Node Port means just like container host port here node will open a port. this node port will send request to Cluster IP Service.
+if a user hits http://server-public-ip:node-port first request goes to a port in the ec2-instance from there node will forward to cluster ip from there request will go to Cluster Ip.
+
+Cluster IP < Node Port < Load Balancer (Why i wrote like this)
+if Node Port is created means we have Cluster IP is also created.
+
+kubectl apply -f 14-node-port.yaml
+kubectl get service
+NAME         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+kubernetes   ClusterIP   10.100.0.1       <none>        443/TCP        71m
+nginx-np     NodePort    10.100.132.243   <none>        80:31508/TCP   2m44s  (31508 Node Port)
+   
+if i hit http://server-public-ip:31508 it will forward to cluster-ip (10.100.132.243) port no 80.
+
+ kubectl get pods -o wide
+NAME    READY   STATUS    RESTARTS        AGE   IP               NODE                            NOMINATED NODE   READINESS GATES
+nginx   1/1     Running   0               59m   192.168.34.154   ip-192-168-57-31.ec2.internal   <none>           <none>  (here IP are of Pod)
+rough   1/1     Running   1 (8m11s ago)   58m   192.168.29.186   ip-192-168-7-41.ec2.internal    <none>           <none>
+
+if you are hitting a port number on a server and you are not getting response means then check whether that particular port number is open to that server or not that is nothing but firewarll that is nothig but security group.
+
+the node server security group are by default set by kubernetes. if we see it's inbound rules all ports are open but we cannot connect from internet.
+
+ChatGPT-1
+----------
+port ranges in a networking context, here are the common categories:
+
+a) Well-Known Ports: Range from 0 to 1023. These ports are assigned by the Internet Assigned Numbers Authority (IANA) and are used for widely recognized 
+                     services and protocols (e.g., HTTP uses port 80, HTTPS uses port 443).
+
+b) Registered Ports: Range from 1024 to 49151. These ports are used by software applications that are not as universally recognized as those in the well- 
+                     known range. They are assigned by IANA for specific services but are not as tightly controlled as well-known ports.
+
+c) Dynamic or Ephemeral Ports: Range from 49152 to 65535. These ports are typically used for temporary connections, such as those initiated by client 
+                               applications to communicate with servers.
+
+ChatGPT-2
+-----------
+for every server there will ephemeral range of ports.
+
+The ephemeral range of ports refers to a set of temporary port numbers that a server (or client) can use to create outbound connections. These ports are used for the duration of a network connection and are released when the connection is closed. They are typically chosen from a specific range designated by the operating system or network protocol.
+
+For most operating systems, the ephemeral port range is:
+
+Linux: Typically from 32768 to 60999.
+Windows: By default, from 49152 to 65535.
+macOS: Usually the same as Linux, from 49152 to 65535.
+
+The exact range can sometimes be configured or modified based on system requirements or administrative preferences. These ports are used to ensure that multiple outgoing connections can be made simultaneously without conflicting with well-known port numbers or other active connections.
+
+our kubernetes cluster open 31508 ephemeral port for node server here it has been opened randomly. insteadly of randomly we can fix the nodePort
+apiVersion: v1
+kind: Service
+metadata: 
+  name: my-service
+spec:
+  type: NodePort
+  selector:
+     app.kubernetes.io/name: MyApp
+  ports:
+   - port: 80
+     targetPort: 80
+     nodePort: 30007	
+
+in our production environment random port better or fixed port better?
+fixed port is better because we can't say to the firewall to open 32768-61000 this full range 
+(firewall team will not agree they will ask us fix a port and come then we will open that port. if we open these many ports definitely we will be under attack)
+
+kubectl delete -f 14-node-port.yaml (deleting to fix node port)
+The range of valid ports is 30000-32767 (kubernetes recommendation)
+
+kubectl apply -f 14-node-port.yaml
+kubectl get service
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
+kubernetes   ClusterIP   10.100.0.1      <none>        443/TCP        116m
+nginx-np     NodePort    10.100.91.233   <none>        80:32760/TCP   28s
+
+Now the port is opened but we need add it to the security group.
+Edit Inbound Rule. Add Rule --> Custom TCP --> Port no 32760 --> 0.0.0.0/0 (from internet)
+
+pod is running in one server. it is not necessary where pod is running. we can't gurantee in which server pod is running. tha's why kubernetes will forward port to all nodes. i.e 32760 port is opened in all nodes of kubernetes. that is we can use any node publicip:node-port and get access to cluster-ip from there to our pod
+
+if nodeport is created means automatically Cluster Ip is also created. Cluster Ip is subset of Nodeport.
+
+Load Balancer
+-------------
+if you created Load Balancer means automatically Node Port and Cluster Ip are also created.
+
+if we put load balancer before nodes. for example if we have 3 nodes. node balancer will connect 3 nodes. if you hit loadbalancer it may send to any node.
+(using Counting Robbin Algorithm)
+
+kubectl apply -f 15-lb.yaml
+The Service "nginx-lb" is invalid: spec.ports[0].nodePort: Invalid value: 32760: provide port is already allocated 
+(32761 new since prevous one already allocated)
+
+kubectl apply -f 15-lb.yaml
+kubectl get service
+NAME         TYPE           CLUSTER-IP       EXTERNAL-IP                                                               PORT(S)        AGE
+kubernetes   ClusterIP      10.100.0.1       <none>                                                                    443/TCP        147m
+nginx-lb     LoadBalancer   10.100.144.247   a5c5481e7bdb94e14b3fce3fbb30b529-2139808882.us-east-1.elb.amazonaws.com   80:32761/TCP   8s
+nginx-np     NodePort       10.100.91.233    <none>                                                                    80:32760/TCP   32m
+
+if we are creating loadbalancer means automatically NodePort and Cluster-Ip are created
+go to Load Balancers you can see there one Load Balancer is created.
+this load-balancer added under 32761 our 3 instances (Target Instances)
+if health status showing out-of service you need to open that port in security group
+Edit Inbound Rule. Add Rule --> Custom TCP --> Port no 32761 --> 0.0.0.0/0 (from internet)
+a5c5481e7bdb94e14b3fce3fbb30b529-2139808882.us-east-1.elb.amazonaws.com (DNS Name of LB)
+if you hit the LB then you will get Welcome to ngix i.e access to your pod
+first request will come to LB we need to ensure port 80 is open in LB then from there NodePort ensure NodePort is open from there Cluster Ip from there Pod

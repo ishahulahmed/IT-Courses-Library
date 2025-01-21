@@ -1,0 +1,284 @@
+if you don't have any idea blindly go for merge.
+
+What is conflict?
+------------------
+When you are trying to merge the changes from one branch to another branch. if git finds out different content at the same line number then git will not understand what to keep and what to remove at that time git will give us the conflict. The two persons who is responsible for the conflict sit together have to dicuss and come to common understanding then they can resolve the conflict and they can proceed with mergin.
+
+Even DevOps engineers will also get conflicts. Because, we are also developing scripts and pushing it to github. devops engineers will also creates branches and then if got approval then it is merged to main branch.
+
+Git Branching Strategy is so much important. Based on the knowledege on this concept we can differentiate easily one person is genuine or not. 
+
+Branching Strategy
+---------------------
+Unfortunately, if you search for branching strategy in internet you will get old strategies. Only few modren stratey articles are there.
+
+developers writing the code in non main/master branches. How it gets upto main/master branch. How the deployment happens in diff environments like DEV, SIT (Systems Integration Testing or QA Env), UAT, PERF (Performance), PRE-PROD, PROD, SEC (Security)
+
+Environment depends on the projects. Usually, banking projects have lot of environments. small projects have less environments.
+
+Waterfall Model
+----------------------
+https://nvie.com/posts/a-successful-git-branching-model/ 
+Written By Vincent Driessen (on Tuesday, January 05, 2010) at that time web applications were not popular he wrote the strategy about desktop applications. this strategy got hugely popular.
+git-flow --> The Strategy return for desktop apps and which got hugely popular 
+GitHub flow --> now he is recommending to use this for web apps
+
+Desktop applications --> Have to support multiple versions (disadvantage of Desktop application)
+	windows 11, 10, 11.3
+	Ms Office 2021, 2019, 2016, 2013 (Desktop Application has to support all these version because not everyone move to latest version)
+		MS Office 2013 --> huge bug (now latest office version 2021 is running but if 2013 got a bug the microsoft team will)
+		get the code released for 2013 latest version
+		resolve the bug
+		release the patch
+	MS Office 2024 (now they are launching office 2024)
+
+one team will work for 2024. one for 2021 etc this was a complex procedure. i.e different teams working on different versions.
+
+atleast 3 months to release the change (in Waterfall Model it was very complex procedure in olden days now it got so mature)
+
+IT was immature in olden days in order to manage these complex software previously it was more desktop and monolithic web applictations. it needed lots of human resource. now, it got so mature that complexity is being reduced by using technology. mostly, devops and cloud is the main reason for applications not getting down, running non-stop with no maintenance pages plus monitoring and fast response etc.
+		
+Web applications --> there is no point of versions 
+
+hotfix
+----------------
+main --> PROD
+hotfix means --> emergency bug --> instead ₹2000 showing ₹2/-, redbus completely down
+for every ticket there will be priority
+P0 (super emergency) --> SLA --> 30min (needs to be resolved within 30mins --> eg: network down for airtel in whole ap
+P1 (priority 1 is high priority) --> ticket --> SLA --> Service level agreement --> 1hr (needs to be resolved within 1hr)
+P4 eg: Address Change
+hotfixes branches are directly merged to main branch and deployed to PROD
+
+a small code change can fix the issue
+
+generally, if there is a change in code
+DEV --> DEV Test --> QA --> QA testing --> UAT --> UAT testing --> PRE-PROD --> regeression testing, sanity testing --> PROD
+1 week (This process may take time of 1 Week)
+
+we cannot wait for 1 week to resovle hotfix. so they will create a hotfix branch from main. for this hotfix branch an emergency protocol is used it should not need to follow the above 1 week process.
+
+hotfix/2024-06-05 (eg of hotfix branch name)
+
+main(long lived) branches --> main, development (these two are long lived branches)
+source: main
+destination:  main, development (after main get it into development) (if you don't fix in development the same bug will continue)
+
+development
+----------------
+development --> current development going on, it represents current state of the project development
+
+source: main (source for development branch)
+destination: nothing (it is not merged any where) (it is like second main because main points to production we don't want to disturb production)
+
+feature branches
+-----------------
+companies like whatsapp will work on more than one feature
+feature/ai-image-generator --> one team --> 10-JUN-2024 (date of release of feature)
+feature/call-recording --> another team --> 10-AUG-2024 (date of release of feature)
+
+source: development
+destination: development
+
+feature/ai-image-generator
+----------------------------
+multiple persons --> should use merge (if multiple persons are working go for merge)
+
+feature/ai-image-generator --> PR (By Pull Request) --> development (merge in development branch)
+
+deploy to DEV environment --> developers will perform the testing from development side..
+
+dev team lead confirms features are tested properly....
+
+Build and Release team --> present they are called devops engineers
+
+create one branch from development --> release branch
+
+Release branch
+------------------
+source: development
+destination: main, development (first main after that development)
+whatsapp: 5.3.1 (current version)
+upcoming release: 5.4.0 -> 10-JUN-2024 --> AI Generator
+upcoming release: 5.5.0 -> 10-AUG-2024 --> call-recording and caller ID (call recording and caller ID feature will take more time because permissions from governemnt authorities)
+
+release/5.4.0 (release branch name) --> deploy into QA --> QA team tests the code (this were all the fight happens between developers and QA)
+from now on every body should work in this release branch only since it is fixed already.
+
+lot of defects (QA will raise defects and developers will fix those defects)
+
+QA team sign off (it is very important) --> clients (clinets will not interact with developers) will directly talk to QA lead. first responsible person QA. (if there is defect in application first responsible person is QA) (Clinet will blame QA team why they sent to production without fixing the defect)
+if there is no proper integration between frontend and backend the application will not work properly. This integration testing is done by testing team.
+
+if defects all fixed --> Took Sign Off from QA team --> UAT appoval from client --> they will release or merge to master branch --> if merged to master branch means directly deployed to production --> there we will tag to this release (see tag symbol on release merged to master) --> when this got success (i.e successfully deploying the release into production) --> this release changes are merged in development --> because in feature version obviously this needs to be there.
+
+only when it went production (i.e merged in master) --> then only i need to bring it to development (here about release branch)
+
+you can delete the release branch after this. in order to retrive it you can use the tag which is there in master branch. in main you can see clearly on tags.
+
+main and development are permanent branches.
+
+in one release you can even deploy multiple features too. (one branch for one feature) (for example call recordign and caller id two features relasing at the same time)
+
+features --> will be merged in to development branch --> developers will do dev testing --> if that is fine --> release branch --> QA will test for bugs and fix those issues --> if no issue --> merge in main and deploy it --> again bring those change into development.
+
+in this whole process development branch will have active development. in main branch only what is there in production it will be there and it is tagged perfectly.
+
+if released successfully you can delete it. in the same feature branch also we can delete it.
+
+Git Flow
+--------
+Git flow is suitable for waterfall and desktop application
+For Current agile and devops this Git Flow is not suitable.
+for web-applications git flow is not suitable
+now Our applications are small and independent.
+
+Feature branching model or GitHub Flow (both same)
+---------------------------------------------------
+2 weeks / 4 weeks --> now release cycle is maximum 2 weeks mostly some cases upto 4 weeks
+
+modules are independent projects...  (frontend, backend, db, microservices etc not monolithic)
+web versions --> not like desktop versions
+
+one branch / one feature --> one person (only one person will work) -> rebase/ merge (here merge strategy can be rebase or merge you project people can decide)
+
+price, description, date (want to include date)
+
+include-date --> do the changes --> i will follow Dev Pipeline (See image) -->  after this i will raise pull request to main branch --> if approved main branch will get this code --> after getting this code in main branch --> i can send or deploy it to any environment (like QA, UAT , Pre Prod etc) --> after testing is done there getting approval or signoff from QA team --> from this branch only i will deploy to productions --> it is that simple.
+
+even hotfix (emergency defect) also same process. you can put hotfix in DEV Pipeline if you want else directly create hotfix branch give it to main. you can even bypass QA/UAT Pipleline directly deploy to production.
+
+there is nothing here --> because web applications will not have multiple versions.
+whatsapp means it will announce new features --> we can see clearly the feature --> but for web applications they will not tell --> directly release to the public.
+
+amazon release frequency --> it deploys 23000 times a day (4 years back) --> 1,25,000 deploys now.
+amazon is following GitHub flow. if they follow git flow do you thing they can deploy this many times.
+
+in order to make this many times. the devops piplines should be very strong. some times they will not even rais pull request they will directly automated the process with these pipelines.
+
+what is your branching strategy?
+---------------------------------
+main --> Production (In our project we have the main branch pointing to the production)
+we will create feature branch from main branch
+we have one release for every 2 weeks, we follow feature branching
+they (developers) do the development and deploy to DEV environment
+if that is success, they will raise PR (pull request), if the PR is approve they merge changes to main branch.
+then we perform QA and UAT deployment.
+once we get QA and UAT sign off, we will deploy to PROD through CR process.
+
+Change Request Process
+-----------------------
+https://www.dnsstuff.com/best-change-management-software
+https://www.dnsstuff.com/wp-content/uploads/2023/12/image-34.png
+
+CR --> change request process 
+(every company will have their own change request tool eg: jira ticketing etc where we will write description and all infomration)
+in changes request process we have to write (for clients this is very important. tracking is very important for any business, system or human)
+what are the changes in the release 
+what is the date and time of release
+if failure, how can we rollback? what is the plan?
+any downtime? --> yes/no
+QA testing --> What Happend?
+UAT testing --> What Happend?
+Scans --> what Happend?
+We have to log everthing clearly for clients this is like tracking. if a person want to know what he did in last 1 year he will check his diary. For a project or company, if we want to know what we did in last 1 year they can directly come and check this Change Request Process. 
+Delivery manager from TCS --> give approval
+QA manager --> approval
+Client approval --> approval
+all of the above 3 will give approval on the same ticket. if got all approvals there is a deployment window.
+
+deployment window --> 10-JUN-2024 03:00-04:00 AM (during less traffic time)
+
+deployment failed, CR failed (if we were not able to deploy at above time then we need to mark it as deployment failed, CR failed mails will go for everyone)
+
+now again
+why it is failed, stop the next sprint 
+
+RCA --> Root cause analysis (where it failed how to stop it again from getting failed we need to submit a report RCA)
+After submmiting all these and client getting satisfied. (asking client we are sorry we will not do this again excuse us for this time then client will get satifsifed and give us the approval for next CR Process)
+
+if you use this CR process terminology in interview then he will understand you are genuine person. there is no technology for this CR process. as i say common sense wins over technology. no matter how much technology you need to follow common sense other wise it is waste. this CR process knowledge is know to people who are in project only and this not big tough process. don't need to worry this is all common sense when you get a job you will understand this process in just half-an-hour. this is all just a ticketing application.
+
+in software industry what they will see is if
+1. you are working on latest modern things from the beginning or
+2. you worked on legacy things, you were part of migrating from legacy to modern
+
+which person i can consider above? definitely second person --> because he has a clear picture --> why migrated from old to new technologies --> he knows both legacy and modren things --> tommorow if we want to some other advanced technologies --> he is the ideal person.
+
+why i said both old git flow and new github flow it will be useful for experience people.
+more than 10 years experience people should tell like earlier were using gitflow model where we had main branch, development branch, release branch, hot fix branch, feature branching. recently, like last 4 years back we migrated to the github flow model or feature branching model.
+now, we have migrated to our monolithich application to the micro services. we have migrated our branching strategy from git flow to github flow strategy.
+tell him our new branching strategy above.
+
+now, saying above you are justified as highly experienced person.
+
+if 3 years experience you can say when i joined it was in the first year git flow from 2 years back we are following the new strategy. obiviously, they will get good impact and will select you.
+
+when i joined in 2012. i saw my seniors sleeping in office during production.
+
+kanuganti mahendra --> 9.5 years --> 4 companies --> never worked on git and devops --> his work
+data center server disk full --> for replacing that disk --> assiging field engineer --> following him up --> giving him access --> allowing him into datacenter --> if he swapping disk over there --> we are monitoring him in console here.
+after legacy enironment --> shiffted to VM Ware --> in VM Ware directly we scan and extend our disk --> still we are working on virtual data cloud.
+
+
+companies will delete the branches because after few years there will be 50 to 60 branches even to clone the code it will be difficult. so, they will delete the branches.
+
+Amani -- she will prepare all the configuration necessary to run a software and push it -- Application Package Manger
+------------------------------------------------------------------------------------------------------------------------
+in her project there will change request meeting in that someone will represent the change. whom soever represent the change they have to tell what are the major changes we are going to do and what are the roll out benfits of this change. change freeze period will be there in that also we will discuss is it super important to roll out in this period. if changes got approved. in changes request schedule time we will perfomr change requests and we will send out the mails.
+
+in whatsapp app or desktop app only when we will update the bugs will be fixed no deployment window like web apps.
+
+sai saranya - developer
+-------------------------
+they will follow cr process with jira tickets. she said exactly like shiva they will follow.
+
+in production that is infra changes or development changes they will follow CR process.
+
+They, will defenitely ask this question. how will push changes to production. To know whehter your genuine or not.
+
+Ramu - DevOps Engineer
+-----------------------
+QA --> will have end user mind set
+Instagram planning to release a new feature. by putting end user in mind they will prepare test cases QA
+for QA they will give release notes. According to this release notes QA team will plan test cases.
+parallel developers will develop. but, QA test cases will only be finished when application come in QA environment. when developer will test in DEV environment and send to QA there test cases will be ready then they will test.
+
+Running QA test cases in DEV Environment will not be successful. (the person said there team wants to run QA cases in DEV)
+
+he said in there deployments there will not only be image deployments but along with them there will be configuration changes along with it they will give db (mysql, mongo) changes also.
+
+in these cases taking docker images. creating cicd pipelines and deploying them. but, configuration changes and db changes is it possible to handle with cicd process.
+db will also have cicd changes like adding new column in table this is part of production release. but, application configuration changes like db end point changing or username and passowrd changing and some configuration thing changes that should not be a part of release.
+
+whether configuration changes should be in CR process or not is debatable. it depends on the client and project. if they want configuration changes also in CR process then they need to go with complete flow. if they feel we don't need configuration changes. we have SSM parameter store if we make changes in it applications will automatically take it. in that case configuration changes need not be in CR Process. 
+
+if configurations changes are not perfomred correctly the whole application might get down. in that situtations client will not take risk. this is not technological decision. this is purely project decision.
+
+for example amazon, google they are confident about there configuration they don't want in CR Process
+Banks which don't take risks they want CR Process. (a bank lost crores of money due to configuration issue)
+
+
+ChatGPT - Configuration Changes 
+-----------------------------------
+Configuration changes in an application refer to modifications made to the settings or parameters that control how the application operates. These changes can affect various aspects of the application’s behavior, performance, and interaction with users or other systems. Here are some common examples of configuration changes:
+
+a) Environment Settings: Adjustments to settings based on the environment where the application is running, such as development, testing, or production. For instance, you might configure different database connections or logging levels for each environment.
+
+b) Feature Toggles: Enabling or disabling specific features or functionalities without altering the application code. This allows for incremental deployment and testing of new features.
+
+c) Performance Tuning: Modifications to settings that impact the application's performance, like adjusting memory allocation, thread pools, or cache sizes.
+
+d) Security Settings: Changes related to security, such as updating authentication methods, configuring encryption settings, or managing access controls.
+
+e) User Preferences: Customizing settings based on user preferences or roles, like changing the appearance of the user interface or modifying default options.
+
+f) Integration Settings: Configurations for connecting with other systems or services, such as API keys, endpoint URLs, or authentication tokens.
+
+g) Localization: Adjusting settings for different languages, regions, or formats (e.g., date and time formats).
+
+h) Error Handling and Logging: Configuring how errors are handled and logged, such as setting log levels (info, warning, error) or defining how and where logs are stored.
+
+Configuration changes can often be applied dynamically without restarting the application, depending on how the application is designed. Proper management of configuration settings is crucial for ensuring the application operates as intended and can adapt to different conditions or requirements.
+
+Configuration changes in an application are like adjusting settings on your phone or computer. Just as you might change your phone's settings to customize how it works for you, configuration changes in an application adjust how the application behaves.

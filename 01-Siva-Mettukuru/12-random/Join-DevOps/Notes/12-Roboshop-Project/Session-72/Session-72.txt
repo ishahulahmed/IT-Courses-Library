@@ -1,0 +1,9 @@
+Session Overview
+-----------------
+i)  Shell script to create all roboshop instances and r53 records
+ii) Shell script to create
+    a) Mongodb
+    b) Redis
+    c) MySQL
+    d) RabbitMQ
+

@@ -1,0 +1,7 @@
+Session Overview
+-----------------
+a) Ansible Tags
+b) Ansible dynamic inventory
+c) Ansible forks
+d) Ansible EC2
+e) Ansible vs Terraform

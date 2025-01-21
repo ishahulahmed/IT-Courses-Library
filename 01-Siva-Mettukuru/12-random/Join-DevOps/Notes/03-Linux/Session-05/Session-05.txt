@@ -1,0 +1,186 @@
+Project Discussion
+---------------------
+3 tier architecture
+
+common sense is more than technology
+
+Desktop vs Web
+------------------
+Desktop apps disadvantages
+--------------------------
+can't access in mobile
+storage
+installation
+upgrade
+data loss
+heavy system resources
+compatibility --> Windows 7, Windows 10 for each OS each version of Desktop Application.
+
+Desktop applications worked during days when internet traffic was less. When internet traffic raised heavily it became difficult to maintain desktop applications and web applications came into picture.
+
+Web applications
+---------------------
+web applications address desktop applications disadvantages.
+a proper architecture is highly required to create and maintain web applications...
+
+Desktop applications is like
+We cook in our home --> batter, gas, time, chutney, etc.
+
+Web Application Analogy
+-------------------------
+road side cart
+--------------------
+single person
+
+Raw items --> eatable format (cooking means)
+
+He is cooking --> Quality food, hygeine food
+He is taking orders
+He is taking bills
+
+10 members at a time.... 100 members can he handle? No
+upgrade --> small shop
+
+small shop
+--------------------
+hire cooking persons
+He will be at counter
+
+20-30 members --> can handle
+100 members --> can they handle? No
+upgrade --> Restaurant
+
+cooking person
+--------------
+take orders
+queue manage
+cook
+
+counter
+--------------
+billing
+
+
+Restaurant
+--------------------
+They hire chef
+They hire waiter
+They hire cashiers
+They hire captains
+
+captain
+-------------
+a person who welcome us and show the table
+
+waiter
+-------------
+He will come take order
+prepare the queue of orders
+
+Chef
+------------
+Only cooking
+Raw items --> food
+
+Cashier
+------------
+Only charge
+
+In Restaurant Case roles and responsibilities are clearly defined.
+
+what will be there in facebook.com
+------------------------------------
+users data
+profile
+posts
+likes
+comments
+
+data is stored in database tables
+
+for example facebook user data table contains
+firstname, lastname, dob, email, mobile number, country, username and password
+
+As per diagram
+----------------
+Backend Server is Chef --> He Will Convert Raw Data into Structured Data and give it Waiter aka User Interface.
+Waiter is User Interface --> Structured item given by Chef User Interface i.e Waiter will garnish and give to the User.
+Captain is Load Balancer here. Load Balancer will send the request to the server where traffic is less.
+
+Frontend Technologies
+---------------------
+HTML --> Text Format
+CSS --> Colors, fonts
+JS --> Validations..
+
+Frontend in 1 server, Backend in 1 server and Db in 1 server here we dividing the responsibilities then our application is proper. This is called 3-tier architecture.
+
+Web/Frontend tier --> LB, HTML, CSS, JS, Angular Js, reactjs, etc, nodejs --> Nginx/Apache servers --> http servers
+API/APP/Backend tier --> Java, .NET,Python, pHp, etc. --> Jboss/weblogic/websphere (old days) --> inbuilt servers like tomcat (present)
+DB tier --> MySQL, MSSQL, Oracle, etc. --> MongoDB, Mysql, Kafka, redis
+
+DB Amdin Activities --> Database Creation, Table Structure Creation, Database Continously Up and Running and Database data Backup Everyday.
+Users, will not have access to backend server. 
+Software technology any type of it may be 90% of importance is data.
+even if you lose 1min of data millions of transactions will be lost. it will affect the business.
+UI, Backend crash means that is just code not a big issue. but if you lose data that's a big issue.
+
+Till now What we learned in previous sessions resume in raw format
+--------------------------------------------------------------------
+Experience with Linux server adming activities like user, service, package, network and process manageemnt.
+Experience in using linux editors like vim.
+Experience in using public and private, configurig them to server.
+One Week Sessions --> 3 lines --> 12 Weeks 50 lines --> refine to 20 lines --> that is your profile summary.
+
+Developers --> Application (Developers develop Application)
+
+feedback (if you built a product like cocola drink will you directly release to the market or take feedback from friends and family)
+In the same way we don't launc our software directly to public.
+
+direct public --> No
+
+Development --> defects, fix them(family)
+
+Testing --> Defects, fix them (Relatives)
+
+Pre-prod --> similar to prod environment 
+
+Coca-Cola Blunder Mistake --> Sending new product --> without feedback --> 600% loss --> so feedback important.
+
+There are different evnironments where we test our application for defects. moving our application in different environments is devops engineers responsibility. 
+
+how you should move --> with speed and accuracy
+To move with speed and accuracy we need tools and integrate tools with each other.
+for example when developer pushes code to github --> automatically through webhook --> we need to 
+
+in DEV Environment 
+-------------------
+clone the code
+compile the code
+build the code
+scan the code
+unit testing
+sast
+deploy
+functional testing
+
+After doing above activities in development environment then we need to move the application to another environment. same code will be moved not different to pre-prod, prod this is a big process.
+
+In this process increasing the speed and accuracy is devops main responsibility.
+
+
+Autoscaling --> lack of autoscaling caused aha site down due prabhas interview. 
+
+Testing is till now 100% is not automated. still manunal testing is needed. only 60% of testing is automated. 
+
+Unit testing --> Developer
+Functional Testing --> Tester
+
+stage('Unit test'){
+	testing a single function
+}
+stage('Functional testing'){
+	testing multiple functions is called functional testing [50 Automated test cases we will test here + remaining they will test manually & approval]
+}
+
+Results of every stage will come in JSON Format. 

@@ -1,0 +1,9 @@
+Session Overview
+-----------------
+a) Ansible Variables
+b) Variable preferences
+c) Data types
+d) Conditions
+e) Quiz
+
+

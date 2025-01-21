@@ -1,0 +1,11 @@
+Session Overview
+------------------
+i) Ansible Roles
+   a) Handlers
+   b) Tasks
+   c) Templates
+   d) Vars
+ii) Ansible Configuration
+iii) Ansible Vault
+
+

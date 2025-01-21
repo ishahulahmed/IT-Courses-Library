@@ -1,0 +1,47 @@
+<mxfile host="app.diagrams.net" modified="2024-07-20T06:53:27.482Z" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36" etag="HVxxxKpFh8YpJlGkwqH7" version="24.7.2" type="device">
+  <diagram name="Page-1" id="0NTraQ_BnjS81q3rlRTF">
+    <mxGraphModel dx="627" dy="637" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="_vtw_B73QNyePPantOCq-23" value="" style="group" vertex="1" connectable="0" parent="1">
+          <mxGeometry x="1000" y="310" width="593.83" height="293" as="geometry" />
+        </mxCell>
+        <mxCell id="_vtw_B73QNyePPantOCq-24" value="" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="_vtw_B73QNyePPantOCq-23">
+          <mxGeometry x="222" y="137" width="225" height="156" as="geometry" />
+        </mxCell>
+        <mxCell id="_vtw_B73QNyePPantOCq-25" value="&lt;b&gt;Docker CE&lt;/b&gt;" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;fontSize=16;" vertex="1" parent="_vtw_B73QNyePPantOCq-23">
+          <mxGeometry x="339" y="141" width="99" height="31" as="geometry" />
+        </mxCell>
+        <mxCell id="_vtw_B73QNyePPantOCq-26" value="&lt;b&gt;local repo&lt;/b&gt;" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="_vtw_B73QNyePPantOCq-23">
+          <mxGeometry x="348.5" y="189" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="_vtw_B73QNyePPantOCq-27" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="_vtw_B73QNyePPantOCq-23" source="_vtw_B73QNyePPantOCq-28" target="_vtw_B73QNyePPantOCq-26">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="559" y="232" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="_vtw_B73QNyePPantOCq-28" value="" style="image;sketch=0;aspect=fixed;html=1;points=[];align=center;fontSize=12;image=img/lib/mscae/Docker.svg;" vertex="1" parent="_vtw_B73QNyePPantOCq-23">
+          <mxGeometry x="467" width="126.83" height="104" as="geometry" />
+        </mxCell>
+        <mxCell id="_vtw_B73QNyePPantOCq-29" value="" style="shape=image;html=1;verticalAlign=top;verticalLabelPosition=bottom;labelBackgroundColor=#ffffff;imageAspect=0;aspect=fixed;image=https://cdn1.iconfinder.com/data/icons/unicons-line-vol-3/24/docker-128.png" vertex="1" parent="_vtw_B73QNyePPantOCq-23">
+          <mxGeometry x="287" y="205" width="48" height="48" as="geometry" />
+        </mxCell>
+        <mxCell id="_vtw_B73QNyePPantOCq-30" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="_vtw_B73QNyePPantOCq-23" source="_vtw_B73QNyePPantOCq-31" target="_vtw_B73QNyePPantOCq-33">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_vtw_B73QNyePPantOCq-31" value="" style="html=1;verticalLabelPosition=bottom;align=center;labelBackgroundColor=#ffffff;verticalAlign=top;strokeWidth=2;strokeColor=#0080F0;shadow=0;dashed=0;shape=mxgraph.ios7.icons.user;" vertex="1" parent="_vtw_B73QNyePPantOCq-23">
+          <mxGeometry y="177.5" width="86" height="75" as="geometry" />
+        </mxCell>
+        <mxCell id="_vtw_B73QNyePPantOCq-32" style="edgeStyle=none;curved=1;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=12;startSize=8;endSize=8;" edge="1" parent="_vtw_B73QNyePPantOCq-23" source="_vtw_B73QNyePPantOCq-33" target="_vtw_B73QNyePPantOCq-29">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="_vtw_B73QNyePPantOCq-33" value="" style="rounded=1;whiteSpace=wrap;html=1;" vertex="1" parent="_vtw_B73QNyePPantOCq-23">
+          <mxGeometry x="210" y="185" width="26" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

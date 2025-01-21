@@ -1,0 +1,674 @@
+Session Overview
+-----------------
+a) Push vs Pull
+b) Install Ansible
+c) Adhoc commands
+d) XML vs JSON vs YAML
+e) Playbooks
+
+disadvantages of shell scripting
+---------------------------------
+1. no idempotency --> idempotency means a function or process that produces the same result regardless of how many times it is performed.
+2. no error handling
+3. Hard to understand
+4. Homogeneous --> means only works for one distro
+5. not scalabale --> you cannot use shell script for multiple servers at a time
+6. imperative type of programming (we need to give everything to computer as instruction. it will execute line by line and syntax is tough in imperative)
+
+declarative syntax like ansible, terraform and kubernetes these will follow declarative style. sequence is not an issue and syntax is easy and self explanatory. you will understand this slowly.
+
+configuration management
+-------------------------
+sever should be ready with application. [it will be ready only after configuring it] 
+
+when we create a server there will be nothing in it. it is just like a plain server. so, how should we make it ready or what are the things we are doing as part of configuration.
+
+install application runtime --> like nodejs or java etc
+install system packages
+install appliction dependencies
+download the code
+create users, permissions, directories
+create sytemctl servies
+
+All these are configuration management. it is very difficult to do them with shell scripting. At a time doing 100's of servers with shell script or manually is very difficult that is we have configuration management tools.
+
+CM tools --> puppet, chef --> old
+Ansible --> new
+old tools have some challenges they are not scalable. syntax is tough there was need to learn programming language. chef we need Ruby language. it was tough.
+
+push vs pull
+-------------
+Push vs Pull this is a architecture style in IT
+
+Our friend sent a courier. he called us this morning and said i am sending you a courier today it will come to hyderabad.
+Delhi --> Hyd
+
+so, we go everyday to local dtdc office ask whether we have recieved any courier. they will check every time we go and ask them and tell us whether received or not this is one way.
+
+1. asking DTDC office every day --> Pull 
+2. don't do anything, when letter comes DTDC deliver to you --> Push
+
+which way is better obviously second way is better.
+
+Pull means everytime we goign and cheking whether received or not.
+Push means when it is received automatically recieve notification.
+
+For Example Facebook if send a message to friend
+- going and checking everytime that person replied or not is pull based
+- whenever we get message we are getting a notification or emaily is push based
+
+pull
+----
+In pull based one system going to another sytem and checking whether changes or information received or not. what happnes then
+
+1. internet traffic increases
+2. unnecessary bandwidth consumption
+3. power and system resources
+4. cost
+
+push
+----
+In push based we can save the above
+active notifications
+
+generally, in 99% cases we prefer push based architecture. in few cases we prefer pull based architecture. we will understand those cases slowly.
+
+chef, puppet these were pull based architecture.
+
+Can you check manually inside a server what programs, packages installed, directories created and users created that is very difficult. if one ok suppose if there are 10 or 100 now this is big hectic task.
+
+For example if you take shell scripting then if you see the shell script we can understand what are things we did inside the server. That is reading the configuration of the server. checking manually inside the server is impossible or difficult. But, if you see the script that can be ansible, shell or chef we can understand what is inside the server. i.e reading the configuration of the server.
+
+if you create configuration once that is not enough in future you may need to update the configuration. some changes may expire then we need to delete the configuration.
+
+CRUD is performed everywhere even for configuration.
+CRUD --> create, read, update and delete.
+
+In pull based we will schedule the server for every 30 mins (here example) to go the Configuration Management Server and Check for Changes. If there are changes update those changes yourself. 
+
+So, this Node Server will go to CM Server every 30 mins check for changes if there are changes then they will download those changes and run those changes and update themselves.
+
+Do you think every 30 Minutes we will have changes --> No [So, Ansible came into picture]
+
+Ansible connects through SSH protocol to Node. For pull based he said not SSH but some other kind of protocol. 
+Here servers (node) going and cheking those things will be not there. 
+
+here if we want to create a configuration we will write a file and upload it in Configuration Management Server from that server we will directly push it.
+for example i want some configuration in NODE-1 then we will write that configuration from CM Server we will push it to NODE-1. it will go to NODE-1 and runs automatically.
+
+As, i said in some cases pull will be useful. imagine there is application is running in production and users using it application like amazon. your getting lot of crores of business. suddenly due to some ignorance an employee made some changes in NODE-1 that is causing application down in NODE-1 server. 
+
+when will be the application be up? --> when it automatically resets in next 30 mins
+
+we made changes in NODE-1 after 30 mins it will go and check with CM Server and see there are differences between them. Then NODE-1 download the changes and automatically resets.
+
+This is possible in pull based but this automatic reset is not possible in push based. in these cases push based will not be useful.
+But, we will keep aside this one case. Because, we have monitoring tools if a server is down we will get an alert immediately we will check and push the changes. we can follow this monitoring mechanism.
+
+100% no concept is correct. we will check the pros and cons and depending upon our project requirements we will follow what is needed.
+
+Mostly, push is good for our application but you need to do some monitoring on the service what is going on.
+
+
+This is already mentioned in github you can read them.
+https://github.com/daws-78s/concepts/blob/main/ansible.MD
+
+Whatever the disadvantages we have in shell we can address them in ansible.
+
+Where Ansible is installed we will call it ansible master server remaining we will call as ansible remote nodes.
+
+Take two instance name one as Ansible-Master and other as Ansible-Node
+Create EC2 Instante --> t2.micro --> Launch Instance
+
+
+Ansible Installation
+--------------------
+In Master Server
+sudo dnf install ansible -y
+
+In Node we won't do any installations
+
+Ansible is developed using python. That is also the reason why ansible popular now days. first it was popular as push based. 
+But, in some cases pull was also required. so, again they incorporated pull also in ansible.
+
+First, we will learn push based then later we will discuss pull based.
+
+From Master Server we will do changes everything in Node Server.
+
+Adhoc commands
+---------------
+Ansible should be able to do the ssh to the node server. so security groups in node server should allow it. port no 22 should be open in node.
+
+SSH protocol
+ansible -i <inventory> -e ansible_user=ec2-user -e ansible_password=DevOps321
+inventory means we will mention ip-address there.
+
+ansible -i 172.31.16.28, all -e ansible_user=ec2-user -e ansible_password=DevOps321  [this command he has not used i don't whether it works or not]
+all means [we are connecting to all the ip-address's mentioned here]
+
+This is almost like 
+ssh -i ec2-user@ip-address
+
+i tried the above command and i got error as
+ERROR! No argument passed to command module
+
+ansible -i 172.31.16.28, all -e ansible_user=ec2-user -e ansible_password=DevOps321 -m ping [this is the first ansible command he used in video]
+Linux --> Commands [in linux we will call commands]
+Commands = Ansible --> modules/collections [in ansible we call command as modules/collections]
+
+Previoulsy, they used to call modules now it is called collections.
+
+ping means you are asking are you alive then it is responding with pong yes i am alive.
+ansible -i 172.31.16.28, all -e ansible_user=ec2-user -e ansible_password=DevOps321 -m ping [use this the node will pong you]
+172.31.16.28 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "ping": "pong"
+}
+
+ansible -i 172.31.16.28, all -e ansible_user=ec2-user -e ansible_password=DevOps321 -m ping  --> To check whether we are able to reach node or not
+
+ansible -i 172.31.16.28, all -e ansible_user=ec2-user -e ansible_password=DevOps321 -m dnf -a "name=nginx state=installed" --> To Install a nginx on node
+[-a here means arguments]
+You will get error "This command has to be run under the root user"
+
+ansible -i 172.31.16.28, all -e ansible_user=ec2-user -e ansible_password=DevOps321 -m dnf -a "name=nginx state=installed" -b
+[-b is nothing but become]
+
+-b --> become root
+
+Ansible syntax is self-explanatory
+
+ansible -i 172.31.16.28, all -e ansible_user=ec2-user -e ansible_password=DevOps321 -m dnf -a "name=nginx state=installed" -b
+172.31.16.28 | CHANGED => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": true,
+    "msg": "",
+    "rc": 0,
+    "results": [
+        "Installed: nginx-1:1.20.1-16.el9_4.1.x86_64",
+        "Installed: redhat-logos-httpd-90.4-2.el9.noarch",
+        "Installed: nginx-core-1:1.20.1-16.el9_4.1.x86_64",
+        "Installed: nginx-filesystem-1:1.20.1-16.el9_4.1.noarch"
+    ]
+}
+
+Ansible, is telling i have made the changes and those changes are.
+
+if you run again the same command you will get result as below
+ansible -i 172.31.16.28, all -e ansible_user=ec2-user -e ansible_password=DevOps321 -m dnf -a "name=nginx state=installed" -b
+172.31.16.28 | SUCCESS => {
+    "ansible_facts": {
+        "discovered_interpreter_python": "/usr/bin/python3"
+    },
+    "changed": false,
+    "msg": "Nothing to do",
+    "rc": 0,
+    "results": []
+}
+
+
+green colour means success
+yellow colour means it changed something and success
+red colour means failure
+
+if i want to run nginx in node server then the module name here is
+ansible -i 172.31.16.28, all -e ansible_user=ec2-user -e ansible_password=DevOps321 -m service -a "name=nginx state=started" -b
+The result is yellow so changed and success
+take node ip-address and search in browser and see test page is coming or not. if it is coming then nginx is running successfully.
+
+Now, can i go ahead and do every configuration using this big commands. is it painful or not? --> yes
+
+In Linux 
+First We Manually configured servers --> through commands [it was painful every command we need to run one by one]
+So, we wrote Shell Script --> all commands in a file, run that file one time
+
+Similarly there are
+Adhoc commands --> they are painful manual way
+Here we call it as Playbook --> keep all your modules in a single file with YAML syntax. Run that file. it is done.
+
+Keep your modules or collections in a file that we call it as playbook. it follows YAML syntax.
+
+YAML --> Yet another markup language.
+
+DTO --> Data Transfer Objects
+------------------------------
+when you go to facebook.com and sign-up for a new account. who is carrying your information from your browser page to facebook server.
+i.e nothing but Data Trasnfer Objects --> Mark up Language
+
+Markup Means putting your information in tags
+for example
+<h1>I am learning YAML</h1>
+<h2>I am learning</h2>
+this is html
+
+our browser is understandign these tags i.e markup's and showing us content according these formats.
+
+HTML --> Hyper test markup language
+XML --> extensive markup language
+
+earlier XML was so much popular. for example how facebook login information will go to facebook server is through XML if used.
+<User> 
+   <Username>sivakumar</Username>
+   <Password>admin123</Password>
+</User>
+
+This is how data is passing now the other system will query this information in database then it will tell this username and password is correct or not.
+
+XML
+---
+if we go to bank they will give a form which is template for them. we can take our own letter and give them but every person will write differently there will no standard template followed.
+
+Name 
+Amount 
+Date
+One person may write in the above formate
+
+Amount 
+Date
+Other Person may write like this
+
+so, it will be difficult for the clerk to enter information. he is whole energy will go in searching information. That is why they come up with forms and templates. now, clerk will enter information fastly because he is habituated to the template.
+
+for example, if we want to store a student information in XML this is also a template
+<Student>
+    <Name>Sivakumar</Name>
+    <DOB>2020-01-01</DOB>
+    <Address>Gandhi Nagar, KR Puram, Bengaluru</Address>
+</Student>
+
+This is a student object. we have the name, dob and address fields in it.
+
+for example if there are two addresses temporary and permanent.
+<Student>
+    <Name>Sivakumar</Name>
+    <DOB>2020-01-01</DOB>
+    <Addresses>
+        <PermAddress>
+            <AddressLine1>D-203</AddressLine1>
+            <AdressLine2>Sai Apartments</AddressLine2>
+            <Street>Gandhi Nagar</Street>
+        </PermAddress>
+        <CurrentAddress>
+               <AddressLine1>D-203</AddressLine1>
+               <AdressLine2>Sai Apartments</AddressLine2>
+               <Street>Gandhi Nagar</Street>
+        </CurrentAddress>
+    </Addresses>
+</Student>
+
+Student - Object, Name-Field, DOB-Field, Addresses-Object[acts as Object this is also field of Student which contains list of Addresses], PermAddress-Object [this is also object], AddressLine1-Field of PermAddress
+
+if i want to mention multiple student in a XML
+<Students>
+   <Student1>
+      <Name>Sivakumar</Name>
+      <DOB>2020-01-01</DOB>
+      <Addresses>
+         <PermAddress>
+            <AddressLine1>D-203</AddressLine1>
+            <AdressLine2>Sai Apartments</AddressLine2>
+            <Street>Gandhi Nagar</Street>
+         </PermAddress>
+         <CurrentAddress>
+               <AddressLine1>D-203</AddressLine1>
+               <AdressLine2>Sai Apartments</AddressLine2>
+               <Street>Gandhi Nagar</Street>
+         </CurrentAddress>
+      </Addresses>
+   </Student1>
+   <Student2>
+      <Name>Sivakumar</Name>
+      <DOB>2020-01-01</DOB>
+      <Addresses>
+         <PermAddress>
+            <AddressLine1>D-203</AddressLine1>
+            <AdressLine2>Sai Apartments</AddressLine2>
+            <Street>Gandhi Nagar</Street>
+         </PermAddress>
+         <CurrentAddress>
+               <AddressLine1>D-203</AddressLine1>
+               <AdressLine2>Sai Apartments</AddressLine2>
+               <Street>Gandhi Nagar</Street>
+         </CurrentAddress>
+      </Addresses>
+   </Student2>
+</Students>
+
+now, this will become list of students. now programming languages query effectively.
+you check this is correctly or not. search XML Validator in google
+https://jsonformatter.org/xml-validator
+
+when siva joined everywhere there was XML. few technologies like Oracle Middleware, Jboss middleware were using XML only. Middleware technologies were 100% dependent on XML.
+
+Opening and closing everytag this was bit repetitive and time taking. so, they come up with JSON
+
+JSON --> JavaScript Object Notation
+------------------------------------
+in Json everything starts with flower braces. if i want to give information in JSON it will be like
+{
+  "Username": "sivakumar",
+  "Password": "admin123",
+  "DoorNo": 123
+} 
+
+you can see Json is easy then XML. for number no need to give double quotes in JSON and after every field there should be a separator (,).
+
+if the same student object if i want to place JSON means
+{
+  "name": "sivakumar",
+  "dob": "2020-01-01",
+  "address": "D-203, Gandhi Nagar, Bang"
+}
+
+this is an object if i want to maintain list of addresses in the object.
+[] --> denotes list
+{} --> map/dictionary 
+
+{
+  "name": "sivakumar",
+  "dob": "2020-01-01",
+  "address": [
+      { 
+         "addressline-1": "D-203", 
+         "addressline-2": "gandhi nagar",
+         "city": "bangalore"
+      },
+      {
+         "addressline-1": "D-203", 
+         "addressline-2": "gandhi nagar",
+         "city": "bangalore"
+       }
+     ]
+}
+
+YAML --> Yet another markup language
+------------------------------------
+based on indentation
+programs (i.e for frontend to backend communication) are still using JSON.
+Ansible, kubernetes and cloud formation here we are using YAML.
+
+Indentation means space. if i want to create a user object
+name: sivakumar
+dob: 2020-01-01
+
+key:value
+
+if i want to create student object
+name: sivakumar
+dob: 2020-01-01
+address: d-203, gandhi nagar, bengaluru
+
+- = list in YAML
+
+if i want to give list of address
+name: sivakumar
+dob: 2020-01-01
+addresses:
+- addressline-1: d-203
+  addressline-2: gandhi nagar
+  city: bengaluru
+
+- addressline-1: d-203
+  addressline-2: gandhi nagar
+  city: bengaluru
+gender: male
+
+search YAML validation
+https://www.yamllint.com/
+
+if i want to write list of students
+- name: sivakumar
+  dob: 2020-01-01
+  addresses:
+	- addressline-1: d-203
+	  addressline-2: gandhi nagar
+	  city: bengaluru
+	  
+	- addressline-1: d-203
+	  addressline-2: gandhi nagar
+	  city: bengaluru
+  gender: male
+- name: sivakumar
+  dob: 2020-01-01
+  addresses:
+	- addressline-1: d-203
+	  addressline-2: gandhi nagar
+	  city: bengaluru
+	  
+	- addressline-1: d-203
+	  addressline-2: gandhi nagar
+	  city: bengaluru
+  gender: male
+
+
+Now, we will write ansible playbooks. To write the play book create a repo in github and store your files in it.
+he created a repository in github named ansible and cloned it in his local machine and used vs code to add files in this repo.
+
+yaml extension name is yaml or yml
+in ansible everything is considered as list whether it as one list or more
+so always start an ansible file with - [very important] [after - give space]
+
+01-ping.yaml
+- name: ping the server
+  hosts: web
+  tasks: #list of tasks/modules/collections
+  - name: pinging the server
+    ansible.builtin.ping:
+
+
+generally, you don't need to remember simply search for ansible ping server you will get something [i.e ansible documentation]
+https://docs.ansible.com/ansible/latest/collections/ansible/builtin/ping_module.html
+
+ansible.builtin means ansible people only developed originally
+few will come from community also [means outside people contributed]
+https://docs.ansible.com/ansible/latest/collections/index.html
+
+collection index here you can get all documentation for different modules
+with ansible not only linux servers, we can create ec2 servers, create google cloud, use netapp, kubernetes and many more.
+
+it is easy to develop new modules using python scripting that is 
+
+Namespace --> Collections [each name space will have collections] --> modules [each collection will have modules]
+
+inventory
+---------
+here inventory means lists of hosts [i.e which hosts you are targeting]
+
+he created a inventory.ini file in vs code
+
+if you want to give a group of servers you can give like this
+[web]
+172.31.22.254
+172.31.22.255
+172.31.22.256
+172.31.22.257
+172.31.22.258
+172.31.22.259
+
+in the 01-ping.yaml file if i give hosts a web
+- name: ping the server
+  hosts: web
+  tasks: #list of tasks/modules/collections
+  - name: pinging the server
+    ansible.builtin.ping:
+
+then it will go the inventory.ini file and whatever that is there below [web] it will ping all those hosts.
+
+[web]
+172.31.22.259
+
+[db]
+172.31.22.251
+
+[app]
+172.31.22.212
+
+this is called ini format i.e grouping the servers
+if you want to connect all the server of different groups then you can give like this in your ini file
+[all:children]
+web
+db
+app
+this is group of groups
+in host: all [give all here]
+
+172.31.22.132 --> keeping as unlisted not including any group you can also put like this
+
+[web]
+172.31.22.132
+
+in ansible server clone this
+https://github.com/ishahulahmed/ansible.git
+
+git clone https://github.com/ishahulahmed/ansible.git
+cd ansible
+
+ansible -i inventory.ini web --list-hosts
+ hosts (1):
+    172.31.22.132
+
+ansible will go to inventory.in and list what is there in web
+
+ansible -i inventory.ini all --list-hosts
+hosts (3):
+    172.31.22.132
+    172.31.24.249
+    172.31.24.243
+
+ansible will bring hosts in all group
+
+ansible -i inventory.ini --help [to get help for inventory commands]
+
+generally grouping the hosts is best recommended way. so that we can target the group which we want.
+
+ansible-playbook -i inventory.ini -e ansible_user=ec2-user -e ansible_password=DevOps321 01-ping.yaml
+[this is a playbook command not adhoc command that's why ansible-playbook]
+PLAY [ping the server] ************************************************************************************************************************************
+
+TASK [Gathering Facts] ************************************************************************************************************************************
+ok: [172.31.23.57]
+
+TASK [pinging the server] *********************************************************************************************************************************
+ok: [172.31.23.57]
+
+PLAY RECAP ************************************************************************************************************************************************
+172.31.23.57               : ok=2    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+In interviews, they are generally asking to share your screen and write a playbook.
+for example write a play book to install nginx and run it
+
+- name: install  and run nginx
+  hosts: web
+  become: yes # equal to -b in adhoc commands, getting root access
+  tasks:
+  - name: install nginx
+    ansible.builtin.package:
+    	name: nginx
+        state: latest
+    
+
+
+if you don't know how to install search ansible installl package --> you will get ansible documentation --> https://docs.ansible.com/ansible/latest/collections/ansible/builtin/package_module.html
+
+ansible.builtin.yum: --> this will work only for redhad based
+ansible.builtin.package: --> this will work for all distributions
+
+in ansible documentation parameters are what we supply for a module if the parameter is as required then it compulsory to provide it. if there is nothing then it is not mandatory. see documentation.
+
+for ansible.builtin.package module parameters name and state are required. so we need to provide them. see documentation
+https://docs.ansible.com/ansible/latest/collections/ansible/builtin/package_module.html#attributes
+
+example
+- name: Install ntpdate
+  ansible.builtin.package:
+    name: ntpdate
+    state: present
+
+if our expense project backend if put few servers redhat and few ubuntu. will it be advantage or disadvantage? --> that's a disadvantage
+even though ansible supports heterogenous nature [supporting different os like pakcage module] but interms of business and technical way also it is wrong decision.
+
+if in a project you different servers what is the it is completely disadvantage to us. so lets go with redhat [you can use dnf or yum]
+
+search ansible install package dnf --> https://docs.ansible.com/ansible/latest/collections/ansible/builtin/dnf_module.html
+here for parameters they have not given which are required to provide. siva was also confused but any how continue.
+
+search ansible start service --> https://docs.ansible.com/ansible/latest/collections/ansible/builtin/service_module.html
+
+- name: install and run nginx
+  hosts: web
+  become: yes # equal to -b in adhoc commands, getting root access
+  tasks:
+  - name: install nginx
+    ansible.builtin.dnf:
+    	name: nginx
+        state: latest
+  - name: start nginx
+    ansible.builtin.service:
+    	name: nginx
+        state: started
+        enabled: yes
+
+ansible-playbook -i inventory.ini -e ansible_user=ec2-user -e ansible_password=DevOps321 02-nginx.yaml
+PLAY [install and run nginx] ******************************************************************************************************************************
+
+TASK [Gathering Facts] ************************************************************************************************************************************
+ok: [172.31.23.57]
+
+TASK [install nginx] **************************************************************************************************************************************
+ok: [172.31.23.57]
+
+TASK [start nginx] ****************************************************************************************************************************************
+changed: [172.31.23.57]
+
+PLAY RECAP ************************************************************************************************************************************************
+172.31.23.57               : ok=3    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+
+we already installed nginx so that's why ok. but we have not enable so changed.
+
+will it take .ini in the command and give just file name --> yes
+ansible -i inventory --> yes
+
+- name: install and run nginx
+  hosts: web [if here i give ip-address]
+
+is it still required to give invetory.ini file in command
+
+this is a small disadvantage in ansible even though you gave ip-address directly still ansible will expect invetory.ini file for running playbook
+
+TASK [Gathering Facts] ************************************************************************************************************************************
+ok: [172.31.23.57]
+
+gathering facts will come implicitly before running our task it will query the server first and pull information from it and run the commands according to it.
+by default gathering facts is yes. if you want you can keep it as no.
+
+can we remove packages with ansible --> yes put state: remove
+in one ansible plabook you can run as many tasks as you want.
+
+ansible-playbook -vvv -i inventory.ini -e ansible_user=ec2-user -e ansible_password=DevOps321 02-nginx.yaml
+if you give -vvv you will get all the information that is running in the background while ansilbe is working. you will get heavy information.
+
+is ansible.builtin.dnf: ansible.builtin.service: is a function --> it is like a command
+with practise you will understand ansible modules and it's parameters and how to write them
+
+ansilbe is very simple then shell-scripting
+
+here we you have setup the server with username and password and used username and password in ansible command. in the realtime how will you use with key based.
+siva said keybased is not a good thing. if ansible is dealing with thousands of server. if you are using keybased then you need to store that key somewhere.
+ansible server or pull from somewhere. if the key is exposed that's a problem and it is a complex task.
+
+this is all into our infrastructure. for the services in our infrastructure we don't need to give again tight security. if your servers are exposed outside then key based authentication may be a good choice.
+
+for the servers which are internal to your organisation. 
+for entering to home we can keep access. but, for in our home and our family we don't need access to every room inside.
+access --> security.
+
+key is secure if your severs are exposed to outside world.
+can we give username and password in a file instead of command --> yes we will do slowly
+
+
+you can create ec2 instances also with ansible but that is not recommended ansible is not for that purpose.

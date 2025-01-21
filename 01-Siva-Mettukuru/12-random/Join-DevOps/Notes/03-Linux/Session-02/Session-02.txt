@@ -1,0 +1,329 @@
+What is DevOps?
+Linux importance
+waterfall vs agile vs devops
+client server architecture
+
+AWS account creation
+
+EC2 server launch
+
+Authentication
+---------------------
+Laptop --> Username and password
+		   fingerprint
+		   
+1. What you know
+2. What you have
+3. What you are
+
+username and password --> what you know
+tokens --> What you have, OTP, RSA physical token, software tokens
+what you are --> fingerprint, retina scanning, palm
+
+keys or tokens 
+
+Cloud servers are remote servers --> they are somewhere in internet
+
+Right, now we use keys to authenticate remote servers. fingerprints, retina etc for remote this advanced technology is not yet present in future it might come.
+
+SSH --> Secure shell --> Linux authentication mechanism (To Connect to Linux)
+port no 22 (it will work on port no 22)
+
+username/password or
+username and private-key (for authentication)
+
+what are keys?
+------------------
+Public vs Private keys
+
+public private key we will generate
+
+Public Key --> Lock
+Private Key --> Key to Open Lock
+
+
+Linux Server Launch
+--------------------
+UNIX and LINUX are not Same they both are different.
+Linux Torvalds --> Linux and Git
+He bought one laptop
+UNIX
+	strictly coupled with hardware
+	MAC laptop is software+hardware --> we dont have freedom to choose OS (MAC is based on UNIX) (in dell or hp we can install whatever OS we want)
+	It is not free, high cost
+DOS
+	blue screen (MS DOS)
+	not free
+
+He started writing OS from the scratch using C language
+No strict couple with hardware
+free
+opensource
+
+Linux is OS/Kernel?
+Kernel --> it is a software component that can interact with hardware
+
+few companies (GNU) developed shell to interact with kernel and few utilities
+Applications/Utilities --> Shell --> Kernel --> Hardware
+
+Kernel+Shell+utilities/apps == OS
+
+Flavours/Distributions
+-----------------------
+Ubuntu
+Suse
+IBM
+Centos
+Fedora
+RHEL --> Redhat Enterprise Linux
+Arch Linux
+Android
+
+Desktop --> graphics
+Server --> No graphics only terminal/shell
+
+enterprise --> you will have support from Redhat
+opensource/community --> no support, only community support
+
+RHEL=CentOs=Fedora=AWSLinux (Same)
+
+
+Centos8
+
+RHEL-9
+
+EC2 Server Launch
+-----------------
+Public key and private keys
+
+GitBash --> Mini Linux for windows
+SSH Client, Git Client
+for Ubuntu and MacOS GitBash Not Necessary you already have Terminal Access
+
+Windows Home folder
+--------------------
+C:\Users\<Laptop-Username>
+
+pwd
+/c/Users/shahu
+
+
+C:\users\user
+
+\ --> Windows
+
+/ --> Linux (Git Bash Mini Linux it will follow Linux Format)
+
+pwd --> present working directory
+
+ssh-keygen --> command to create pub and private key
+
+ssh-keygen --help (Command Usage)
+
+[-t dsa | ecdsa | ecdsa-sk | ed25519 | ed25519-sk | rsa] (latest algorithm is rsa)
+[-b bits]
+[-f output_keyfile]
+ 
+
+ssh-keygen -t rsa -b 4096 -f <your-file-name>
+
+ssh-keygen -t rsa -b 4096 -f daws-78s (don't give space in file-name)
+if you want give any passphrase give your passphrase or else just press enter to continue without passphrase
+
+.pub --> publickey
+no extension --> private-key
+
+.pem is for private-key (daws-78 you can make it as daws-78s.pem)
+
+enable extension in your windows laptop
+control panel --> file explorer options --> View --> remove hide extensions to enable it.
+
+EC2 Launch
+------------
+create key in AWS account 
+(Save Public Key in AWS Account. Private will be with you. you will not share anywhere)
+AWS Login --> EC2 Serivce --> Network & Security --> Key Pairs --> Actions --> import key pair
+Name --> daws-78s --> copy you public key content and paste in text box (careful while pasting no extra line) --> import key pair
+
+Firewall creation (like gate to house. for server also firewall is like gate)
+0-65,535 -> 65,536 (ports a laptop will have)
+
+laptop chrome browser --> in one tab request to GitHub --> Response is coming to Same Tab Same browser --> not other tabs or other browsers in laptop
+
+Posted courier from
+Delhi --> HYD
+
+flat no, apartment name, street, city, pincode
+
+in system so many processes will be running
+every process will open one port number...
+
+https://facebook:443 --> there is a https process running inside facebook server or port no 443
+
+a random port will be opened for this chrome tab
+
+facebook 443 (request i want facebook.com from port no 443), I opened a random port 44565 (reponse will be sent to your chrome browser tab with port no 44565)
+
+in fire wall we will block or open port no's.
+
+SSH will run on port no 22...only facebook admin staff will have this access (SSH and HTTP these are called protocols)
+facebook https access --> yes public will have this access
+
+443 --> open for public
+22 --> only open for admin staff
+
+firewall is nothing but security group
+Network & Security --> Security Groups --> create Security group 
+
+Security grop name --> allow-everything
+description --> allow-everything
+VPC --> default
+
+Inbound Rules --> Type - All Traffic --> Protocol - All --> Port Range - All --> Source - Anywhere IPVP4
+Outbound Rules --> Type - All Traffic --> Protocol - All --> Port Range - All --> Source - Anywhere IPVP4
+Create Security Group
+
+For Inbound Rules if Source - My IP then it will open from your iP only
+
+0.0.0.0/0 --> internet, open for everyone
+
+Instances --> US East (N. Virginia) --> Here Cost is Less
+Instances --> Launch Instance --> Name - linux-practice --> Browse more AMIs - Amazon Linux 2 AMI (HVM) - Kernel 5.10, SSD Volume Type - Select
+instance type --> t2.micro (1 CPU, 1 GB RAM)
+
+CPU
+RAM
+Storage
+OS
+
+key pair - daws-78s --> Network - Select existing security group - allow-everything --> Configure Storage - 8GB --> Launch It.
+
+54.86.71.109 --> public ip address of that instance when he created
+
+ssh -i <private-key> user-name@IP
+
+ssh --> protocol
+-i --> to provide our key
+
+ssh -i daws-78s user-name@IP
+
+ssh -i daws-78s.pem ec2-user@54.80.172.61
+are you sure you want to connet? yes. enter your passphrase if given.
+
+port no, ip, username/password
+
+https://facebook.com:443 (443 default so it will hide)
+
+gitbash --> ssh client (once you connect to the server git bash will become ssh client)
+putty, mobaxterm, superputty (you can use these also)
+
+$ --> normal user
+# --> root access (sudo su or sudo su -)
+
+In our company laptops admin access will be removed.
+
+ssh -i /d/devops/keys/daws-78s-keys/daws-78s ec2-user@54.80.172.61 (you can use absolute path also to connect to server)
+/c/devops/daws-78s/daws-78s.pem --> absolute
+daws-78s/daws-78s.pem --> relative
+
+shift + insert (to paste the copied content into terminal)
+
+In Linux Server Everythign is Command.
+
+command-name <options> <inputs>
+
+pwd --> present working directory
+
+uname --> outputs the name of the operatins system you are using
+
+uname --help (for other options with uname command)
+uname -a (if like a letter only one hyphen) (print all information)
+uname --all (if like a word then two hyphens need to provided) (This also print all information)
+
+uname --help
+Usage: uname [OPTION]...
+Print certain system information.  With no OPTION, same as -s.
+
+  -a, --all                print all information, in the following order,
+                             except omit -p and -i if unknown:
+  -s, --kernel-name        print the kernel name
+  -n, --nodename           print the network node hostname
+  -r, --kernel-release     print the kernel release
+  -v, --kernel-version     print the kernel version
+  -m, --machine            print the machine hardware name
+  -p, --processor          print the processor type or "unknown"
+  -i, --hardware-platform  print the hardware platform or "unknown"
+  -o, --operating-system   print the operating system
+      --help     display this help and exit
+      --version  output version information and exit
+
+GNU coreutils online help: <http://www.gnu.org/software/coreutils/>
+For complete documentation, run: info coreutils 'uname invocation'
+
+command --help
+man command (man means manual of particular command)
+
+ls --help
+man ls
+
+ls --> list subdirectories
+
+clear --> To Clear Terminal
+history --> Till now used commands
+
+
+/home/ec2-user --> default folder when logged in
+
+cd --> change directory
+
+/ --> root directory
+/home/ec2-user --> defualt directory --> if you type cd enter
+
+cd .. (one step back)
+drwxr-xr-x  (d directory)
+-rw-r--r--  (- file)
+lrwxrwxrwx  (l link)
+
+ls -l --> long format
+ls -lr --> reverse alphabetical order
+ls -lt --> latest files
+ls -ltr --> starts from old files
+ls -la --> all files and directory including hidden
+
+hidden files and directories start with . (dot)
+
+CRUD --> Create Read Update Delete (Entire Software will be based on CRUD Operations Only)
+facebook --> Create User --> Update User --> Read User Information --> Delete User
+Even In Linux CRUD will be applicable
+Linux is case-sensitive
+
+ls --> read
+I want to create files folder
+
+create file
+---------------
+touch <file-name> --> this will create a file
+touch sample
+
+update --> enter info into file
+cat > sample
+entr the text you want (in the prompt)
+once over click enter and ctrl+d
+
+To read the updated file cat file-name
+cat sample
+
+> --> replace old content
+>> --> append/add to the old content
+
+use tab for autocompletion
+
+Delete
+----------------
+rm  <file-name> (rm sample)
+rm -r --> recursive (only rm is used for file) (rm -r for directories with and without files init)
+rmdir --> deletes only empty directory, fails when it has files inside
+
+mkdir --> make directory
+
+DevSecOps means nothing two scanning tools will be added that's it.

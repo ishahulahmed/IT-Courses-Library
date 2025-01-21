@@ -1,0 +1,46 @@
+eksctl
+-------
+eksctl version --> To Check eksctl version
+
+eksctl create cluster --config-file=eks.yaml 
+eksctl delete cluster --config-file=eks.yaml
+
+
+kubectl
+--------
+kubectl version --> Client, Server and Kustomize Version
+kubectl version --client --> Client and Kustomize Version
+
+kubectl get nodes --> display nodes in k8 cluster
+
+kubectl api-resources --> you will get all the resources in kubernetes
+kubectl api-resources | wc -l --> you will get the count of resouces
+
+kubectl create namespace expense (or) kubectl create ns expense
+kubectl delete namespace expense (or) kubectl delete ns expense
+kubectl describe namespace expense (or) kubectl describe ns expense
+kubectl get namespace or kubectl get ns --> lists all the name spaces
+
+kubectl apply -f <file-name.yaml>
+kubectl delete -f <file-name.yaml>
+
+kubectl get pods
+kubectl describe pod nginx
+
+kubectl exec -it pod-name -c containter-name -- bash --> To connect to a container in pod
+kubectl exec -it multi-container -c alma -- bash
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

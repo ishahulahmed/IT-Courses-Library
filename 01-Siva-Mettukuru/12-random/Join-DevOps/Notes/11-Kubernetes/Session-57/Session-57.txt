@@ -1,0 +1,446 @@
+Session Overview
+-----------------
+a) ReplicaSet
+b) Deployment
+c) MySQL
+d) Backend
+e) Frontend
+
+What is Service?
+----------------
+Service provides Load Balancing to the Pods as well as acts like DNS to the pods. pod to pod communication can be only achieved through the service.
+
+
+Cluster IP --> it is purely Internal to the Kubernetes Cluster
+Node Port --> for all the nodes inside Kubernetes Cluster it will open one port. Node Port is forwarding the traffic to the Cluster IP.
+Load Balancer --> Load Balancer is forwarding the traffic to the Node Port and Node Port is forwarding the traffic to the Cluster IP.
+
+
+Sets
+--------
+1) ReplicaSet
+2) DeploymentSet
+3) DaemonSet
+4) StatefulSet
+
+ReplicaSet
+-----------
+a) create replicas of pod.
+b) ReplicaSet is nothing but creating multiple Replicas of Pod.
+c) Pod is Subset of ReplicaSet
+d) pod = replicaset-name-<some-random-string> 
+
+ChatGPT --> ReplicaSet
+-----------------------
+In Kubernetes, a ReplicaSet is a resource that ensures a specified number of pod replicas are running at any given time. It maintains the desired state of your application by monitoring and managing the number of pod instances, making sure that the right number of pods are operational. If a pod fails or is deleted, the ReplicaSet will create a new pod to replace it.
+
+Here are some key points about ReplicaSets:
+
+1) Purpose: The primary role of a ReplicaSet is to guarantee that a certain number of pod replicas are running. This is crucial for maintaining high 
+            availability and reliability of applications.
+
+2) Spec: In its specification (spec), you define the number of replicas you want and the template for the pods. The template includes the pod's metadata and 
+         specification, such as containers and their configurations.
+
+3) Label Selector: A ReplicaSet uses label selectors to identify the set of pods it should manage. The label selector in the ReplicaSet’s spec must match 
+                   the labels of the pods it controls.
+
+4) Updates: While ReplicaSets are used to manage the number of pod replicas, they are typically not used directly for updates. Instead, Kubernetes      
+            Deployment objects manage ReplicaSets and handle rolling updates to ensure smooth transitions between different versions of an application.
+
+5) Deployment and ReplicaSet: When you create a Deployment, Kubernetes automatically creates and manages ReplicaSets to handle scaling and rolling updates. 
+                              The Deployment object is the preferred method for managing ReplicaSets because it provides additional features like rolling 
+                              updates and rollbacks.
+
+In summary, a ReplicaSet is a fundamental Kubernetes object that ensures a specified number of pod replicas are running, but in practice, it’s often managed indirectly through Deployments for more advanced management features.
+
+kubectl apply -f 16-replicaset.yaml
+replicaset.apps/nginx created
+
+kubectl get pods
+NAME          READY   STATUS    RESTARTS   AGE
+nginx-5psql   1/1     Running   0          18s
+nginx-s2btt   1/1     Running   0          18s
+nginx-zdwsz   1/1     Running   0          18s
+pod = replicaset-name-<some-random-string>
+
+Deploymet
+-----------
+a) Deployment means removing old code, releasing new version of code. changes the application version.
+b) Process of Deployment
+     i) stop the server
+    ii) remove old code
+   iii) download new code
+    iv) restart the server
+
+image: nginx:stable-perl (updating ReplicaSet Pods with new image)
+
+kubectl apply -f 16-replicaset.yaml
+replicaset.apps/nginx configured
+
+kubectl get pods
+NAME          READY   STATUS    RESTARTS   AGE
+nginx-5psql   1/1     Running   0          11m
+nginx-s2btt   1/1     Running   0          11m
+nginx-zdwsz   1/1     Running   0          11m
+
+ReplicaSet can create Replicas but it cannot update it. 
+
+kubectl apply -f 02-pod.yaml
+pod/nginx created
+
+kubectl get pods
+nginx         1/1     Running   0          65s
+nginx-5psql   1/1     Running   0          16m
+nginx-s2btt   1/1     Running   0          16m
+nginx-zdwsz   1/1     Running   0          16m
+
+changing pod definition in 02-pod.yaml
+image: nginx to  image: nginx:stable-perl
+
+kubectl apply -f 02-pod.yaml
+pod/nginx configured
+
+kubectl get pods
+NAME          READY   STATUS    RESTARTS      AGE
+nginx         1/1     Running   1 (35s ago)   3m40s
+nginx-5psql   1/1     Running   0             19m
+nginx-s2btt   1/1     Running   0             19m
+nginx-zdwsz   1/1     Running   0             19m
+
+changing pod definition in 02-pod.yaml (another new deployment)
+image: nginx to  image: nginx:stable-otel
+
+kubectl apply -f 02-pod.yaml
+pod/nginx configured
+
+kubectl get pods
+NAME          READY   STATUS    RESTARTS      AGE
+nginx         1/1     Running   2 (48s ago)   8m26s
+nginx-5psql   1/1     Running   0             24m
+nginx-s2btt   1/1     Running   0             24m
+nginx-zdwsz   1/1     Running   0             24m
+
+so, here pods update for every deployment. but, during every start there will be downtime. it may be 1 second or 2 second.
+
+replicaset cannot update pods. replicaset single and whole responsiblity creating multiple pods. for example you asked to create 3 replicas. if someone deletes or it crashes also replicaset will immediately up it within seconds.
+
+pod can update and restart but there is down time to it. so, there deploymentset which overcome replicaset issues.
+
+DeploymentSet
+--------------
+replicaset is subset of deployment set
+
+kubectl delete -f 16-replicaset.yaml
+replicaset.apps "nginx" delete
+
+kubectl delete -f 02-pod.yaml
+pod "nginx" deleted
+
+since names were give same so deleted
+
+kubectl apply -f 17-deployment.yaml
+deployment.apps/nginx created
+
+kubectl get deployments
+NAME    READY   UP-TO-DATE   AVAILABLE   AGE
+nginx   3/3     3            3           4m14s
+
+kubectl get replicaset or kubectl get rs
+NAME               DESIRED   CURRENT   READY   AGE
+nginx-68fcf7b7bf   3         3         3       4m43s
+
+kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-68fcf7b7bf-jdgbf   1/1     Running   0          6m15s
+nginx-68fcf7b7bf-vqwbp   1/1     Running   0          6m15s
+nginx-68fcf7b7bf-zhlzd   1/1     Running   0          6m15s
+
+replicaSet = deployment-name-<random-string> (nginx-68fcf7b7bf)
+pod = rs-<random-string> (nginx-68fcf7b7bf-jdgbf)
+
+now, changing version (new deployment)
+
+kubectl apply -f 17-deployment.yaml
+deployment.apps/nginx configured
+
+kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-8494fb8c88-g8crp   1/1     Running   0          59s
+nginx-8494fb8c88-k6xjt   1/1     Running   0          56s
+nginx-8494fb8c88-qghsp   1/1     Running   0          61s
+
+you can see by comapring age and name of the pods here new pods are created with new id's
+
+deployment set will create another replicaset in the background and slowly move everything to this new replicaset during every change (i.e deployment)
+one new pod in new replicaset and delete one pod in old replicaset in the same way for other pods.
+you need replicaset responsiblity is to have at any time 3 pods
+
+
+watch kubectl get pods (in another screen)
+
+now, creating 20 replicas
+
+kubectl apply -f 17-deployment.yaml
+deployment.apps/nginx configured
+
+
+now in another screen you can see 20 pods are runnning
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-8494fb8c88-8gx5b   1/1     Running   0          2m59s
+nginx-8494fb8c88-9cbld   1/1     Running   0          2m59s
+nginx-8494fb8c88-cs95z   1/1     Running   0          2m59s
+nginx-8494fb8c88-ggngp   1/1     Running   0          2m59s
+nginx-8494fb8c88-j6zvv   1/1     Running   0          2m59s
+nginx-8494fb8c88-k6xjt   1/1     Running   0          34m
+nginx-8494fb8c88-lqxwk   1/1     Running   0          2m59s
+nginx-8494fb8c88-mq85k   1/1     Running   0          2m59s
+nginx-8494fb8c88-mvmtn   1/1     Running   0          3m
+nginx-8494fb8c88-pw7fh   1/1     Running   0          2m59s
+nginx-8494fb8c88-qghsp   1/1     Running   0          34m
+nginx-8494fb8c88-scqt4   1/1     Running   0          2m59s
+nginx-8494fb8c88-t6snr   1/1     Running   0          2m59s
+nginx-8494fb8c88-t8j77   1/1     Running   0          2m59s
+nginx-8494fb8c88-vkb5h   1/1     Running   0          2m59s
+nginx-8494fb8c88-vkz2m   1/1     Running   0          26m
+nginx-8494fb8c88-xkcnv   1/1     Running   0          2m59s
+nginx-8494fb8c88-xn5sv   1/1     Running   0          2m59s
+nginx-8494fb8c88-xrkvc   1/1     Running   0          2m59s
+nginx-8494fb8c88-zbp4s   1/1     Running   0          2m59s
+
+now going  image: nginx:stable-otel to image: nginx  (new deployment going to latest version)
+
+kubectl apply -f 17-deployment.yaml
+deployment.apps/nginx configured
+
+you can see another screen new pods are created with in less time down time is neglible.
+
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-68fcf7b7bf-69r2c   1/1     Running   0          11s
+nginx-68fcf7b7bf-7f5jc   1/1     Running   0          11s
+nginx-68fcf7b7bf-7ll44   1/1     Running   0          7s
+nginx-68fcf7b7bf-8lvq8   1/1     Running   0          11s
+nginx-68fcf7b7bf-c85tf   1/1     Running   0          10s
+nginx-68fcf7b7bf-cpw8n   1/1     Running   0          9s
+nginx-68fcf7b7bf-fg7w4   1/1     Running   0          11s
+nginx-68fcf7b7bf-j69vp   1/1     Running   0          11s
+nginx-68fcf7b7bf-j9m8p   1/1     Running   0          11s
+nginx-68fcf7b7bf-jk6n5   1/1     Running   0          8s
+nginx-68fcf7b7bf-kpglg   1/1     Running   0          7s
+nginx-68fcf7b7bf-lkwlp   1/1     Running   0          8s
+nginx-68fcf7b7bf-mmccv   1/1     Running   0          10s
+nginx-68fcf7b7bf-pvs58   1/1     Running   0          11s
+nginx-68fcf7b7bf-ts5fp   1/1     Running   0          11s
+nginx-68fcf7b7bf-vknct   1/1     Running   0          11s
+nginx-68fcf7b7bf-xjjjx   1/1     Running   0          11s
+nginx-68fcf7b7bf-xl5dh   1/1     Running   0          9s
+nginx-68fcf7b7bf-xvz98   1/1     Running   0          8s
+nginx-68fcf7b7bf-zjhql   1/1     Running   0          7s
+
+expense-k8
+-----------
+in manifest file we will give image address and tell how kubernetes should run this image.
+
+git clone https://github.com/ishahulahmed/expense-k8.git
+cd expense-k8
+
+till now we were using, defualt namespace. but, for expense project first we need create a namespace
+alias ka="kubectly apply -f" (for faster typing)
+ka namespace.yaml
+kubectl get namespace
+
+cd mysql
+ka manifest.yaml
+kubectl get pods (it will show pods in default namespace)
+kubectl get pods -n expense (to get pods in expense namespace)
+NAME                   READY   STATUS    RESTARTS   AGE
+mysql-8b78cbcd-d95ck   1/1     Running   0          116s
+mysql-8b78cbcd-rhfrm   1/1     Running   0          116s
+
+kubens installation
+----------------------
+it is painful for us to everytime to type -n namespace. so, there is a tool called kubens we will install this to make it easier to us.
+https://github.com/ahmetb/kubectx
+sudo git clone https://github.com/ahmetb/kubectx /opt/kubectx
+sudo ln -s /opt/kubectx/kubens /usr/local/bin/kubens
+
+cd expese-k8/mysql
+kubens expense (with these command namespace is set as expesne automatically ne need to use -n namespace with every command)
+Context "i-051f3a7e92ac9b22d@expense-1.us-east-1.eksctl.io" modified.
+Active namespace is "expense".
+
+kubect get pods (now, by default you will get pods from expense namespace)
+NAME                   READY   STATUS    RESTARTS   AGE
+mysql-8b78cbcd-d95ck   1/1     Running   0          12m
+mysql-8b78cbcd-rhfrm   1/1     Running   0          12m
+
+
+alias kp="kubectl get pods"
+kp
+
+pod to pod communication can be established using service. here, since it is purely internal connection we are gonna use cluster Ip Service.
+ka manifest.yaml
+deployment.apps/mysql unchanged
+service/mysql created
+
+kubectl get svc
+NAME    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)    AGE
+mysql   ClusterIP   10.100.149.152   <none>        3306/TCP   34s
+
+kubectl exec -it mysql-8b78cbcd-d95ck -- bash
+
+bash-5.1# mysql -u root -pExpenseApp@1
+mysql> show databases;
++--------------------+
+| Database           |
++--------------------+
+| information_schema |
+| mysql              |
+| performance_schema |
+| sys                |
+| transactions       |
++--------------------+
+5 rows in set (0.00 sec)
+
+DB_HOST is a Configuration. we supply a configuration to an application using ConfigMap.
+
+cd backend
+ka manifest.yaml
+kp
+NAME                       READY   STATUS    RESTARTS   AGE
+backend-7b7fbcfd6d-8594z   1/1     Running   0          30s
+backend-7b7fbcfd6d-dbqwn   1/1     Running   0          30s
+mysql-8b78cbcd-d95ck       1/1     Running   0          43m
+mysql-8b78cbcd-rhfrm       1/1     Running   0          43m
+
+kubectl logs backend-7b7fbcfd6d-8594z
+{ "timestamp" : 1723037056, "msg" : "App Started on Port 8080" }
+
+kubectl exec -it backend-7b7fbcfd6d-8594z -- sh (sh since it is a alpine image)
+here we can't use curl http://localhost:/
+this backend application fully secured and immutable (since we have removed root access for this image)
+we can't we even download curl command over here
+in order to use curl command go to dockerfile after FROM instruction place RUN command to download curl overthere
+
+since, we don't have access to curl command. we are creating an debug image from that we will create a pod and see if everything is working is expected or not.
+this debug image created in expense-docker we will push this to dockerhub from there we will pull and test using debug.yaml file in our expense-k8 project.
+
+cd expense-docker/debug
+docker build -t ishahulahmed/debug:v1.0 .
+docker login
+docker push ishahulahmed/debug:v1.0
+
+cd expense-k8/
+kubectl apply -f debug.yaml
+kp
+kubectl exec -it debug -- bash
+[root@debug /]# telnet mysql 3306
+
+kp
+kubectl logs backend-7b7fbcfd6d-7257j
+{ "timestamp" : 1723105704, "msg" : "App Started on Port 8080" }
+
+backend will run only when mysql is running. we can debug connections in this way.
+
+for frontned, if you take nodeport then you are exposing your ip to public and you can't configure in r53. since your ip will keep on be changing. that's why we take load balancer. load balancer can be configured in route 53.
+
+cd frontend
+ka (kubectl apply -f manifest.yaml)
+kp (kubectl get pods)
+kubectl logs frontend-595489fcd8-nmtwr
+nginx: [emerg] bind() to 0.0.0.0:80 failed (13: Permission denied)
+
+ports 0 to 1023 (reserved by linux for system administration)
+System ports, also known as well-known ports, include ports 0 to 1023 and support commonly used service.
+
+in kubernetes environment, a normal pod with normal user without root access cannot claim port 80 from system. if you give it root access then it can claim. but, giving root access is not in our list (i.e best practise) 
+
+for security reasons we cannot claim port no 80 for nginx, we can claim port no 8080. To do that we need to change our configuration in frontend in our expense.conf 
+
+server {
+    listen       80; // here we make 8080
+    server_name  localhost;
+
+    proxy_http_version 1.1;
+
+we need to change here and then again we need to go for docker build. since in old image there will port no 80. so we need to build new image.
+best practise is configuration should be separate from application code. for every new change in configuration then you won't need to make changes in application code.
+
+we can keep nginx configuration in a conigmap
+nginx configuration path --> /etc/nginx/nginx.conf
+
+spec:
+      containers:
+      - name: frontend
+        image: ishahulahmed/frontend:v1.0
+        volumeMounts:
+        - name: nginx-conf
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+          readOnly: true
+        # envFrom:
+        # - configMapRef:
+        #     name: frontend
+      volumes:
+      - name: nginx-conf
+        configMap:
+          name: frontned
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+
+we are mounting a volume to make changes in configuration file. To change port to 8080 from 80 without building new docker image by using configmap.
+here we are doing this way because we don't want to go again for build process. if we go for build process then we need to whole big process again.
+
+ka (reapplying frontend manifest.yaml after making changes in configuration using configmap)
+kp
+kubectl exec -it frontend-7b0cc56fcb-7bn2h -- bash
+nginx@frontend-984b959d8-9rkhv:/$ cat /etc/nginx/nginx.conf
+
+kubectl get svc
+NAME       TYPE           CLUSTER-IP      EXTERNAL-IP                                                             PORT(S)        AGE
+backend    ClusterIP      10.100.111.61   <none>                                                                  8080/TCP       4h7m
+frontend   LoadBalancer   10.100.6.134    a755626d661974b0288a56aaa57bf539-57822294.us-east-1.elb.amazonaws.com   80:32715/TCP   2m32s
+mysql      ClusterIP      10.100.52.96    <none>                                                                  3306/TCP       4h11m
+
+a755626d661974b0288a56aaa57bf539-57822294.us-east-1.elb.amazonaws.com (url to access to expense app)
+in frontend EXTERNAL-IP load balancer is also created.
+here 32715 will not work becuase we have not allowed it in security group. in security group we should allow the ephemeral range. in kubernetes the ephemeral range decided by kubernetes is 30000 to 32767
+edit inbound rule in security-group Custom TCP 30000-32767 0.0.0.0/0
+load balancer --> Target Instance --> Health Checks
+
+load balancer is not part of eks cluster. so it will be ouside in diagram.
+
+if you need to debug (i.e troubleshooting ping or telnet or curl) then use debug pod
+in debug pod command telnet backend 8080 (this means backend is able to accept connection from port 8080)
+
+in frontend mainfiest.yaml near nginx.conf: |  (here pipe is used to inform this is not a single line but a multi line)
+
+Create Record in route 53
+Record Type --> CNAME - Routes traffic to another domain name and to some AWS resource
+Route traffic to --> Alias to Application and Classic Load Balancer
+Region --> US EAST (N.Virginia)
+a755626d661974b0288a56aaa57bf539-57822294.us-east-1.elb.amazonaws.com
+Routing Policy --> Simple Routing
+
+
+
+
+
+
+ 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

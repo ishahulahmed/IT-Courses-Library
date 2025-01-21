@@ -1,0 +1,320 @@
+What is DevOps?
+
+Book or Internet Answer --> DevOps = Development + Operations 
+
+What is computer?
+	Laptop/Desktop/Mobile/Server == Computing Device
+	
+	Processor
+	Ram
+	Storage
+	OS = Graphics + Kernel = Linux not windows (OS for Servers no Grpahics)
+	Why servers will not have graphics 
+
+Laptop/Desktop = Internet surfing + Development + Songs + movies = daily use
+Mobile = Apps + Internet + calling
+Server = to server the application
+
+more graphics = more memory + more power + more time
+
+Server = less memory + less power + less AC + less time + less cost (it should consume)
+Servers are more powerful to server many requests as they have more powerful Processor + Ram + Storage
+
+Client and Server
+-------------------
+in or internet world, everything is a computer
+
+we have a Lawyer , we are clients for him
+
+legal service, so we are clients
+
+who gives info = service provider
+who requests info = client
+
+client server not on the basis of size but on the basis of request and service
+
+laptop = client (diagram)
+server = facebook
+
+laptop = client (diagram)
+mobile = server
+
+mobile = client (diagram)
+laptop = server
+
+What is DevOps?
+-----------------
+
+before independence
+--------------------
+stakeholders --> who are part of system
+school = students, parents, teachers
+
+ideally 100% students should get pass
+
+only one final exam 50 years back
+
+student = he will not study from DAY-1
+teachers = teachers may not focus to complete syllabus from DAY-1
+parents = they always worried about their children from DAY-1
+
+clients == parents
+
+pass percentage was very less
+
+30 years back
+--------------------
+unit-I, unit-II, quarterly, unit-III, Half yearly, unit-IV, grand test and final test
+
+student = student may start study JUL 1st week
+teachers = teachers will start focus on lessons
+parents = they will wait until JUL 3rd week
+
+everybody will analyse results.
+
+100 --> 31 members got 31% (33% is needed to Pass), 69% (69% passed)
+
+unit-II --> 72%
+III --> 75%
+Final --> 95% (Here there are 7 Chances before final exam for the students to improve) (here parents need not worry till last exam like previous)
+
+15 year back
+-------------------
+daily slip tests
+
+DAY-1 we teach something
+DAY-2 we will conduct exam, max 5 questions
+
+students = they start studying from DAY-1
+teachers =  they start teaching from DAY-1
+parents = they can see results from DAY-1
+
+99.99%
+
+process improvement is the key for best results
+
+whatsapp --> 2011
+whatsapp --> 2024
+
+process improvement happened in whatsapp system...
+
+SDLC --> Software Development Lifecycle
+Requirements gathering --> what our customers want
+Analysis --> Analyse the requirements
+Design --> Start designing the project, customers will accept the designing
+Develop/implementation --> Implement the designing
+Deployment
+Test --> Test the design and everything
+Maintainance --> 
+
+ChatGPT
+---------
+The Software Development Life Cycle (SDLC) is a systematic process for planning, creating, testing, and deploying an information system. It ensures that the software meets quality standards and customer requirements. The SDLC typically involves several phases:
+
+1. Planning: Define the scope, objectives, and resources needed. Develop a project plan and schedule.
+
+2. Analysis: Gather and analyze requirements from stakeholders. Document what the system needs to do.
+
+3. Design: Create architectural and detailed designs for the system. This includes defining system components, user interfaces, and data structures.
+
+4. Development: Write and compile the code based on the design specifications. This phase involves actual coding and unit testing.
+
+5. Testing: Evaluate the system to find and fix bugs. Perform various tests such as integration testing, system testing, and user acceptance testing.
+
+6. Deployment: Release the software to the production environment where it can be used by end-users.
+
+7. Maintenance: Provide ongoing support and updates. Address any issues or enhancements needed post-deployment.
+
+Different methodologies can be applied to these phases, such as Waterfall, Agile, Scrum, or DevOps, depending on the project's needs and goals.
+
+Waterfall --> water is falling to down
+Construction is over --> but testing is failed, output is not as per the design
+Demolish the house, start again
+
+50% construction is over --> now customer wants some change in design
+
+disadvantages
+---------------
+it can't accomodate new requirements
+final product output is only at the end
+
+IT--> Waterfall
+----------------
+students = developers
+parents = clients
+teachers = testing team
+
+developers, testers, clients
+
+2 or 3 years (Project Duration)
+
+developers = no development from DAY-1
+testers = no testing from DAY-1
+clients = worried
+
+after 1 year they start serious development
+
+few employees will resign, new employees will come = KT
+
+started development
+
+testing what to do? reading 100's of pages from client requirement and planning test cases...
+
+development is completed in DEV env, developers tesed it is good
+
+testing environment --> under pressure. raise more and more defects
+
+started fights between developers and testers
+
+100 defects --> 80 defects valid, 20 defects invalid
+
+lot of emails between developers and testers..involving team leaders.. involving managers .. account head
+
+clients == Ferrari (Client Expenctation) == Maruthi 800 (Actually Developed)
+
+main disadvantage in watefall --> you cannot insert new requirements. you have to wait until the final product is delivered.
+
+Agile
+--------
+start with small things --> keep short goals
+divide the system into small modules
+signup and login
+product catalogue
+cart
+payment
+delivery
+
+sprints and modules
+
+Sprint-1 may be for 1 month
+---------------------------
+signup and login
+
+developers = they start from DAY-1 = 1.5 week for development
+testers = 1.5 week for testing
+1 week for deployment
+
+1.5 weeks = developers concentration is more
+testers = focus is less during 1.5 of weeks of development because product is not ready and vice versa
+
+10 defects --> 8 valid, 2 invalid
+
+again same fight
+
+90% completed, 10% pending
+
+Sprint-2 product catalogue
+---------------------------
+10% backlog (complete 10% backlog of sprint 1 along with sprint 2)
+
+
+Sprint-final
+---------------------------
+ferrari == Honda City
+
+
+2016 --> too much load on servers (once jio came in 2016)
+----------------------------------------------------------
+daily slip test = daily testing
+
+Sprint-1 = process improvement
+-------------------------------
+DAY-1 he developed a code for
+
+Enter your First Name
+
+DAY-1 ask testing team to test this small code
+
+positive and negative (test cases)
+
+1. enter the name in 20 char (positive)
+2. enter the numbers in the name field (negative)
+
+10 test cases --> 
+
+DAY-2 ==> no chance of raising invalid defects. 3 valid defects.
+Developers and testers will communicate
+
+
+if the code developed is built and tested on the same day then you can call it as DevOps ==> We use tools to make it fast and reliable
+
+Businesses will aim for
+1. Faster releases to the market
+2. Less defects
+
+Increasing this speed and accuracy is DevOps Process
+
+amazon vs flipkart
+-------------------
+every 11.2sec they do one release, fully automated with less defects (amazon is winner)
+
+manual testing --> automated testing
+build and deployment --> 
+
+deployment --> automate
+------------
+1.0 --> running
+deployment means
+download the new version
+stop the sytem
+remove old version
+install new version
+start the system
+
+DevOps and cloud two wheels for a bike
+--------------------------------------
+if you say i will use only DevOps in on premise then you will not get 100% Automation.
+if you say i am in cloud but i will not use DevOps again you will not get 100% Automation.
+For Complete Automation DevOps and Cloud is So much Important. 
+
+Newly Starting Companies are not looking rent a room, install servers, provide power, keep a security guard and put Air Conditioners. No one are looking to do that. Because that is more costly for them and that is not there responsibility.
+
+if you starting a restaurant business then restaurant is your main focus. putting servers in a room that is additional responsibilty. even if you lose some money we should focus on our responsibility that is the achievement of cloud.
+
+What is DevOps?
+---------------
+DevOps is a process improvement. What DevOps say is whatever the code is developed by the developer that should be built and test on the same day.
+
+What is improving here using DevOps?
+------------------------------------
+We improve communication between the communication between the developers and testers their efficieny becoming more. There are no fights between the teams. Product delivery is 100% accurate. These are the advantages we got through DevOps.
+
+Server
+---------
+Windows vs Linux --> Linux
+Super computers also use linux
+
+everything is command here --> everything is text
+
+Linux can run for years without restart (if a server restarts site will down and customers cannot access your site)
+less power
+less bandwidth
+less memory
+100% free
+fast
+
+We will start learning Linux
+
+AWS account create --> free trail
+500-1000rs per month
+if more bill --> ask AWS they will refund
+1 Lakh --> please refund
+
+who owns the debit card
+use the same name on the card, for email, firstname and lastname also
+and address also same as bank debit card address
+and check online usage is enabled or not for debit card
+
+1 year (free trial) --> not everything is free
+
+8GB RAM is mandatory for this course
+
+Linux --> vim editor, cut and awk, user management, package management
+Resume is not 1 day task it is continous task
+
+core values of the concepts will never change learn concepts not tools
+now jenkis few years some other so learn concept not tool
+
+
+
+

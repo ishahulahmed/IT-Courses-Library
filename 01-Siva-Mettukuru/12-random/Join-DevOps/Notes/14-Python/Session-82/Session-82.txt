@@ -1,0 +1,14 @@
+- Conditional Statements
+     - if - else blocks
+     - if (mandatory)
+     - else (optional)
+     - But you should have only one else statement
+     - elif - else if 
+- Exception Handling: try(Mandatory), except(Mandatory), else(optional), finally(optional) 
+- Loops
+     - For: Continue, break, pass
+     - While
+- Functions
+- Lambda
+
+

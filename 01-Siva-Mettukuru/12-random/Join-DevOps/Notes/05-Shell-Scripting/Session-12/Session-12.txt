@@ -1,0 +1,4 @@
+Session Overview
+-----------------
+a) Idempotency
+b) Expense project completed

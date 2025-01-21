@@ -1,0 +1,150 @@
+2016 December
+80 batches
+joindevops.com
+AWS Startup and activate
+Microsoft, Google, Skill India and Startup India
+
+Technology in regional languages
+meeting project expectations
+Live sessions
+QA and community support
+	error title, description
+	what steps we taken care
+	others will reply
+30min dedicated QA sessions
+Weekly Quizzes --> focus, interest and engagement
+	1, 2 and 3 --> Amazon gift cards
+Interview Questions --> Thursday evening
+
+Planning
+---------
+Technical Group discussions
+Interactive interview discussions
+
+Roboshop --> Ecommerce IBM based project
+12 microservices including RDBMS, NoSQL, Cache and Queue
+NodeJS, Python, Java and Go languages
+
+Mini Project, Main Project
+
+DAY-1 Project based learning
+
+Linux --> 5 days
+Project Discussion
+	Manual Project implementation
+	Shell Script --> Automate Project build and deployment
+	Disadvantages of shell
+	Ansible --> addressing the disadvantages of shell
+	Project automation with Ansible
+	IaaC --> automation of infra
+	Terraform --> Project Infra into multi Environments --> AWS
+	Jenkins CICD --> Project deployment into VM with autoscaling
+					 sonarqube, nexus, build and deployment, Git
+					 Webhooks
+	Need for containerisation
+	Docker
+	Project again with docker
+	Docker disadvantages
+	Kubernetes --> 95%
+	Monitoring
+		Prometheus and grafana
+		ELK
+	python scripting --> Cloud automation
+	
+Variables
+Data types
+functions
+loops 
+conditions
+
+recordings are for lifetime access
+max 2hr to upload sessions
+07:15-08:45 AM IST
+MON-FRI
+
+TUE, WED, THUR, SAT and SUN
+
+1st week --> TUE, WED, THUR
+
+End of the session, we can handle questions
+
+Placement Assistance
+---------------------
+Quizzes
+Interview Questions
+Resume preparation
+Mock Interviews
+Job alrets and references
+Lifetime QA sessions
+3 years of min experience
+
+Certification --> if you have budget you can do
+No DevOps certification --> outside certifications are bogus
+
+AWS solutions architect associate
+CKA -> Kubernetes admin
+Terraform
+
+exp*3 --> exp*4 = avg package
+
+Honesty and sincerity --> no need to answer 100%
+
+freshers --> no responsibilites, empty mind (they can learn anything)
+
+daily 1hr -> apply for all positions
+
+You are already working in IT
+------------------------------
+Developer
+tester
+weblogic, websphere, middleware etc
+L2 support
+Sharepoint
+Networking
+Backup and storage
+
+upgrading technology is mandatory
+
+Support Engineer -->
+
+Assistant system engineer trainee
+assistant system engineer
+system engineer
+consultant
+
+Developer
+Support engineer
+
+HR
+	HR discusion
+	technical interviews
+BGV process
+	form fill --> same position as in payslip
+	name
+	company
+	start date and end date
+	salary
+	position
+	
+NON-IT & Career gap, College students
+---------------------------------------
+90%
+time
+practice and focus
+
+NON-IT to IT
+-------------
+https://www.youtube.com/watch?v=F_5Ek2GqX04
+
+frontend, backend, DB -->  expenses
+roboshop --> ecommerce
+catalogue, cart, user, shipping, payment, delivery, web
+
+DevOps is a Emerging Technology our company asked us to upgrade to DevOps so i went for DevOps --> Question (She is working on JBOSS lost her job due to DevOps)
+
+Malluru Mamtha --> HR Payroll & Operations (3 Years) --> Concentrix (Work Day Tool - 1 Year) --> Resigned --> Now DevOps
+
+You need to be aware of Devolpment Structure not Devlopment cause development is done by developers.
+No, one will tell you to learn Java and dot Net at Once. is that possible. in the same way multi clouds not possible. first learn one then after getting command on one cloud then go to next cloud.
+
+ATS --> Application Tracking System

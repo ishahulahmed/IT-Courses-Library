@@ -1,0 +1,348 @@
+recap
+---------
+public key vs private key
+generated keys
+created security group
+launched EC2
+connected
+practiced few commands
+
+rm daws-78s.pem daws-78s.pub (removing more than one file at a time)
+
+copy
+----------
+select the file | ctrl+c + ctrl+v
+
+cp <source-file> <destination-path>
+
+/etc --> passwd (there is a file in /etc named paasswd)
+
+cp /etc/passwd . (in linx . means current working directory)
+cp /etc/passwd /home/ec2-user/
+cp /etc/passwd users (copying passwd file from /etc as users in current working directory)
+cp /etc/passwd devops/users (copying passwd file to devops folder with name as users)
+
+
+cut
+-----------
+select the file | ctrl+x + ctrl+v
+
+mv <source-file> <destination-path>
+
+mv sample devops/ (moving sample file to devops folder)
+
+mkdir cloud
+cd cloud
+touch example
+cd ..
+
+cp cloud devops (Trying to copy cloud folder to devops this will not copy any files)
+cp: omitting directory ‘cloud’
+
+cp -r cloud devops (These will copy recursively entire cloud folder and its files into devops folder)
+
+mv cloud devops (moves cloud folder into devops folder)
+
+mv users user-list (Renaming)
+(here moving the technically inthe same directory there is  no user-list. so, here we are renamis users as user-list)
+
+grep
+-----------
+used to search for a word in file
+
+grep <word-to-find> <which-file>
+
+grep ec2-user user-list
+ec2-user:x:1000:1000:EC2 Default User:/home/ec2-user:/bin/bash
+
+grep ec2-User user-list (no Output Since Linux is case sensitive and there is no word with U capital in ec2-User)
+
+grep -i ec2-User user-list (here we are telling with -i be case insensitive)
+ec2-user:x:1000:1000:EC2 Default User:/home/ec2-user:/bin/bash
+
+Piping
+-------
+1st Pipe Output will be Second Pipe Input (see diagram)
+| -> pipe symbol
+
+cat user-list | grep ec2-user (here file name not given but output of 1st command acted as input of second command)
+ec2-user:x:1000:1000:EC2 Default User:/home/ec2-user:/bin/bash
+
+curl and wget
+---------------
+in windows --> example git bash download --> go to git bash site --> click on downloads --> click on git bash download link
+in linux we use wget
+
+wget -> web get 
+wget <file-url>
+https://github.com/git-for-windows/git/releases/download/v2.44.0.windows.1/Git-2.44.0-64-bit.exe
+
+wget is used to download files and folder or softwares into linux server
+
+curl is used to get the text directly on to the terminal
+
+curl <file-url>
+curl git-hub-file-raw-url (use git hub raw url if use direct file ure it will get along with contents it html, css and js structure)
+curl https://raw.githubusercontent.com/daws-78s/notes/main/session-02.txt | grep ls
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  3824  100  3824    0     0  42446      0 --:--:-- --:--:-- --:--:-- 42966
+ls --> list subdirectories
+ls -l --> long format
+ls -lr --> reverse alphabetical order
+ls -lt --> latest files
+ls -ltr --> starts from old files
+ls -la --> all files and directory including hidden
+ls --> read
+
+wget https://raw.githubusercontent.com/daws-78s/notes/main/session-02.txt (This will download the file)
+
+
+cut and awk
+------------
+https://raw.githubusercontent.com/daws-78s/notes/main/session-02.txt
+
+Siva kumar reddy = siva, kumar, reddy [dividing using space]
+space is called as delimiter
+
+https: <empty> raw.githubusercontent.com daws-78s notes main session-02.txt (if divide the above url using delimiter /)
+
+cut command is used to get the fragments of a text using delimiter
+
+cut -d "/" -f1 (-d is delimiter, f1 is first fragment)
+
+echo https://raw.githubusercontent.com/daws-78s/notes/main/session-02.txt | cut -d '/' -f1
+https:
+
+
+awk command
+-----------
+awk command is used text processing..generally used to divide the text in column format
+
+awk -F "/" '{print $1F}'
+
+awk -F "/" '{print $NF}'  [here NF means nth fragment that is last fragment we don't need to calculate for last fragment]
+
+echo https://raw.githubusercontent.com/daws-78s/notes/main/session-02.txt |awk -F "/" '{print $NF}'
+session-02.txt
+
+sudo useradd shahul
+cat /etc/passwd
+root:x:0:0:root:/root:/bin/bash
+bin:x:1:1:bin:/bin:/sbin/nologin
+daemon:x:2:2:daemon:/sbin:/sbin/nologin
+adm:x:3:4:adm:/var/adm:/sbin/nologin
+lp:x:4:7:lp:/var/spool/lpd:/sbin/nologin
+sync:x:5:0:sync:/sbin:/bin/sync
+shutdown:x:6:0:shutdown:/sbin:/sbin/shutdown
+halt:x:7:0:halt:/sbin:/sbin/halt
+mail:x:8:12:mail:/var/spool/mail:/sbin/nologin
+operator:x:11:0:operator:/root:/sbin/nologin
+games:x:12:100:games:/usr/games:/sbin/nologin
+ftp:x:14:50:FTP User:/var/ftp:/sbin/nologin
+nobody:x:65534:65534:Kernel Overflow User:/:/sbin/nologin
+systemd-coredump:x:999:997:systemd Core Dumper:/:/sbin/nologin
+dbus:x:81:81:System message bus:/:/sbin/nologin
+tss:x:59:59:Account used for TPM access:/:/sbin/nologin
+systemd-oom:x:995:995:systemd Userspace OOM Killer:/:/usr/sbin/nologin
+polkitd:x:994:993:User for polkitd:/:/sbin/nologin
+sssd:x:993:992:User for sssd:/:/sbin/nologin
+sshd:x:74:74:Privilege-separated SSH:/usr/share/empty.sshd:/sbin/nologin
+chrony:x:992:991:chrony system user:/var/lib/chrony:/sbin/nologin
+maintuser:x:1000:1000:Local Maintenance User:/home/maintuser:/bin/bash
+ec2-user:x:1001:1001::/home/ec2-user:/bin/bash
+shahul:x:1002:1002::/home/shahul:/bin/bash
+
+
+cat /etc/passwd | awk -F ":" '{print $1F}'
+root
+bin
+daemon
+adm
+lp
+sync
+shutdown
+halt
+mail
+operator
+games
+ftp
+nobody
+systemd-coredump
+dbus
+tss
+systemd-oom
+polkitd
+sssd
+sshd
+chrony
+maintuser
+ec2-user
+shahul
+
+here AWK command is printing 1 Fragment based on the delimiter in every row and printing in column format when there are multiple lines in a file. You can print any column based on the delimter {print $NF} then it will print last column. 
+AWK advantages is it can get the nth fragment and it can divide the text into column format. still there are lot more we can do with awk but that is not necessary this enough for now.
+
+head and tail
+--------------
+head --> gives first 10lines of the file
+head user-list
+head -n 2 user-list (to get first 2 lines)
+
+tail --> last 10 lines of the file
+tail user-list
+tail -n 2 user-list (to get last 2 lines) (you can give number as per your wish)
+
+Editor
+------------
+vi and vim
+
+vim advanced version of vi
+
+Vim editor has 3 modes
+a) ESC Mode
+b) Colon Mode
+c) Insert Mode
+
+vim <file-name>
+
+when you first open a file with vim <file-name> it will be in ESC Mode. 
+If you Want to go to Colon Mode From ESC press Shift + : (colon)
+If You want to go back then again press ESC
+If you want to go to Insert Mode from ESC Mode then press i 
+If you want to go back to ESC Mode from Insert Mode then again press ESC
+But, you cannot go to colon mode to insert mode directly.
+if you want to go to colon mode to insert mode first esc then you are in ESC mode then press i then you are in insert mode.
+
+
+Colon/Command mode
+-------------------
+:q --> Quit, to come out of the file 
+(if you not written anything in the file just went in saw and come out) (if you write something then use quit then it will through error either to force  
+ quit or save and quite) (E37: No write since last change (add ! to override) )
+:q! --> force quit, dont save the changes, quit the file
+:wq --> write and quit
+:set nu 
+(type set nu and enter you can see numbers for each line once after pressing enter it will come to ESC Mode. it will not save the file with numbers. it is just for us to see numbering.)
+:set nonu (removes numbers once after removing it go back to ESC Mode)
+
+sudo cp /etc/ssh/sshd_config config (copying a big file for practise purpose this file requires sudo access)
+sudo chown ec2-user:ec2-user config (changing ownership to ec2-user in order to make normal user access this file. we will chown next class)
+vim config
+
+:/<word-to-find> --> search the word from top
+:/bin (press n to go to next word in the file you can see on the right bottom on which line and charchater the word is starting)
+
+:?<word-to-find> --> search the word from bottom
+:?bin (press n to go to next word)
+
+:noh --> remove focus i.e nohighlight (the words you searched will keep on highlighted to remove that highlighting)
+:%d --> delete everything
+
+:s/word/new-word (here s means substitue) 
+(this replace the word only in the line where your cursor is not other lines. if you are trying to replace a word which is not in the line where you cursor it will not work)
+:s/bin/BIN --> replace in the line where your cursor is (here s means substitute) 
+
+:line-number (cursor will go to starting of that line)
+:23 (goes to 23 line)
+
+:%s/bin/BIN --> replace in every line, but only first occurence 
+(it will replace in every line but if there are more than one word with same name then only first occurence)
+
+:<line-no>s/<word-to-find>/<replace-word>/g --> first occurence in that line, if you want global(all occurences in that line) just give g
+:6s/bin/BIN/g (with g at the end it will replace all bin words to BIN without g only first occurence)
+
+:%s/<word-to-find>/<replace-word>/g --> all occurences in the file
+:%s/options/OPTIONS/g (all occurences in the file will be changed)
+
+:%s/<word-to-find>/<replace-word>/gi --> all occurences in the file (i means here case insensitive when finding a word)
+:%s/OpTioNs/OPTIONS/gi (all occurences will be changed and the case is insensitive when finding the word)
+
+:wq vs :wq!
+-------------
+In Vim, both :wq and :wq! are commands used to save changes and exit the editor, but there's a key difference between them:
+
+1. :wq: This command stands for "write and quit." It saves the changes to the file and then exits Vim. If the file is writable and there are no issues, this command will work smoothly. If the file has been modified in a way that could prevent writing (e.g., if it's read-only), Vim will prompt an error.
+
+2. :wq!: The ! after wq forces the write and quit operation. This command will attempt to save the changes and exit Vim even if the file is read-only or if there are other issues that might prevent writing normally. Essentially, :wq! overrides file write restrictions.
+
+In summary:
+- Use :wq for standard save and exit.
+- Use :wq! to force save and exit, overriding any write protection on the file.
+
+Esc Mode
+----------
+shift+g --> go to bottom
+gg --> go to top
+u --> undo (after changing words)
+yy --> copy (copy the line on which your cursor is)
+p --> paste (it will paste the line below your copied line or below where your cursor is)
+10p --> 10 times copy (will paste 10 times below where your cursor is) (press 10 and p)
+dd --> will cut the line where your cursor is
+
+% means everything
+:%d --> will delete everything
+
+vim config-1 (if file is there it will open. else it will say new when opening a file) (i.e you can write a new file)
+view user-list (it will open file in read only format in vime editor) 
+
+Permissions
+-------------
+R - 4
+W - 2
+X - 1
+
+-rw-rw-r-- 
+
+
+-	rw-		 rw-		r--
+    <user/owner>       <group> 	       <others>
+	u	         g 		 o
+
+sivakumar created a file in a folder, He is the owner. His team devops is a group. anyone else they become others.
+
+chmod --> change permissions (chmod change modifications)
+
+chmod o+x <file-name> (here others we are giving executing permission)
+-rw------x 1 ec2-user ec2-user 3666 Aug 30 07:58 config
+
+chmod o+r config
+-rw----r-- 1 ec2-user ec2-user 3666 Aug 30 07:58 config
+
+chmod g+rw config
+-rw-rw---- 1 ec2-user ec2-user 3666 Aug 30 07:58 config
+
+chmod o-x config
+-rw------- 1 ec2-user ec2-user 3666 Aug 30 07:58 config
+
+chmod ugo+rwx config
+-rwxrwxrwx 1 ec2-user ec2-user 3666 Aug 30 07:58 config
+
+read - 4
+write - 2
+execute - 1
+
+user --> full access
+group --> RW
+Others -- X
+
+chmod 761 <file-name>
+
+chmod 761 config
+-rwxrw---x 1 ec2-user ec2-user 3666 Aug 30 07:58 config
+
+chmod 777 config
+-rwxrwxrwx 1 ec2-user ec2-user 3666 Aug 30 07:58 config
+
+
+755
+user --> full
+group --> rx
+others --> rx
+
+chmod 755 config
+-rwxr-xr-x 1 ec2-user ec2-user 3666 Aug 30 07:58 config
+
+if same file two people are accessing at a time if one person writes and saves the file. The other person needs refresh and write or reopen the file then write and save his work.
+
+I feel we can user :wq! force save.

@@ -1,0 +1,621 @@
+Recap
+----------
+
+pwd, cd, clear, history
+ls
+cat
+cp mv
+cut awk
+curl wget
+vim
+chmod
+grep
+head
+tail
+touch
+
+command-name <options> <inputs>
+-l, --list (either use -l or --list) (if sigle charachter as option then use one hypen. if more than one charachter as option then use double hypen)
+-a, --all  (either use -a or --all) (if sigle charachter as option use one hypen. if more than one charachter as option then use double hypen)
+here -l, --list, -a, --all are options
+
+cp command will not work without inputs
+for few commands inputs is mandatory for few not mandatory like ls command.
+
+User management
+--------------------
+if there is a server and multiple users need to access it then  
+we need to create multiple user accounts
+employees will join teams and exit teams that's a continous process. instead of creating permissions separately for each user.
+we create groups/teams we add users to the group...
+only administrative team will have root access to server others will login as normal users.
+
+useradd <user-name>
+
+useradd ramesh
+useradd: Permission denied. (normal user cannot add another user they should have admin access i.e root access)
+
+sudo su (su is super-user) (if you use sudo su then it will be in folder where used sudo su command)
+if you were in /tmp folder then if you use sudo su then it will land in the same folder
+pwd
+/home/ec2-user or /tmp wherever you were there at the time of usings
+with root access if you type cd and enter it's default location is /root
+
+
+sudo su - (if you use sudo su - then it's landing location will be /root and when you exit this mode it will go back to the folder where you were)
+pwd
+/root
+
+
+/root --> landing location of root user. (if you use sudo su -)
+sudo su -
+
+with root access you can create user
+useradd ramesh
+
+id <user-name> --> userid, user-name
+
+id ramesh (to check whether a user is added or not(=)
+uid=1002(ramesh) gid=1002(ramesh) groups=1002(ramesh)
+
+
+in linux, when you create user, by default a group will be created with same user-name
+
+/etc/passwd --> will have users info
+cat /etc/passwd --> will show you all the users list in that specific server.
+
+getent group --> will have group info (here group only not group name) (no need cat just type getend group)
+
+i have created a user ramesh but to give his password
+
+passwd <user-name>
+passwd ramesh
+it will prompt for new password and re-type password then it will update it successfully
+passwd ramesh
+passwd: Only root can specify a user name. (root access need to update or add password)
+username should not be in password it is a recommendation not a rule.
+
+here, we have added a user and given a password to him. how can this user login?
+till now we have used key based authentication, pub and private key
+
+if you want to change this behaviour 
+/etc/ssh/sshd_config --> SSH configuration (this is SSH configuration file)
+
+vim /etc/ssh/sshd_config
+PasswordAuthentication yes (no users can login to server using password)
+
+sshd -t (To check if there is any error in sshd configuration file)
+(use this command from any where sshd -t not only in /etc/ssh/) (if no error it will not show anything)
+
+if i wrote wantedly fdfh like something in sshd_config file then type sshd -t you will get error
+/etc/ssh/sshd_confg: line 63: Bad configuration option: fdfhPasswordAuthentication
+/etc/ssh/sshd_confg: terminating, 1 bad configuration options
+
+if you made any changes in sshd file then check once with sshd -t command before logging out to the server. if there is bad configuration you cannot login again due to bad configuration. if it is only password based no other alternative.
+
+if you made any changes then you need to restart that particular service. here sshd service.
+systemctl restart sshd
+
+now admin will inform ramesh. his user is created and send him ip-address and username and password. 
+now ramesh will take gitbash since it not key based. he will login with password
+ssh ramesh@3.89.28.201
+ramesh@3.89.28.201's password: input-password
+your successfully login.
+[ ramesh@ip-172-31-37-108 ~ ]$ pwd
+/home/ramesh
+
+he is in his home folder /home/ramesh
+
+id ramesh
+uid=1002(ramesh) gid=1002(ramesh) groups=1002(ramesh)
+
+linux will have two groups
+gid=1002(ramesh) --> primary group
+groups=1002(ramesh) --> secondary or supplementary group
+
+i want to create a group devops
+groupadd devops
+
+getent group (you can see list of groups)
+
+I want to add ramesh to devops group..
+
+usermod -g devops ramesh -> adding ramesh to devops group as primary (-g is for primary group)
+
+id ramesh
+uid=1002(ramesh) gid=1003(devops) groups=1003(devops)
+
+
+linux should have only 1 primary group, can have multiple secondary groups
+
+for example i want to give ramesh temporarily access to testing team, he has to do some testing related activities.
+there will be a group called testing...
+
+groupadd testing (here we are create a group called testing. since it is not there in our server)
+
+usermod -aG testing ramesh (-a for append. G for Secondary group) (adding ramesh to testing group temporarily)
+
+id ramesh
+uid=1002(ramesh) gid=1003(devops) groups=1003(devops),1004(testing) (here testing also added as secondary group)
+
+now, ramesh had done his testing related activities
+gpasswd -d ramesh testing --> deleting ramesh user from testing group..
+
+id ramesh
+uid=1002(ramesh) gid=1003(devops) groups=1003(devops) (testing group removed)
+
+
+you can't remove primary group of linux user, you can only change/modify
+
+when you create a user his username only be his primary-group and secondary-group
+when you change primary group his secondary group will also be same.
+
+usermod -g testing ramesh
+
+id ramesh
+uid=1002(ramesh) gid=1004(testing) groups=1004(testing)
+
+now, if you try to remove ramesh from testing secondary group
+
+gpasswd -d ramesh testing
+Removing user ramesh from group testing
+gpasswd: user 'ramesh' is not a member of 'testing'
+
+id ramesh
+uid=1002(ramesh) gid=1004(testing) groups=1004(testing)
+
+until testing is there a primary group you cannot remove secondary group testing as well. you can add other secondary groups and remove them but not this secondary group which is also a primary.
+
+CRUD Operation
+---------------
+create user --> useradd 
+read user --> id or cat /etc/passwd
+modify user --> usermod -g or -aG <group-name> <user-name>
+delete user
+
+when employee leaving organisation
+----------------------------------
+delete the user
+
+Process to delete a user
+--------------------------
+1. remove user from group
+2. delete the user
+
+ramesh --> testing (ramesh primary group we have changed to testing)
+userdel ramesh --> ramesh will be removed? what about ramesh group created by default.
+
+1. remove all his secondary groups
+2. change primary group to his own group.
+3. then delete the user
+
+userdel ramesh
+userdel: group ramesh not removed because it is not the primary group of user ramesh.
+
+getent group --> you will see ramesh group so you have delete the group manaully
+
+groupdel ramesh (to delete group ramesh)
+
+Proper Way to delete a User let us take another example
+--------------------------------------------------------
+Raheem Joined our Organisation
+------------------------------
+useradd raheem
+id raheem
+uid=1002(raheem) gid=1002(raheem) groups=1002(raheem)
+usermod -g devops raheem
+id raheem
+uid=1002(raheem) gid=1003(devops) groups=1003(devops)
+usermod -aG testing raheem
+id raheem
+uid=1002(raheem) gid=1003(devops) groups=1003(devops) ,1004(testing)
+
+Raheem leaving our organisation
+--------------------------------
+gpasswd -d raheem testing
+id raheem
+uid=1002(raheem) gid=1003(devops) groups=1003(devops)
+usermod -g raheem raheem
+id raheem
+uid=1002(raheem) gid=1002(raheem) groups=1002(raheem)
+userdel raheem
+
+now, there is no user raheem and group raheem
+
+Till now, we have seen user password authentication. what if a new user have to login with his private key?
+------------------------------------------------------------------------------------------------------------
+now i am going to create robert user with key based authentication. 
+
+as i said every user will have their own public and private key.
+
+when robert join the company he will create his own pubic and private key.
+ssh-keygen -t rsa -b 4096 -f robert
+
+robert will send his public key to the adminstrative team. through email.
+
+
+robert public given to administrative team
+-------------------------------------------
+ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCUAgROf/YdViSjcvCk5kKWjWaq7wNReWuZpR8qo1QbOqduON+MnHEZ6ygYgF5K5QhXjp6FXetEU+54MStMvUaw6/C7mDhN3t6aQH2+J1lT3ezhekrUOG0+y7u1m3QYZ96rUSUSDiabXq/Vjorx44ggHRuWxZzKqb2Kpj4zH/B0qLQ2LoiklILzf/peCJqNCSq0dLMEFX+JXtH3aAoKlm0k0IBA4zMTF82+UOfgT/+zHPfzBPoo7k4AvaX2KJ5+k27pwqrtMEOvX0w+GguIQ78Ukj5YWW8DVsHzaf5HsLCeZ9W3CB+fTvDnKbchpnUpHDlQnaekgNqMv4B485TUyxjgOmwq2Fw8/ZvEZUe0J9kY1wphfqlv4QtxMCPsI85soi+QIRiPEAxKL6fomSXHMQIDSBl2ddOpnApC9Wwpe5jfhIFG4jtB/q2aHm1IDbrAW6o9S6Y+mqtJ5eCkLDpQIBIODpBzws/hmiciCy42kQFgJ/cgnRtr868EkK4xJec/98p2L0E9z6qZgjyrPkeAlDedAOKFUwjyjneUNDt+f6U3dBl+oeRtAEQOSuozkN+DGzB49KN55fXf6GIeajFM6973SPtXISyyRonHpPptl8dPWoWvIKMIK3TnssHkrPKXsGdDC0NRF2d9Wt7KcD6TbJHsgov+4RMenF/aRr6GUwxFaw== shahu@Shahuls-Laptop
+
+now administrative team will add this key to linux server.
+useradd robert --> we have i.e admin team created user robert which means home folder /home/robert is also created.
+cd /home/robert/
+ls -la
+mkdir .ssh (in user home folder there should be .ssh folder for ssh authentication purpose)
+ls -la
+drwxr-xr-x  2 root   root     6 Sep  2 12:40 .ssh (here permission should only be to robert not even to his group)
+chmod -R 700 .ssh
+ls -la
+drwx------  2 root   root     6 Sep  2 12:40 .ssh (here we have given permissions only to user. no access to groups and others)
+cd .ssh
+touch authorized_keys (in this authorized_keys we will place robert's public key without any mistakes or new line) (this is purely linux admin activity)
+vim authorized_keys (paste your public key and save)
+chmod 400 authorized_keys (do not give more than rw i.e 600 even to user)
+
+R 4
+W 2 
+X 1
+
+here, we took public-key from robert. went into his home-folder create a folder named .ssh. we created a file named authorized_keys and pasted public-key content in it.
+
+now, everything is ready permission have be set correctly. but still robert cannot log-in using ssh because ownership of .ssh folder is showing root.
+cd /home/robert
+ls -la
+drwx------  2 root   root    29 Sep  2 12:46 .ssh
+
+permission on a file or folder is different from ownership.
+command to change ownership
+chown <user>:<group>
+chown -R robert:robert .ssh (-R for recursive to include all files inside the folder)
+
+chown -R rober:robert .ssh
+
+ls -la
+drwx------  2 robert robert  29 Sep  2 12:46 .ssh 
+
+now, this folder only robert has access no other has access. inside this folder
+cd .ssh
+ls -la
+drwx------ 2 robert robert  29 Sep  2 12:46 .
+drwx------ 3 robert robert  74 Sep  2 12:40 ..
+-r-------- 1 robert robert 746 Sep  2 12:46 authorized_keys
+
+inside, this folder also only robert has access that too only read access he cannot even change the key. if lost his private key. he will send request to administrator. 
+
+let, us see now whether robert is able to login or not.
+go to the path were robert private key is located then 
+ssh -i robert robert@3.89.28.201
+
+robert, is now able to sucessfully login.
+
+in projects there might be key based authentication or password based authentication. generally there will be azure active directory with centralised login using SSO (Single Sign-On).
+When we join a company for our laptop they will give a username and password. so, in company whatever you open the same will be your username and password. with that username and password they will integrate linux-servers. so, there is some centralised management that is called IAM. [not aws iam here]
+
+here, for robert i want to give sudo access
+admin will with root access in server
+vim /etc/sudoers
+## Same thing without a password
+# %wheel   ALL=(ALL) NOPASSWD: ALL
+robert ALL=(ALL) NOPASSWD: ALL
+
+so, in this file whose names are there they will get sudo access.
+
+let, us see whether robert is able to use root access
+ssh -i robert robert@3.89.28.201
+sudo useradd sachin [yes, robert is able to add another user using sudo access]
+id sachin
+uid=1003(sachin) gid=1005(sachin) groups=1005(sachin)
+
+But, in the interviews they will ask /etc/sudoers is a crucial file. do you need to go every time in to that file to give access.
+what we will do use we will add user to a group called wheel
+for example i am removing 
+robert ALL=(ALL) NOPASSWD: ALL 
+this from /etc/sudoers file
+
+successfully, removed robert from sudoers file. now, without touching sudoers file i can add robert to wheel group
+usermod -aG wheel robert
+id robert
+uid=1002(robert) gid=1002(robert) groups=1002(robert),10(wheel)
+
+1. either add in sudoers file
+2. or add to wheel group
+
+adding to wheel group is safe and easy.
+
+here, still adding to wheel group he will not get sudo access because we need to uncomment in sudoers file
+# %wheel  ALL=(ALL)   NOPASSWD: ALL
+
+after uncommenting the above line and commenting %wheel   ALL=(ALL)   ALL this line
+login to robert now try for sudo access
+ssh -i robert robert@3.89.28.201
+sudo useradd sivakumar [now it is working]
+id sivakumar
+uid=1004(sivakumar) gid=1006(sivakumar) groups=1006(sivakumar)
+
+another interview question where linux stores the password?
+cat /etc/shadow
+the password is encryptyed you cannot read that password
+for example 
+useradd ramesh
+passwd ramesh [give ramesh150 as password]
+
+now, go to 
+cat /etc/shadow
+ramesh:$6$aCR6r.i9cyQLq2r9$x2U3cIaQMhkIylGxKzN0dfUANmQL0u7l05Zo7pI./O/bebkrKhC8ZjrEDMd7MRBjB44aMBw8.k0W3c90A6P1e0:19969:0:99999:7:::
+(this is the encrypted password)
+
+where linux stores 
+users --> /etc/passwd
+passwed --> /etc/shadow
+
+this is enough for us.
+
+package management
+----------------------
+in linux, if want to install a software we call it as package management generally.
+
+windows --> Software
+linux --> Package
+linux server --> go to some location (url) --> fetch the package --> install it.
+yum --> we use yum package manager to install packages in rhel 
+
+there are some games which won't run without java being installed or some websites which won't work without JavaScript beign enabled. in the same way
+in linux, one package may be depends on another package. olden days we have rpm
+rpm --> red hat package manager
+
+rpm we have to manually get the dependencies, install them and finally main package..
+(dependencies are the packages on which main packages is dependent)
+
+yum --> automatic dependencies management
+
+yum install git -y (-y for auto approve)
+(if i use this command first yum will install all dependencies of git i.e all packages or softwares on which git is depending then it will install git)
+
+for example
+yum install git 
+Dependencies resolved.
+============================================================================================================================================================
+ Package                                  Architecture             Version                                Repository                                    Size
+============================================================================================================================================================
+Installing:
+ git                                      x86_64                   2.43.5-1.el9_4                         rhel-9-appstream-rhui-rpms                    54 k
+Installing dependencies:
+ emacs-filesystem                         noarch                   1:27.2-9.el9                           rhel-9-appstream-rhui-rpms                   9.6 k
+ git-core                                 x86_64                   2.43.5-1.el9_4                         rhel-9-appstream-rhui-rpms                   4.4 M
+ git-core-doc                             noarch                   2.43.5-1.el9_4                         rhel-9-appstream-rhui-rpms                   2.9 M
+ perl-AutoLoader                          noarch                   5.74-481.el9                           rhel-9-appstream-rhui-rpms                    21 k
+ perl-B                                   x86_64                   1.80-481.el9                           rhel-9-appstream-rhui-rpms                   184 k
+ perl-Carp                                noarch                   1.50-460.el9                           rhel-9-appstream-rhui-rpms                    31 k
+ perl-Class-Struct                        noarch                   0.66-481.el9                           rhel-9-appstream-rhui-rpms                    22 k
+ perl-Data-Dumper                         x86_64                   2.174-462.el9                          rhel-9-appstream-rhui-rpms                    59 k
+ 
+Transaction Summary
+============================================================================================================================================================
+Install  67 Packages [I removed few dependency lines]
+
+how did yum know to fetch from which url?
+cd /etc/yum.repos.d
+ls -l
+-rw-r--r--  1 root root 1883 Sep  2 09:49 docker-ce.repo
+-rw-r--r--. 1 root root 1142 Aug 17  2023 epel-cisco-openh264.repo
+-rw-r--r--. 1 root root 1552 Aug 17  2023 epel-testing.repo
+-rw-r--r--. 1 root root 1453 Aug 17  2023 epel.repo
+-rw-r--r--  1 root root 4723 Jun  7 11:44 redhat-rhui-beta.repo.disabled
+-rw-r--r--  1 root root  467 Sep  2 07:36 redhat-rhui-client-config.repo
+-rw-r--r--  1 root root 6088 Jun  7 11:44 redhat-rhui-eus.repo.disabled
+-rw-r--r--  1 root root 5896 Sep  2 07:36 redhat-rhui.repo
+-rw-r--r--. 1 root root 5792 Feb 22  2024 redhat-rhui.repo.rpmsave
+
+cat docker-ce.repo
+you can see url's set into variables in that file.
+baseurl=https://download.docker.com/linux/rhel/$releasever/$basearch/stable (for each repo there are url's i just gave one)
+
+/etc/yum.repos.d here url's will be there. tommorow if we want to install jenkins or anyother package. first if we add url's here then yum can install those packages. yum can go and fetch those packages automatically.
+
+here we need to add all those repos
+/etc/yum.repos.d --> location of package URL's
+
+yum install git -y (-y is for auto approve)
+yum remove git -y 
+
+In Ubuntu OS it may be apt install git -y
+in redhat yum newly dnf also came.
+
+yum list installed --> installed packages
+yum list installed | wc -l (wc is for word count -l is for lines) (run commnad as super user)
+538 --> output
+yum list all --> all packages for this linux server
+yum list all | wc -l (wc is for word count -l is for lines) (run commnad as super user)
+29758 --> output
+available = all - installed
+yum list available
+yum list available | wc -l (wc is for word count -l is for lines) (run commnad as super user)
+29215 --> output
+
+yum search mysql --> it will list all the packages related to mysql (if we don't know exact package name)
+cat /etc/*release --> to know the distribution of your server
+
+cat /proc/cpuinfo --> gives cpu information of your system
+cat /proc/meminfo --> gives memory inforation of your system
+cd /etc/
+ls -l *release
+lrwxrwxrwx. 1 root root 21 Sep 27  2023 os-release -> ../usr/lib/os-release
+-rw-r--r--. 1 root root 44 Sep 27  2023 redhat-release
+lrwxrwxrwx. 1 root root 14 Sep 27  2023 system-release -> redhat-release
+cat /etc/os-release --> cat /etc/*release (both can be used to know the distribution of your server)
+yum update --> if there is any update version in packages it will show packages which has updated versions.
+yum update package-name --> it will update the package to latest version
+
+
+EPEL, which stands for Extra Packages for Enterprise Linux, is a repository of additional packages for Enterprise Linux distributions such as Red Hat Enterprise Linux (RHEL), CentOS, and Oracle Linux. Managed by the Fedora Project, EPEL provides a wide range of packages that are not included in the default repositories of these distributions.
+
+EPEL (Extra Packages for Enterprise Linux) repository offers a variety of popular packages including development tools like htop and git, as well as server utilities such as nginx and postgresql. It provides additional software that complements the core RHEL/CentOS distributions, enhancing functionality and performance.
+
+In AWS Linux there is yum repos apart from yum repos AWS people created their own repos it's name is amazon extras. so our server will connect to this extras repos also. [here siva is aws linux 2 image for his instance]
+
+in AWS Linux Instance
+yum install nginx -y
+Loaded plugins: extras_suggestions, langpacks, priorities, update-motd
+amzn2-core
+No package nginx available.
+Error: Nothing to do
+
+nginx is available in Amazon Linux Extra topic "nginx1"
+
+To use, run
+# sudo amazon-linux-extras install nginx1
+
+Learn more at
+https://aws.amazon.com/amazon-linux-2/faqs/#Amazon_Linux_Extras
+
+instead of yum we amazon-linux-extras that's the difference
+amazon-linux-extras intally nginx1 -y (with super-user)
+
+yum update Vs yum upgrade
+--------------------------
+'yum update' upgrades existing packages to the latest versions without removing or installing new packages, while 'yum upgrade' not only updates packages but also handles obsoleted packages and may install or remove packages as needed.
+
+Which to use:
+- Use 'yum update' for a straightforward update of existing packages, avoiding potential changes in package dependencies or removals.
+- Use 'yum upgrade' when you want a more comprehensive update that also manages package obsoletions and dependencies, which may involve installing or 
+  removing packages.
+
+OS Updates is done by administration team. when updating OS we have to make our applications down.
+
+service management
+---------------------
+0-65,535 ports = 65,536 (These many ports for a computer)
+
+SSH 22 (SSH will run in port 22)
+
+ssh -i <private-key> user@ip
+
+request will go to this IP address, server will check is there any service running on port 22. then it will forward request to ssh
+
+ssh servie will check credentials, if success login
+
+ssh is a service which running in port no 22. we can access only when the service is running.
+
+For example:
+
+Delhi --> Mumbai (sent a post from delh to mumbai)
+
+if flat number not provided, letter will stuck at security 
+
+in the same way if port number is there then only it will reach to the service.
+
+diagram:
+request --> ip-address --> port no --> service
+inside server there is a ssh service running on port no 22
+
+service means it is running for infinite time. if it stops means then it cannot serve the request.
+
+how to manage this service?
+amazon-linux-extras install nginx1 -y how to run this installed nginx package.
+
+systemctl start nginx --> it means nginx is running
+systemctl status nginx --> to check whether it is running or not.
+this nginx is a http server. http port no 80. https port no 443.
+http://3.89.28.201:80/ 
+request goint --> to this Ip-address --> there is a service running on port no 80 --> service name is nginx.
+in broswer i gave ip-address:port-number 3.89.28.201:80
+in browser i gave facebook.com it is https it's port number is 443 by default request is going to port 443.
+
+systemctl stop nginx --> To stop service. if stop then you cannot connect.
+request goes to ip-address --> but the service is not running on that port.
+
+if you installed any package it will create a folder in /etc like nginx /etc/nginx/
+to change nginx port no
+cd /etc/nginx/
+ls -l
+vim nginx.conf
+
+ server {
+        listen       80;
+        listen       [::]:80;
+        server_name  _;
+        root         /usr/share/nginx/html;
+
+        # Load configuration files for the default server block.
+        include /etc/nginx/default.d/*.conf;
+
+        error_page 404 /404.html;
+        location = /404.html {
+        }
+
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+        }
+    }
+
+if someone start this service it listens on port no 80.
+
+now, i want to list it on port no 8080.
+ server {
+        listen       8080;
+        listen       [::]:8080;
+        server_name  _;
+        root         /usr/share/nginx/html;
+
+        # Load configuration files for the default server block.
+        include /etc/nginx/default.d/*.conf;
+
+        error_page 404 /404.html;
+        location = /404.html {
+        }
+
+        error_page 500 502 503 504 /50x.html;
+        location = /50x.html {
+        }
+    }
+
+after changes
+systemctl start nginx
+http://3.89.28.201:8080/ --> port no provide as 8080 then it will work
+
+systemctl restart nginx --> to restart service
+systemctl enable nginx --> when we shutdown and start our laptop automatically few software will run those are enabled softwares.
+
+enable --> if a service is enabled, even after restarting the server that service automatically start...
+
+systemctl enable nginx
+Created symlink /etc/systemd/system/multi-user.target.wants/nginx.service → /usr/lib/systemd/system/nginx.service.
+
+systemctl disable nginx --> if you don't want the service to run automatically when server restarts.
+Removed "/etc/systemd/system/multi-user.target.wants/nginx.service".
+
+process management, network management, linux folder structure (in next session)
+
+Jenkins Insallation to see how yum.repos.d work
+-------------------------------------------------
+sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat/jenkins.repo   --> created jenkis.repo in yum.repos.d
+sudo rpm --import https://pkg.jenkins.io/redhat/jenkins.io-2023.key
+sudo yum upgrade
+# Add required dependencies for the jenkins package
+sudo yum install fontconfig java-17-openjdk
+sudo yum install jenkins
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+sudo systemctl status jenkins
+
+
+DNS
+facebook.com --> 11.45.67.89
+
+https://facebook.com:567 (if not defualt port)
+users will remember facebook.com not port number that is why we use default port number.
+
+movie we will download
+vlc media software we will download and install
+install = download + install
+
+for 5 years experience certificates
+aws architect associate
+cka
+if possible terraform.
+
+a person with 7 to 8 years java experience he has poor performance rating in project works in CapGemini. 
+siva said first 4 years put as java remain aws devops.
+

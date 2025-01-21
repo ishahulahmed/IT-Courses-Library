@@ -1,0 +1,365 @@
+git reset
+git revert
+
+mostly these commands we should not use. But, there are situations when we you should use them. we will discuss about them today.
+
+git reset vs git revert --> undo the changes done
+
+you, should always pull the changes before you push.
+cd /d/devops/repos/git-dosa
+git checkout main
+git pull origin main
+
+Best Practise
+---------------
+before you raise PR, check main branch moved forward or not?
+git checkout main
+git pull origin main
+
+pull before push --> recommended way (even before pushing your branch commits pull changes in main)
+
+ChatGPT
+-------
+No, the changes in the main branch will not automatically reflect in your dosa branch after you switch back to it. When you create a branch, it takes a snapshot of the current state of the repository at that point in time.
+
+To incorporate the changes from main into your dosa branch, you'll need to merge or rebase. Here’s how you can do it:
+
+1. Merge:
+   bash
+   git checkout dosa
+   git merge main
+   
+   This will bring the changes from main into your dosa branch, creating a new merge commit.
+
+2. Rebase (if you prefer a linear history):
+   bash
+   git checkout dosa
+   git rebase main
+   
+   This will replay your dosa branch commits on top of the latest commits from main.
+
+Choose the method that best fits your workflow!!
+
+Concept
+--------
+git checkout -b reset-revert
+Switched to a new branch 'reset-revert'
+
+our, busniess grown we thought to have new item 99 dosa. so we made samples to try it in our own shop
+git add .; git commit -m "paneer curry" [not pushed to remote did locally only at shop still not launched]
+git add .; git commit -m "added cheese" [doing locally only for our employees and owners to taste]
+git add .; git commit -m "added butter" [doing locally]
+
+git log --oneline
+a304aa4 (HEAD -> reset-revert) added butter
+583273b added cheese
+e4ca200 paneer curry
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+Suddenly, owner said that this all not good remove. Till know the changes we did how to bring back to original is nothing but reset and revert.
+
+Till now we have made changes locally only not commited to remote
+
+Reset
+-------
+reset will undo the changes, it is destructive operation. it will change the history and commit id. [commit ids will change if try to reset and then commit again same changes]
+
+git reset (3 options)
+1. soft --> reset the commit, but keep the changes in staging area
+2. mixed --> reset the commit, but will not keep the changes in staging area
+3. hard --> reset the commit, changes will be reset from workspace, staging area and commit.
+
+1. soft --> it will remove the commits, but keep the changes in staging area
+2. mixed --> it will remove the commit, changes will also be removed from staging area but you can see them in the workspace now it is your wish what to do.
+3. hard --> remove the changes from commit, staging and workspace.
+
+
+index/staging/ temp area -> git add (we will add to staging area by git add command) (everything same index or staging or temp)
+
+soft --> it will remove the commits, but keep the changes in staging area
+
+git add .; git commmit -m "" (these are the two operations we performed)
+
+git reset --soft HEAD~1 (with these only commit will be removed and it will be in staging area) (HEAD~1 means reset one commit from HEAD)
+(HEAD means current branch which it is pointing to)
+
+git log --oneline
+583273b (HEAD -> reset-revert) added cheese
+e4ca200 paneer curry
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+Commit has gone but changes still will be there in staging area. 
+
+git add .; git commit -m "added butter and cheese"
+git log --oneline
+b875700 (HEAD -> reset-revert) added butter and cheese
+583273b added cheese
+e4ca200 paneer curry
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+git reset HEAD~1 --> changes will reset from local commit and staging area
+
+git reset HEAD~1
+Unstaged changes after reset:
+M       menu.txt
+
+git status [changes have been removed from staging area also]
+On branch reset-revert
+Changes not staged for commit:
+  (use "git add <file>..." to update what will be committed)
+  (use "git restore <file>..." to discard changes in working directory)
+        modified:   menu.txt
+
+no changes added to commit (use "git add" and/or "git commit -a")
+
+git log --oneline
+583273b (HEAD -> reset-revert) added cheese
+e4ca200 paneer curry
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+changes will be in workspace (vscode) but not in staging area.
+
+mixed --> it will remove the commit, changes will also be removed from staging area but you can see them in the workspace now it is your wish what to do.
+
+git reset --hard HEAD~1 --> remove the changes from commit, staging and workspace.
+
+git reset --hard HEAD~2 [removes two commits from the branch to which HEAD is pointing]
+
+git reset --hard HEAD~2
+HEAD is now at 1f46400 Merge pull request #4 from ishahulahmed/karam-egg-dosa
+
+git log --oneline
+1f46400 (HEAD -> reset-revert, origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+you can see even in workspace also changes were removed.
+
+git add .; git commit -m "added dalda"
+git add .; git commit -m "added ghee"
+
+git log --oneline
+58ce1dc (HEAD -> reset-revert) added ghee
+f7ce2cb added dalda
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+git reset --soft f7ce2cb 
+- you're telling Git to move the current branch's HEAD pointer to the commit identified by f7ce2cb
+- The --soft option means that all changes made in the commits after f7ce2cb will be kept in the staging area (index). This means you can easily recommit them if needed.
+- In short, it's a way to undo commits while keeping the changes available for further modification or re-commit.
+
+git log --oneline
+f7ce2cb (HEAD -> reset-revert) added dalda
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+git add .; git commit -m "removed dalda"
+git log --oneline
+8368e5c (HEAD -> reset-revert) removed dalda
+f7ce2cb added dalda
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+git reset --soft HEAD~1
+git log --oneline
+f7ce2cb (HEAD -> reset-revert) added dalda
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+again i thought commit removed dalda
+git add .; git commit -m "removed dalda"
+
+git log --oneline
+db5ea3e (HEAD -> reset-revert) removed dalda
+f7ce2cb added dalda
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+here, i have reset and again i though to commit removed dalda you can see commit id's changed for removed dalda if tried to commit again from the previous one.
+
+so reset is destructive operation. it will change the history and commit id.
+
+git reset 1f46400
+git log --oneline
+1f46400 (HEAD -> reset-revert, origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+Revert
+-------
+changes are pushed to remote, others pulled your changes already. [raised PR merged changes others pulled those changes]
+reset is not recommended if changes are already pushed to remote. [if i myself made changes in commit ids by reseting and pushed it already every one pulled  your code so the commit id's will differ for everyone if you try to reset and push again]
+
+revert is safe if changes are pushed to remote already. revert will not change the history.
+mistakes should not be removed from history, it should only be corrected.
+
+reset will be have as if mistake is not done. but, revert will keep the record of mistake and make changes upon it. since commit id's have not been changed if others will pull changes will be automatically covered for others.
+
+we will revert changes slowly one by one.
+
+git add .; git commit -m "added kaju paste"
+git add .; git commit -m "added dates"
+git add .; git commit -m "added apples"
+
+git log --oneline
+0fefddf (HEAD -> reset-revert) added apples
+48bcf79 added dates
+63f55d9 added kaju paste
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+
+git push origin reset-revert
+
+now, things went into remote others took our code and working on it. if we want to undo changes then commit id's will get change and complete history will change if we use reset. 
+so, slowly remove changes one by one
+
+git revert HEAD~1
+
+you will get merge conflict error go to vs code and remove apples from it.
+
+git add .; git commit -m "removed apples"
+
+git log --oneline
+26391c4 (HEAD -> reset-revert) removed apples
+0fefddf added apples
+48bcf79 added dates
+63f55d9 added kaju paste
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+generally, if we did a mistake whether country or parliament. trying to remove that mistake from history is right or wrong? - it's wrong thing.
+
+git revert HEAD~1
+
+you will get merge conflict error go to vs code and remove dates from it.
+
+git add .; git commit -m "removed dates"
+
+git log --oneline
+dc36d31 (HEAD -> reset-revert) removed dates
+26391c4 removed apples
+0fefddf added apples
+48bcf79 added dates
+63f55d9 added kaju paste
+1f46400 (origin/main, main) Merge pull request #4 from ishahulahmed/karam-egg-dosa
+298a621 (origin/karam-egg-dosa) remove neyyi
+4322c8a added oil
+d2c90bb added 2 eggs
+3f45f5d added extra karam
+8572644 added neyyi
+14f5301 Merge pull request #1 from ishahulahmed/karam-dosa
+2052f25 (origin/karam-dosa, karam-dosa) added oil to karam dosa
+467de17 added karam to dosa
+587b8b9 started first with plain dosa
+
+git revert HEAD~1
+
+

@@ -1,0 +1,67 @@
+1. PV --> representing physical storage
+2. PVC --> Claiming the storage
+3. SC --> automatic creation of volume and PV based on the claim from PVC
+
+Statefulset Features
+---------------------
+1. stateful applications like DB
+2. PV and PVC are mandatory for statefulset
+3. Orderly provisioning of pods happens.
+4. pods keep their identity like name.
+5. We must create headless service.
+6. every pod should have its own storage. so PV and PVC should be created for every pod. 
+   (implementing point 6 is tough and we need to lot of mysql [since we are using mysql] configurations. doing that is waste of time and there is no  
+    advantage in doing that. Our intentions is too see how StatefulSet will work. Clustering (MySQL Master and Nodes) Implementation is  Database team  
+    responsibility completely. we cannot do that it is so much time taking. if we go in that direction then our real intention learning devops will be 
+    gone)
+
+Actually, mysql is plain and base image it doesnot have by default clustering capability as see in previous class diagram (i.e each node getting aware of CUD operations performed on other nodes). There is company called percona (https://www.percona.com/) they will target mysql and try to add clustering capability to mysql. percona will have this solution. They will do lot of configuration to achieve this clustering capability.
+
+search --> percona mysql in kubernetes --> https://docs.percona.com/percona-operator-for-mysql/ps/kubernetes.html (Install Percona Server for MySQL on Kubernetes) 
+My Strong Suggestion is don't go for this because this is not our responsibility.
+
+We will implement as per diagram but it will not get clustering capability. Our intention is to make StatefulSet is working.
+
+Mostly 99.999% Databases like RDBMS, MongoDB and any Database containing customer information we will not place it in kubernetes. We place Second Level of Database applications like alerts, monitoring applications. We did this only for interview perspective. in real time no one will place databases in kubernetes.
+
+
+
+
+1. Install EBS drivers
+2. Check EC2 Role permissions
+3. create storage class
+4. create statefulset
+
+mysql-mysql-0
+
+pvc-name-statefulset-name-0
+
+if deployment, nslookup of service gives, service IP address
+if statefulset, nslookup of headless service gives us IP address of all pods.
+
+
+HELM
+--------------
+1. building image
+2. running image
+
+only few values frequently change in manifest files.
+
+1. kubernetes package manager
+2. templatise manifest files
+
+1. Chart.yaml
+
+install hellm chart
+
+helm install <preferred-name> . --> . represents Chart.yaml in current directory
+
+helm uninstall nginx
+
+helm upgrade nginx .
+
+helm status
+
+helm history
+
+9:00

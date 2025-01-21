@@ -1,0 +1,3 @@
+Session Overview
+-----------------
+a) Roboshop Manual creation

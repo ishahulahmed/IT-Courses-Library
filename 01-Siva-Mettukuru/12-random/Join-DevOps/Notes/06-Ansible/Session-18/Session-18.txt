@@ -1,0 +1,5 @@
+Session Overview
+-----------------
+a) Shell vs command module
+b) Backend server configuration
+c) Frontend server configuration

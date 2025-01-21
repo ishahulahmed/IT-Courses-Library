@@ -1,0 +1,18 @@
+Session Overview
+-----------------
+1) Prometheus
+   a) CPU utilisation
+   b) RAM
+   c) Disk Usage
+   d) network 
+2) ELK
+   a) Elasticsearch
+   b) Kibana
+   c) Filebeat
+   d) Logstash
+3) 4 golden signals
+   a) Latency
+   b) Errors
+   c) Traffic
+
+

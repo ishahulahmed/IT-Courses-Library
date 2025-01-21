@@ -1,0 +1,543 @@
+Session Overview
+----------------
+i) Monitoring
+ii) Prometheus
+    a) Time series database
+    b) Node exporter
+
+He Asked anyone working in monitoring?
+a) Prudvi 
+--> He Said we use it for cloud watch monitoring.
+--> What you do in the cloud watch? he said they will have EMR (Amazon Elastic Map Reduce) Jobs. Data Collect, Sending Data to Datadog, Post Calls or Some Other issues they will log them separetly and send it to cloud watch.
+--> Any Application Monitoring? He said multiple EMR Jobs related to big data.
+--> Any Application Monitoring, End Points, Logs and Latency? He said only upto Parcer or parcel something not clear.
+
+b) Sainath Vellaga
+--> he said they will use itrs tool in that they will see process monitoring, log related monitoring, errors, they will define some exception and monitor them. 
+--> if there are any scripts they will configure and monitor them.
+--> predefined works if any are repetitive.
+--> in weblogic server they have some texts automating them using scripts. itrs banking related tool they are using that tool.
+
+Monitoring is a never ending topic just like how linux is never ending. no matter how much you do there will be a mistake somewhere.
+
+c) Shaik Shareef [Siva Old Student from London]
+--> he setup ELK Stack. They will get logs durign testing related to 5g.
+--> that logfiles will be integrated with different vendors. 
+--> in telecommunications we have CU (Control Unit) and DU analysing logs related to them we get latency, throughput this is all 5g related stuff.
+--> for analysing them we setup ELK Stack. He said that he has some idea about prometheus and grafana for application monitoring he was using them.
+
+d) Pavan
+--> in his previous organisation they were using datadog. which service is connecting to which service.
+--> error logs, how many requests came, latency and other things calcuating by datadog.
+--> he used to migrate services in datadog to google cloud.
+
+it may be any business web application, desktop, data pipelines or big data due to errors in applications at different stages application will get down time. 
+There will be checks for application according to those checks we will monitor the application periodically. if it is very important application we will monitor it every one minute. priority less means every 5 minutes depends on our business we will set monitoring priority.
+
+for monitoring we will take google sre monitoring they will give some good guidelines
+he searched for google sre monitoring
+https://sre.google/workbook/monitoring/ --> ultimately, we can refer this monitoring
+
+Monitoring is of two types
+Black box monitoring
+White box monitoring
+
+Black box monitoring
+----------------------
+For example if we want to monitor facebook. we can monitor facebook by looking whether facebook is up and running continously. 
+whether facebook.com is opening or not. we are able to login or not. whether giving error if given correct username and password. we can monitor this way this is known as black box monitoring. we don't know what is happening inside facebook. i.e facebook internal implementation we don't know but still we can do the monitoring.
+
+end user can test application --> facebook up or not, login functionality working or not, facebook post working or not.
+
+White box monitoring
+-----------------------
+application internal monitoring --> only facebook employees can do this
+
+internal monitoring means
+server cpu, ram and memory
+number of requests
+latency --> time to respond to our requests
+logs monitoring
+
+search for google sre --> "Four Golden Signal" for monitoring systems --> https://sre.google/sre-book/monitoring-distributed-systems/
+The Four Golden Signals
+i) latency
+ii) traffic
+iii) Saturation (memory)
+iv) errors
+
+https://sre.google/sre-book/monitoring-distributed-systems/
+
+if we monitor these four our application will be in good stage.
+
+we achieve the above four using prometheus and grafana.
+
+Let us first discuss prometheus.
+
+prometheus
+---------------
+CCTV [monitoring know to us]
+----------------------------
+1. CC cameras
+2. centralised monitors
+
+cc cameras are capturing videos, centralised system is pulling those videos
+
+Two types of videos are here
+1. Live/Instant video
+2. Historical
+
+so, if we install CC Cameras. Centralised system will pull those videos continously. we can monitor those videos anytime instantly or historically. 
+here CC cameras is a agent. centralised monitors is a centralised system.
+
+centralised system will always have agents through that agents it will pull continously.
+
+just like LIC our village will have LIC agents they will create new policies or collect money for existing policies from us and send it centralised system.
+This is pull concept.
+centralised system will ask to agents always how many policies came and how much money collected all these information it will collect through agents.
+
+centralised and agent system
+
+CC camers --> agents
+Centralised Software --> Pull data from cameras continously.
+
+In the same way our servers also. here there will a prometheus server. servers which you want to monitor are called nodes.
+our centralised system (prometheus) will be connected to these nodes.
+
+pull vs push
+---------------
+pull model will have agents, push model will not have agents
+
+if pull model where should we install agents. in nodes we should install agents. 
+like LIC is in delhi. LIC agents will be every village.
+
+if we want to monitor something we need install an agent that agent is node-exporter.
+node exporter agent will be running in nodes. our centralised server to connect to nodes software we have is node explorer.
+
+our promethus will connect to node explorer and pull data from it.
+
+time series database
+---------------------
+whenever you are collecting some data what is the main field you should capture? data and time i.e timestamp
+timestamp
+
+our expenses 
+29-JUL ₹500
+30-JUL ₹600
+31-JUL ₹499
+
+quarterly, yearly, weekly
+
+from this we can capture quarterly expenditure, yearly expenditure, weekly expenditure and many more.
+which quarter spent more, which week spent more etc.
+
+any technology if you are capturing some data if you capture timestamp for that particular data you can make any number of queries.
+so, time series database means capture anything but attach at what time you captured it that is called time series database.
+
+main component in prometheus is time series database.
+prometheus will capture everthing from agents and store it in time series database. 
+
+There will be a http server (nothing but browser) this will access time series database and show the information in database to user.
+
+if user connects to prometheus server throug http this https will show information in time series database.
+
+In the same way there will be Alert Manager and Service Discovery in Prometheus Server we will discuss about it. This is the architecture of prometheus.
+
+main basic thing is connecting prometheus server to nodes pulling data from nodes and placing it in time series database. if you have data there you can do anything other things like Alert Manager, Service Discovery is not a big matter.
+
+Installing Prometheus
+---------------------
+EC2 --> Launch Instance --> Name-prometheus --> t3.medium (because will install grafana also) --> Launch Instance
+
+search prometheus --> go to https://prometheus.io/ --> Download --> prometheus-2.54.1.linux-amd64.tar.gz (copy link address)
+https://github.com/prometheus/prometheus/releases/download/v2.54.1/prometheus-2.54.1.linux-amd64.tar.gz
+
+sudo su
+cd /opt/ (option softwares)
+wget https://github.com/prometheus/prometheus/releases/download/v2.54.1/prometheus-2.54.1.linux-amd64.tar.gz
+ls -l
+tar -xf prometheus-2.54.1.linux-amd64.tar.gz (untarring tar)
+ls -l
+mv prometheus-2.54.1.linux-amd64 prometheus (renaming)
+cd prometheus
+ls -l
+-rwxr-xr-x 1 ec2-user 127 140096826 Aug 27 10:58 prometheus     --> this is script
+-rw-r--r-- 1 ec2-user 127       934 Aug 27 11:11 prometheus.yml --> this is configuration file
+
+if we run script it will run. but, instead of running this way we can run through systemctl.
+
+search prometheus systemd service file --> Nikolai Janakiev --> https://janakiev.com/blog/prometheus-setup-systemd/ --> Copy Create Systemd Unit File
+siva made few changes to it.
+
+[Unit]
+Description=Prometheus Server
+Documentation=https://prometheus.io/docs/introduction/overview/
+After=network-online.target
+
+[Service]
+Restart=on-failure
+ExecStart=/opt/prometheus/prometheus --config.file=/opt/prometheus/prometheus.yml 
+
+[Install]
+WantedBy=multi-user.target
+
+
+/opt/prometheus/prometheus --> this is the script we want to run
+--config.file=/opt/prometheus/prometheus.yml --> configuration file for this script
+
+vim /etc/systemd/system/prometheus.service
+systemctl start prometheus
+systemctl status prometheus
+systemctl enable prometheus
+netstat -lntp [9090 is the port]
+
+in browser place instance public-ip:9090 you will get promethues page like jenkins we did.
+
+Working model of Prometheus
+----------------------------
+prometheus is very simple and very powerful it can not only monitor outside resources it can monitor itself too.
+
+up --> To check whether server is up or not. if the result is 1 then it is up else if 0 means it is down. here, prometheus is monitoring itself.
+up[1m] --> It will check historical data of 1 minute. since scrape interval in configuration file is 15s you will get 4 intervals data as output.
+
+cd /opt/prometheus/
+cat prometheus.yml
+
+configuration-file
+------------------
+# my global config
+global:
+  scrape_interval: 15s # Set the scrape interval to every 15 seconds. Default is every 1 minute.
+  evaluation_interval: 15s # Evaluate rules every 15 seconds. The default is every 1 minute.
+  # scrape_timeout is set to the global default (10s).
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load rules once and periodically evaluate them according to the global 'evaluation_interval'.
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# A scrape configuration containing exactly one endpoint to scrape:
+# Here it's Prometheus itself.
+scrape_configs:
+  # The job name is added as a label `job=<job_name>` to any timeseries scraped from this config.
+  - job_name: "prometheus"
+
+    # metrics_path defaults to '/metrics'
+    # scheme defaults to 'http'.
+
+    static_configs:
+      - targets: ["localhost:9090"]
+
+
+scrape_interval: 15s --> it is telling to scape the metrix every 15 seconds
+scrape_configs: --> This tells whom i should scrape
+targets: ["localhost:9090"] --> this means it will scrape local host
+
+scrape means for here it will for every 15s sever in geeki dani lo vunna metrics ni capture chestadhi
+
+up[1m]
+up{instance="localhost:9090", job="prometheus"}             1 @1727947983.351
+                                                            1 @1727947998.351
+                                                            1 @1727948013.349
+                                                            1 @1727948028.352
+
+up[2m] --> you will get 8 responses
+up --> Instant Data. 
+up[time-interval] --> Historical Data
+
+there will be so many metrics like up in prometheus
+prometheus_http_requests_total --> for our server how many requests came to that specific end point.
+
+prometheus_http_requests_total{code="200", handler="/-/quit", instance="localhost:9090", job="prometheus"}                              0
+prometheus_http_requests_total{code="200", handler="/-/ready", instance="localhost:9090", job="prometheus"}                             3
+prometheus_http_requests_total{code="200", handler="/api/v1/label/:name/values", instance="localhost:9090", job="prometheus"}           4
+prometheus_http_requests_total{code="200", handler="/metrics", instance="localhost:9090", job="prometheus"}                             678
+
+In Our Server for /metrics api-endpoint we got 678 requests.
+
+like this data will be there immediately we will not understand everything but slowly we will understand there are lot of metrics in prometheus.
+
+You see your configuration (prometheus.yaml) in Status --> Configuration
+
+This is how prometheus monitors its own server.
+up --> Execute --> you can see graph also --> in grah 1h means last 1 hour --> you can see green line on 1 which means it is up if it is down then it will show 0.
+
+you can set the graph last 1h, 2h, 30m, 15m etc. it will show uponly in our case our server is up only.
+
+Now, we will see how to create Nodes and see metrics from that nodes.
+
+Node Creations and their metrics
+---------------------------------
+Create Instance --> name - node-1 --> t3.micro --> Launch Instance.
+our aim is to fetch metrix from node-1 and configuring them.
+
+In agent based architectures first we need to install node exporter then we need to connect the server and agent.
+
+Go to https://prometheus.io/ --> Download --> node_exporter --> node_exporter-1.8.2.linux-amd64.tar.gz (copy this link address)
+https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz
+
+sudo su
+cd /opt/
+wget https://github.com/prometheus/node_exporter/releases/download/v1.8.2/node_exporter-1.8.2.linux-amd64.tar.gz
+
+tar -xf node_exporter-1.8.2.linux-amd64.tar.gz 
+mv node_exporter-1.8.2.linux-amd64.tar.gz node_exporter
+cd node_exporter
+ls -l
+total 20040
+-rw-r--r-- 1 ec2-user 1002    11357 Jul 14 11:57 LICENSE
+-rw-r--r-- 1 ec2-user 1002      463 Jul 14 11:57 NOTICE
+-rwxr-xr-x 1 ec2-user 1002 20500541 Jul 14 11:54 node_exporter (if you run this it will collect all the data from server and provide to prometheus)
+
+node exporter will collect all the data from the server and provide to prometheus when it will ask or it will collect data when prometheus ask for it.
+
+we should run it inorder to node explorer to be active
+
+[Unit]
+Description=Node Exporter
+After=network-online.target
+
+[Service]
+Restart=on-failure
+ExecStart=/opt/node_exporter/node_exporter 
+
+[Install]
+WantedBy=multi-user.target
+
+There is no configuration file for this.
+
+vim /etc/systemd/system/node_exporter.service (paste the above content)
+systemctl start node_exporter
+systemctl status node_exporter
+systemctl enable node_exporter
+netstat -lntp [9100]
+
+what does it mean if a process or application is running continously? it means it can respond to the requests.
+prometheus like in its configuration file it will connect to the nodes and asks hey node_exporter give me the data. it depends how you configured time interval.
+
+here prometheus should know who are its targets.
+
+we will write a configuration file. see prometheus.yml file. we creating another job for prometheus in it.
+- job_name: "nodes"
+    static_configs:
+      - targets: ["172.31.25.87:9100"] (private-ip of node: port-number)
+
+now prometheus server for every 15s whatever is there in scrape_configs it will contact it and fetch data.
+
+up{instance="localhost:9090", job="prometheus"} --> here up is metric and things inside it are labels with ther values.
+like instance is label and its value is localhost:9090
+
+search prometheus scrape config labels --> first stack overflow recommendation
+https://stackoverflow.com/questions/49829423/prometheus-add-target-specific-label-in-static-configs
+you can create lables and key value pairs like that
+
+labels:
+   name: prometheus
+
+labes:
+   name: node-1
+
+in your prometheus server
+cd /opt/prometheus
+vim prometheus.yml
+remove the old things and add our new content from prometheus.yml file which we wrote in vs code.
+
+systemctl restart prometheus
+
+less /var/log/messages [to see what does prometheus while restarting]
+you can see messages like TSDB started, Loading Configuration and a lot of logs
+
+journalctl -u prometheus.service [very important if service not stated and failed see this to see logs]
+i wrote a mistake labels typed as laebl service not stated after using that i command i was able to see logs and clear the issue.
+
+To delete all the content in vim --> esc mode --> then :%d
+
+now run up query in prometheus 
+up{instance="localhost:9090", job="prometheus", name="prometheus"}            1
+up{instance="172.31.25.87:9100", job="nodes", name="node-1"}                  1
+
+we can see labels visible and our node is up since status is 1.
+
+let me go and stop instance in aws of node-1
+now again use up query in prometheus 
+
+up{instance="localhost:9090", job="prometheus", name="prometheus"}               1
+up{instance="172.31.25.87:9100", job="nodes", name="node-1"}                     0
+we can see node is down as status is 0
+
+
+if i start the node again automatically it will be up again.
+up{instance="localhost:9090", job="prometheus", name="prometheus"}                     1
+up{instance="172.31.25.87:9100", job="nodes", name="node-1"}                           1
+
+node_memory_MemAvailable_bytes  --> this metric will show how much memory there in node
+node_memory_MemAvailable_bytes{instance="172.31.25.87:9100", job="nodes", name="node-1"}                       463826944
+
+free [type free in node for verifying]
+               total        used        free      shared  buff/cache   available
+Mem:          726564      270012      407552        2360      146932      456552
+Swap:        2097148           0     2097148
+
+watch free
+
+Every 2.0s: free                                                                                       ip-172-31-25-87.ec2.internal: Thu Oct  3 14:16:55 2024
+
+               total        used        free      shared  buff/cache   available
+Mem:          726564      269884      407336        2356      147280      456680
+Swap:        2097148           0     2097148
+
+node_memory_MemAvailable_bytes / 1024
+{instance="172.31.25.87:9100", job="nodes", name="node-1"}                 456432
+
+there might be some difference here and there due in that 15s changes may takes place.
+
+globe symbol in prometheus will open metrics explorer you will get total metrics list
+
+Let us now configure the metrics which we need
+prometheus is famous for time series database. since, graph in prometheus is not good we will install grafana over it.
+grafana is tool created for good visulalisation.
+
+search grafana --> go to https://grafana.com/ --> Docs --> Under Open Source Select Grafana --> Left Panel --> Set up --> Install Grafna --> RHEL or Dedora
+
+install grafana in our prometheus server
+
+Import the GPG key
+wget -q -O gpg.key https://rpm.grafana.com/gpg.key
+sudo rpm --import gpg.key
+error: gpg.key: import read failed(0).  --> getting error
+
+this was not working so imported the key manually
+
+in browser go this address https://rpm.grafana.com/gpg.key
+copy the key
+vim gpg.key [in home folder only he did this command]
+paste your key there
+
+Create /etc/yum.repos.d/grafana.repo with the following content:
+sudo su
+vim /etc/yum.repos.d/grafana.repo
+[grafana]
+name=grafana
+baseurl=https://rpm.grafana.com
+repo_gpgcheck=1
+enabled=1
+gpgcheck=1
+gpgkey=https://rpm.grafana.com/gpg.key
+sslverify=1
+sslcacert=/etc/pki/tls/certs/ca-bundle.crt
+
+sudo dnf install grafana -y
+
+At the page end there will be refer to start the grafana server
+
+To start the service, run the following commands:
+sudo systemctl daemon-reload
+sudo systemctl start grafana-server
+sudo systemctl status grafana-server
+
+grafana server is a simple web application
+
+netstat -lntp [3000 this is the port it is running]
+pulic-instanced-id:3000 in the browser
+54.242.178.170:3000
+
+username - admin
+passowrd - admin
+
+after that it will ask new password set admin123 as it's password for convinience.
+
+click on open menu --> Connections 
+our main data is in prometheus time series database. This grafana is just like x-axis and y-axis. x-axis will have time and y-axis will have value.
+but grafana needs data it can take that data from any where one of that datasource is prometheus.
+
+in Connections --> prometheus and select it --> Add new data source --> Prometheus server URL --> http://localhost:9090 (since prometheus is in our local system) --> Save & test
+if give prometheus as input to grafana it will take data neatly.
+Open menu --> Connections --> Data sources --> you can see successfully prometheus added
+
+Open menu --> Dashboards --> now we can create Dashboards
+Graphs is nothing but creating Dashboards
+
+Create Dashboard --> Add visulisation --> select data source --> prometheus
+select code option (near Kick start your query line end) to run your query --> in Enter a PromQL query box type up --> Run queries
+
+you can see the difference in graphs between grafana and prometheus how much difference is there.
+people will put data in prometheus but deal graphs in grafana.
+
+Options 
+Legend - Custom - {{name}}
+Run queries
+
+if auto you will get below the x-axis like
+{__name__="up", instance="172.31.25.87:9100", job="nodes", name="node-1"}
+{__name__="up", instance="localhost:9090", job="prometheus"}
+{__name__="up", instance="localhost:9090", job="prometheus", name="prometheus"}
+
+if legend option give {{name}} you will get names
+up
+prometheus
+node-1
+
+ctrl + click on that item to show all the items graphs at once
+
+in the right side of the grap there are lot of options click time series panel you will have lot of options bar charts etc
+
+You can Add Threholds and give colour to them
+if 0 red
+if 1 green
+
+you can also give Title of panel in panel options
+you save dashboard name demo
+so in demo dashboards we created panel named UP
+
+in Dashbaords you can put Auto Refresh it will refresh for every 5s
+few people will be monitoring this boards. if there is a red flag in this board then we must look into the problem.
+
+it is not possible for us to see dashboards for red flag. it is time waste. so there is something called alerting.
+it will alert us if there is any error. we don't need to keep on look in to the monitor.
+
+previously in orgainisation there were few teams whose work is looking into tv for any red flags. if there is any red flag they will raise the incidence and follow up through mail. 
+
+obviously now this change there is alerting system.
+
+if we create a dashboard and save it. we can monitor that dashboard itself every time cause data is being take from tsdb of prometheus regularly. no need create again dashboards.
+
+you can even edit those saved dashboards and apply the changes.
+
+grafana component will refere to HTTP since we gave http://localhost:9090 see diagram. 
+
+user will hit grafana --> grafana will request from HTTP
+
+Alert Manager and Service Discovery we will see tommorow.
+
+cloud watch is same like tsdb same concept. since entire infrastructe in cloud it will some what more effective.
+
+in real time also we use grafana with prometheus.
+prometheus and grafana are light weight. if they both are in the same server it will be very speed to fetch the data etc.
+grafana is like a graph it will take any data you give even you can give Elasticsearch
+
+in a linux server resources we can monitor. They will build dashboards already. For those dashboards they will give some number.
+
+Data sources --> prometheus Build a dashboard --> import dashboard --> There will be an id for the dashboards they built --> place the id --> load dashboard --> that dashboard will come to us.
+eg 747 as id and load the dashboard.
+
+prebuild dashboard --> for which we are giving our datasource.
+
+newrelic is for different purpose it is for application end point monitoring.
+we have 11 componets like shipping, catalogue some times shipping may down we need to  monitor all those end points.
+
+one tool cannot fulfill all monitoring needs there are variety of tools for different purpose.
+
+here while installing grafana we created grafana repos by seeing in internet steps. in orgainisation they will have there own repos and servers will strictly connect to those repos only for installing softwares.
+
+it may depend some will have own repos. some will download public. like banks own repos due to security etc.
+
+some times they will download manually also. in grafana documents also you can see manual process to download grafana.
+
+Elasticsearch is where we push our application logs.

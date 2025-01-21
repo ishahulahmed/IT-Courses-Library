@@ -1,0 +1,9 @@
+Session Overview
+-----------------
+a) Functions
+b) Colours
+c) Logs and Redirections
+d) Loops
+e) Expense MySQL script
+
+

@@ -1,0 +1,6 @@
+Session Overview
+-----------------
+a) Crontab
+b) Disk Usage
+c) Sending Gmail from Linux Server.
+d) Shell Disadvantages

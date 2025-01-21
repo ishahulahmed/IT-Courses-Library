@@ -1,0 +1,9 @@
+Session Overview
+-----------------
+a) Variables
+b) Read command
+c) Conditions
+d) Exit status
+e) Special variables in Shell Script
+
+

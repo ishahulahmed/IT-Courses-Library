@@ -1,0 +1,376 @@
+Session Overview
+------------------
+a) Docker disadvantages
+b) EKS installation through eksctl
+c) K8 Resources
+      i) Namespace
+     ii) Pods
+
+Docker High Level Design
+-------------------------
+1. build the image
+2. run the image
+
+problems in Docker
+---------------------
+1 pg --> 10 rooms
+
+power cut, water cut
+
+10 pg --> 1 pg water cut
+
+he will shift persons to other pg temporary.
+
+1 host --> 3 containers if host crash
+no LB
+
+scalbility
+-------------
+noraml servers with R53
+traffic increases, multiple servers and keep LB and update R53 as LB URL..
+if container crash, docker is not able to replace automatically --> not reliable --> self healing
+no proper volume management (if host crash storage will also be lost i.e volumes created in docker will also be lost)
+no strong network connectivity (3 hosts --> 1 conatiner in 1 host cannot connect with another container in another host)
+no auto scaling
+no secrets and config management
+
+3 hosts --> 1 pod is host-1 another pod is in host-2 (here container in terms of docker but he used pod mistakenly)
+
+docker = suit = image build + image pull through its hub + running the images as containers (docker is like a suite)
+docker is providing runtime environment to run docker images...
+
+
+client = docker command
+
+docker daemon = docker engine
+
+daemon/server responds to client
+
+docker run nginx  --> daemon checks image available in local or not, if not available pull it and keep it in local
+run a continer and send output to client
+
+architeture is nothing but how your system is getting request and how it is processing it inside and how your sending your response back to the client.
+(netflix architecture for example)
+
+https://docs.docker.com/guides/docker-overview/
+
+What is Docker Architectures?
+-------------------------------
+Docker architecture consists of docker client. docker client which is a docker command line tool and docker engine that is nothing but docker host and the local registry and the central registry. whenever, you run a command in docker host it will connect to the daemon it will check for the image in local if it is not available it will pull from the cetral repository and keep it in local create a container out of it and send a response to the client. which is nothing but command line. Apart from this we have docker objects like docker images, containers, networking and volumes.
+
+kubernetes was using docker internally to run containers but since it was not following some principles it stopped using docker for running container. But, docker has rich interface to build images. so, we are using docker to build images. For, running containers we are using kuberenetes now.
+
+kubernetes is a container orchestrator... (in music one person giving instructions to every musician)
+
+a) In General Use: More broadly, an orchestrator can be anyone who organizes and coordinates various elements to achieve a specific goal. This could apply  
+                   to event planning, project management, or any situation where multiple components need to be synchronized. if you want to run 100 pg, we 
+                   will take help of manager..he needs some software
+
+b) In Technology and Computing: An orchestrator refers to a tool or system that manages and coordinates the various components of a complex system. For 
+                                instance, in cloud computing or container management (like Kubernetes), an orchestrator helps manage tasks like 
+                                deployment, scaling, and networking of applications.
+
+if you want to run 100pg, we take help of manager..he needs some software (Id for every PG, Room No for every pg for monitoring and control with software)
+101-PG1
+
+can 100 IIT grade developers work without manager?
+(like an orchestrator in music he cannot play musical instruments but he will give instructions and guide them and connect everyone)
+
+image buiding is not kubernetes responsibilty but container orchestration is only the resposibility of kubernetes. so, from now we build images through docker and run containers through kubernetes. from now on we don't need docker run command.
+
+In Master Node desing master will get the request. master will decide where it should send the request.
+
+Master/Control-Plane --> Amazon EKS 
+EKS Nodes --> EC2 Instances (Hosts) with Containers
+
+Manager will bring work ultimately who will work Team Members.
+Master will decide who and how they will run. ultimately work is done by nodes. i.e nodes are running the containers.
+Nodes should run containers. container run time environment will be present in node.
+in order to run containers it should have container run time environment. EKS Nodes will automatically come with container run time environment.
+
+kubectl --> A command line to connect to Kuberenetes
+
+image, ports, versions, volumes, name, env variables (main things we will give in running docker image in docker run command)
+
+git is a server we are communicating to git through git command line
+kubernetes is a server kubectl is command line to connect to it.
+
+we can create cluster manually in EKS. But we will use terraform DevOps Engineer. But terraform little bit complex. if we concentrate on terraform now then overall intention of learning kubernetes will be gone. ulimately in our course how to create EKS Cluster and how to upgrade it is also there using blue green deployment zero downtime. But, our intention is learning kubernetes first. EKS Team has provided eksctl (eks control) command line through which we can easily create a cluster.
+eksctl --> The official CLI for Amazon EKS.
+https://eksctl.io/
+
+ChatGPT -- Cluster
+-------------------
+In AWS EKS (Elastic Kubernetes Service), a cluster in AWS EKS is an overarching entity that includes all the components needed to run Kubernetes workloads. Here's a breakdown of what a cluster entails in this context:
+
+a) Control Plane: This is the managed part of the cluster that AWS takes care of. It includes components like the Kubernetes API server, scheduler, and 
+                  controller manager. The control plane manages the state of the cluster and orchestrates the various operations.
+
+b) Worker Nodes: These are the EC2 instances (or AWS Fargate, if you're using it) where your containerized applications actually run. The worker nodes are 
+                 registered with the control plane and run Kubernetes components like the kubelet and container runtime.
+
+c) Node Groups: AWS EKS uses node groups to manage and scale the worker nodes. You can define different node groups for different types of workloads, with 
+                varying instance types and scaling policies.
+
+d) Networking: The cluster uses a Virtual Private Cloud (VPC) for networking. It has its own network configurations, including subnets, security groups, and 
+               network policies, to control how resources within the cluster communicate with each other and with external services.
+
+e) Kubernetes Resources: Within the cluster, you define and manage Kubernetes resources such as Pods, Services, Deployments, and ConfigMaps. These resources 
+                         represent your application’s components and their configurations.
+
+f) Cluster Configuration: AWS EKS allows you to configure your cluster using Kubernetes tools and APIs, and you can manage it using the AWS Management 
+                          Console, AWS CLI, or Kubernetes command-line tools like kubectl.
+
+By handling the control plane management and integration with AWS services, AWS EKS simplifies running Kubernetes at scale while letting you focus on deploying and managing your applications.
+
+
+if you are using eksctl you need to cofigure it. (i.e only through your credentials it can built cluster on EKS Just like terraform need credentials)
+in projects they will create some workstations and jumphosts from there you will have access to eksctl and kubectl not from laptops (off course from laptops you can have but in projects they will not give access through laptops)
+
+Docker is not a command that is a complete suit. that's we are not installing docker in our laptops
+
+First we need to create a workstation everything is going to be here. (nothing but ec2 instance) 
+
+eksctl --> create and manage EKS cluster
+kubectl --> to manage containers in kubernetes cluster
+
+eksctl install
+https://docs.aws.amazon.com/emr/latest/EMR-on-EKS-DevelopmentGuide/setting-up-eksctl.html
+(just google eksctl install and go to aws documentation link in that use linux)
+eksctl version --> To Check eksctl version
+
+
+kubectl install
+https://docs.aws.amazon.com/eks/latest/userguide/install-kubectl.html
+(just google kubectl install and go to aws documentation link in that use linux)
+
+move kubectl to /usr/local/bin/ so that any user can use it
+sudo mv kubectl /usr/local/bin/
+kubectl version --client
+
+after, installing those type aws configure it will ask access key and secret key and region (us-east default nothing).
+or else, simply select the instance --> Actions --> Security --> IAM role --> give any role you have created with admin access.
+
+use eksctl documentation to write eks.yaml file
+
+managedNodeGroups:
+ - name: spot
+   instanceType: m5.large
+   desiredCapacity: 3
+   spot: true
+
+Usually AWS will manage Control Plane, But we are asking here to manage NodeGroups also.
+
+100 CPU, 2TB RAM
+
+on demand --> t3.micro -- 0.02$ USD
+
+50 CPU, 1TB RAM --> 50 CPU 1TB RAM (Spot) --> 80% discount --> AWS will take over our instances with 2min notice.
+
+ChatGPT
+-------
+Here's a concise comparison of AWS On-Demand, Spot, and Reserved Instances:
+
+1) On-Demand Instances:
+   a) Pricing: Pay-as-you-go model; no long-term commitment, costs are billed per hour or second.
+   b) Availability: Always available and can be launched or terminated at any time with guaranteed uptime.
+   c) Use Case: Best for applications with unpredictable workloads or for short-term, urgent needs where you need immediate access without commitment.
+2) Spot Instances:
+   a) Pricing: Much cheaper than On-Demand (up to 90% discount), but pricing varies and can change based on supply and demand.
+   b) Availability: AWS can terminate Spot Instances with short notice (usually two minutes) if capacity is needed elsewhere or if the Spot price exceeds  
+                    your bid.
+   c) Use Case: Ideal for flexible and fault-tolerant workloads that can tolerate interruptions, such as batch processing or large-scale data analysis.
+3) Reserved Instances:
+   a) Pricing: Significant discounts (up to 75%) compared to On-Demand pricing, with options for 1-year or 3-year terms; requires upfront or partial 
+               upfront payment.
+   b) Availability: Reserved capacity is guaranteed for the term of the reservation, providing consistent performance and availability.
+   c) Use Case: Best for predictable, steady-state workloads where you can commit to a longer-term use, like running a web server or database.
+
+spot instances are not for production they are for non production environmnet UAT and Development and Practise Purposes.
+we are using spot becuase m5.large means huge bill
+
+git clone https://github.com/ishahulahmed/k8-eksctl.git
+cd k8-eksctl
+eksctl create cluster --config-file=eks.yaml 
+it takes 10 to 15 mins to create a cluster becuase cluster is not a single component.
+
+kubectl get nodes --> display nodes in k8 cluster
+kubectl version (just version)
+Client Version: v1.30.0-eks-036c24b
+Kustomize Version: v5.0.4-0.20230601165947-6ce0bf390ce3
+Server Version: v1.30.2-eks-db838b0
+
+in kubernetes everything is a yaml file everything is a resource
+
+K8 Resources
+-----------------
+Namespace --> isolated project where you can create resources related to your project 
+(like VPC which gurantees an isolated environment where person from anther vpc cannot access this VPC)
+In Kubernetes, namespaces provide a mechanism for isolating groups of resources within a single cluster. Names of resources need to be unique within a namespace, but not across namespaces.
+https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/
+
+kubectl api-resources 
+(you will get all the resources in kubernetes)
+kubectl api-resources | wc -l 
+(you will get the count of resouces)
+
+kubectl create namespace expense
+kubectl get ns or kubectl get namespace
+
+default           Active   114m (like default VPC)
+expense           Active   57s (We Created)
+kube-node-lease   Active   114m (Administration)
+kube-public       Active   114m (Administration)
+kube-system       Active   114m (Administration)
+
+kubectl delete namespace expense
+
+we can create namespace using commands but the best practise use yaml file
+
+basic syntax for any resource
+------------------------------
+kind:
+apiVersion:
+metadata:
+
+spec:
+
+apiVersion there will different version use whatever is apt
+metadata means some extra information
+
+kubectl apply -f <file-name.yaml>
+kubectl delete -f <file-name.yaml>
+
+kubectl describe ns expense
+
+Gym Pod --> minimum Gym equipment in a small container.
+pod is smallest deployable unit in kubernetes.
+deployable means runnable. in docker it is container. in kubernetes it is called pod
+A pod in Kubernetes is a group of one or more containers that share the same network and storage. It’s the smallest unit of deployment in Kubernetes, meaning it’s where your applications run. Pods are managed by higher-level controllers to ensure they stay running as needed.
+
+pod vs container
+-------------------
+a pod contains multiple containers. containers inside pod share same n/w and storage.
+
+docker run nginx
+
+kubectl apply -f 02-pod.yaml (we are pushing to EKS it will see the instructions assign work to one of its nodes)
+if you don't mention namespace it will run in default namespace
+kubectl get pods
+kubectl describe pod nginx
+
+Status:           Running
+IP:               192.168.32.64 (Pod Ip Address)
+IPs:
+  IP:  192.168.32.64
+
+ Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  29s   default-scheduler  Successfully assigned default/nginx to ip-192-168-34-132.ec2.internal (EKS assigned it to one of the nodes)
+  Normal  Pulling    28s   kubelet            Pulling image "nginx"
+  Normal  Pulled     25s   kubelet            Successfully pulled image "nginx" in 3.009s (3.009s including waiting). Image size: 70985377 bytes.
+  Normal  Created    25s   kubelet            Created container nginx
+  Normal  Started    25s   kubelet            Started container nginx
+
+you cannot give same name to a pod if some other pod is also running with same name
+
+kubectl delete -f 02-pod.yaml
+kubectl delete -f 03-multi-container.yaml
+
+kubectl exec -it multi-container -c alma -- bash
+(To Connect to the container like docker exec -it)
+
+When you use docker exec -it to connect to a container and run curl localhost inside the container, you are querying the container itself, not the host server. (by defualt port 80)
+
+but when you connect to a container inside a pod using exec -it and type curl local host (here alma) you will see your getting index.html of nginx. because containers within the same Kubernetes Pod share the same network namespace, which means they are part of the same network. This allows them to communicate with each other using localhost and also to share the same IP address. 
+
+Example Scenario
+-----------------
+Assume you have a Pod with two containers:
+
+Container A: Runs a web server on port 8080.
+Container B: Runs a client application that needs to connect to the web server.
+
+In this case, Container B can connect to the web server in Container A using localhost:8080. Both containers have access to the same network namespace, so communication is straightforward and doesn’t require explicit network configurations for inter-container communication within the same Pod.
+
+Interacting with Other Pods
+-----------------------------
+If you need containers to communicate with containers in other Pods, you would use Kubernetes services and DNS names. For example:
+
+Pod-to-Pod Communication: Use Kubernetes Services to expose Pods, and access other Pods via the service name or cluster DNS.
+
+Cross-Pod Communication: Pods use DNS names for service discovery. A service’s DNS name can be used by any Pod within the same namespace (or across namespaces if configured).
+
+Networks Vs Storage in Pods
+----------------------------
+Containers within a Kubernetes Pod can share the same network namespace but do not automatically share storage because of the distinct ways Kubernetes manages networking and storage. Here’s why:
+
+Shared Network Namespace
+-------------------------
+Reason for Shared Network Namespace:
+
+1) Single Network Namespace: Containers in a Pod share the same network namespace to facilitate inter-container communication and simplify networking. This 
+                             is designed to:
+   a) Simplify Communication: Containers within a Pod can communicate with each other using localhost or 127.0.0.1, which is straightforward because they  
+                              use the same IP address and port namespace.
+   b) Use the Same IP Address: Sharing the network namespace means all containers in the Pod share the same IP address, simplifying service discovery and 
+                               communication patterns within the Pod.
+   c) Consistency: It ensures that all containers can directly talk to each other as if they were running on the same host.
+
+2) How It Works:
+   a) Network Stack: Containers share the same network stack, including IP address, network interfaces, and ports.
+   b) Communication: They can communicate using localhost and bind to ports without interfering with other containers in the same Pod.
+
+Non-Automatic Shared Storage
+------------------------------
+Reason for Non-Automatic Shared Storage:
+
+1) Separate Filesystems: By default, each container in a Pod has its own filesystem. This separation:
+   a) Encapsulates: Ensures that containers remain isolated in terms of file storage and avoid unintended data sharing.
+   b) Flexibility: Allows each container to manage its own storage independently unless explicitly configured to share data.
+
+2) Explicit Configuration for Sharing: To enable shared storage, Kubernetes requires explicit configuration. This ensures that:
+
+   a) Controlled Sharing: Only specific storage areas are shared, avoiding accidental data conflicts or overwrites.
+   b) Flexibility: Users can choose how and where to share storage, using mechanisms like EmptyDir for temporary shared storage or Persistent Volumes for   
+                   long-term storage needs.
+
+3) How to Configure Shared Storage:
+   a) Volumes: You can define volumes in the Pod spec to enable sharing between containers:
+   b) EmptyDir: A temporary volume that exists for the life of the Pod.
+   c) Persistent Volumes (PVs) and Persistent Volume Claims (PVCs): For durable, long-term storage that can be shared across multiple Pods or retained   
+                                                                    beyond the Pod's lifecycle.
+
+Summary
+----------
+a) Network Sharing: Containers in the same Pod share the network namespace to facilitate simple and direct communication.
+b) Storage Sharing: Containers do not share storage by default to maintain encapsulation and flexibility. Shared storage must be explicitly configured using  
+                    volumes.
+The distinction in handling networking and storage helps Kubernetes balance between ease of communication and careful management of resources and data. If you have more questions or need further clarification on specific scenarios, feel free to ask!
+
+if you are accessing an application the logs will be keep on writing. In banking companies logs should be maintained atleast 1 year.
+
+In kubernetes both nodes and containers are ephemeral. (for example autoscaling depending upon the traffic nodes may remain or removed)
+For Maintaing Logs there are some softwares like ELK (Elasticsearch, Logstash and Kibana). We Push our logs into ELK because it is permanent storage there logs will remain any no of days.
+
+can backend application handle both pushing logs and handling user requests then backend has 2 responsibilites then backend performance drastically reduces. in this cases we put backend and have another application called fluentd. it's solo responsibility is it will access whatever the logs backend application writes and pushes it to ELK.
+
+fluentd is like a helper to backend. generally this design pattern is called sidecar pattern.
+we will also use proxy pattern (like reverse proxy) for sidecar we need two containers. 
+Motorcyle with a Sidecar 
+
+In the sidecar pattern, you typically have two containers running in the same environment, such as within the same Kubernetes pod. One container runs the main application, and the other container (the sidecar) provides auxiliary functionality like logging, monitoring, or service discovery.
+
+The proxy pattern, in contrast, does not inherently involve multiple containers. It can be implemented within a single container or process where a proxy object or service intermediates between the client and the target object or service.
+
+ELK --> Log Storage (here logs will be stored permanently irrespective whether pods deleted or not)
+
+
+delete cluster because more charges
+eksctl delete cluster --config-file=eks.yaml
+
+docker suit = build + image maintanance + docker run time (containerd)
+docker uses containerd as runtime
+if docker itself is using containerd as runtime not it's own. Then why to install docker kubernetes discontinued docker now started supporting directly containerd and discontinued. previously kubernetes was using docker now it stopped. if you connect to the node and type docker ps it used to show list of containers
+there are lot of tools to build images not only dokcer
+in order to keep an container running you don't CMD in docker instruction. you use kuberenetes container runtimes to keep container active.

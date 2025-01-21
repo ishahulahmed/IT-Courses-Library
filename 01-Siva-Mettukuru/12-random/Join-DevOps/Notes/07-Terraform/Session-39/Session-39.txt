@@ -1,0 +1,265 @@
+Session Overview
+-----------------
+a) Introduction to GIT
+b) Shift left process
+c) DevOps process
+
+web-dev.daws78s.online --> frontend
+http --> fixed response
+https://web-dev.daws78s.online
+
+CDN --> frontend ALB --> https://web-dev.daws78s.online --> frontend TG --> frontend instance on port no 80 --> /api/ --> backend.app-dev.daws78s.online --> backend TG on port no 8080 --> DB
+
+infra is good now
+
+GIT (1:01:55)
+--------------
+entire code --> zip file (integration of code) --> Continous Integration
+all developers wrote code and making it as one zip file is called integration of code. if we do this process continously then it is called continous integration.
+till now we were skipping this process of creating zip file and we were using already created zip file in our projects for the sake of completeness.
+
+In old days, if we developers wrote new code then manually we need to clone the code and run the commands like npm install npm build in the server.
+
+Developers will write code and push their code if they feel everything is good they will inform Build and release engineers.
+
+Build and release engineers will then
+--------------------------------------
+clone the code manually in the server and run commands like
+npm install --> get the libraries from internet
+npm build 
+This is manual process.
+
+ 
+If we need to automated this process then when Developer push commit to GitHub then automatically it should
+------------------------------------------------------------------------------------------------------------
+Shift Left
+---------------
+clone the code
+compile the code
+unit testing
+scan the code --> DevSecOps (if in the Dev Environment you can implement DevSecOps that is nothing but Shift Left)
+	Static source code analysis --> SonarQube (Previously we used to show our lead or senior engineers for correctness of our code)
+	SAST --> Security point of view (Static Application Security Testing) (Password on logs, variable given unnessary Access)
+	DAST --> Dynamic application security testing (When code is running any vulnerabilites to hack our application)
+	Open source scanning --> (npm install get the libraries from internet) (some people put bugs and vulnerabilities in these libraries to hack)
+	docker image scanning --> AWS ECR
+deploy to DEV
+functional testing
+	
+In Old days after deploying to production we used to do securtiy and other testing was done 
+------------------------------------------------------------------------------------------- 
+deploy in DEV
+deploy in QA --> Run test cases
+deploy in PROD 
+	sanity testing
+	regression testing
+	security testing
+	vulnerabilities testing
+
+now, with Shift Left Approach what ever that was done after production we are shifting them to left side. 
+i.e doing them in development stage only (all kind of code scanning and security testing) before moving to next stage.
+
+In DevOps, 'Shift Left' is a strategy that involves moving testing and security pracitces to earlier stages of the software development life cycle (SDLC). This proactive approach aims to improve application security and quality by indentifying amd fixing issues before they become more difficult to address.
+
+In your profile also keep as 
+We implemented the industry best practise of Shift Left in our DevOps Project.
+
+They will ask you what do you mean by Shift Left?
+Instead of testing in the production environment for the quality and security vulnerabilities. we moved it to the development environment. so, that we can find the vulnerabilites at the early stages and our application is well tested.
+
+ShiftLeft Vs DevSecOps
+-----------------------
+a) Core Focus
+   - Shift Left: Enhancing overall quality by moving testing and quality checks earlier.
+   - DevSecOps: Embedding security into every stage of development.
+
+b) Scope
+   - Shift Left: Covers testing, performance, and general quality assurance.
+   - DevSecOps: Specifically targets security practices and vulnerabilities.
+
+c) Implementation
+   - Shift Left: Involves early integration of automated tests and feedback loops.
+   - DevSecOps: Incorporates security tools and practices into the CI/CD pipeline.
+
+d) Objective
+   - Shift Left: Reduces cost and effort of fixing defects by addressing them earlier.
+   - DevSecOps: Minimizes security risks and ensures continuous compliance.
+
+e) Cultural Impact
+   - Shift Left: Promotes a culture of early quality and testing.
+   - DevSecOps: Fosters shared responsibility for security across teams.
+
+f) Tools and Techniques
+   - Shift Left: Uses tools for early testing like unit tests and static analysis.
+   - DevSecOps: Employs security tools such as SAST, DAST, and vulnerability scanners.
+
+g) Integration
+   - Shift Left: Integrates testing and quality checks earlier in the development lifecycle.
+   - DevSecOps: Integrates security measures throughout coding, building, and deployment stages.
+
+h) Impact on Teams
+   - Shift Left: Affects developers and QA teams by encouraging early testing.
+   - DevSecOps: Involves developers, security, and operations teams in shared security responsibilities. 
+
+Unit Vs Functional
+-------------------
+Lot, companies will ignore unit testing
+brick --> basic unit of the block (in a building)
+wall --> testing the wall is functional testing --> without testing brick if you construct wall it may be good
+but if brick is weak --> wall may be good --> but it is a bad design --> ultimately vulnerabilites will come with time due to bad weak bricks
+
+function --> testing a function is called unit testing (in code function is like brick)
+in the same way without unit testing if you do functional testing it may pass --> but suddenly defects will come. (like redbus 2000 ticket shown as 20)
+unit testing is manadatory. after doing unit testing then we should do functional testing for a particular module.
+in shift left we will cover this everything.
+
+In order to do all this Starting Point is Git.  
+
+Git
+--------------
+GitOps -> everything should be inside git, no manual process
+i.e you should not do anything manually. whatever you do should be through the script and the script should also be in the git.
+we automated infra with terraform but the commands which i gave lke terraform plan, terraform init, terraform apply etc was manually. nothing should be manual everything should be through script.
+
+slowly, whatever we will do through will be through script and we will run that script. Then, git will be the single source of truth. git will become the central point. whatever you do either development, devops, cloud infrastructure as a code, scripting and anything everything will be in git and will run through git. with all these git is now central point of contact.
+
+
+Git --> single source of truth, version control
+
+Recap of what we did through Git till now
+-------------------------------------------
+
+created repo in console
+clone the repo
+add authentication
+do changes
+git add . --> add code to temp area
+git commit -m "some" --> commit the code to local repo
+git push --> push the code to central/remote repo
+
+existing folder
+----------------
+create repo in central
+git init --> .git directory will be created
+git branch -M main (as it will create master branch we want to name as main)
+git remote add orign <git-url>
+git add git commit git push
+
+generate public/private key pair
+keep public key in server
+keep private key with us
+pass private key at the time of authentication
+
+same process can be done with github
+Login github --> Settings --> SSH and GPG Keys
+
+~  --> tilde symbol
+cd --> default home directory in my laptop 
+pwd --> /c/Users/shahu (default home directory)
+cd ~ --> you will go to same /c/Users/shahu default home directory
+~/.ssh --> /c/User/shahu/.ssh (.ssh is a hidden directory)
+
+cd ~/.ssh
+ssh-keygen -f github
+cat github.pub (copy this public key)
+
+SSH and GPG Keys --> New SSH key --> Tilte - MyLaptop-New -->Key type - Authentication Key --> Key (Paste Content)
+
+Since we are doing SSH authentication we need to create ssh config file in our laptop
+.ssh (in this folder) --> create file named config without any extension
+
+
+Host github.com
+	HostName github.com
+	User git
+	IdentityFile ~/.ssh/github
+
+here User is git. if you see any repository in github ssh url will have user as git.
+For Identity file you need to pass Private Key. You can place anywhere but give correct path.
+git@github.com:ishahulahmed/Join-DevOps.git (git is user-name)
+git@github.com:ishahulahmed/Join-DevOps.git (github.com is HostName)
+in our config file we gave Host as github.com which act as a alias to our HostName and to identify our respective key in the list of keys in config file.
+
+
+
+If you set config file correctly now you can clone repos using SSH.
+cd /d/devops/
+git clone git@github.com:ishahulahmed/Join-DevOps.git (cloning using SSH) (here User@Host since user is git and host is github.com in our config file)
+User@Host not User@HostName
+
+if in our config file we gave
+Host 78s
+      HostName github.com
+      User git
+      IdentityFile ~/.ssh/github
+
+cd /d/devops/
+git clone git@github.com:ishahulahmed/Join-DevOps.git (this will not work and through an error since Host name is 78s)
+git clone git@78s:ishahulahmed/Join-DevOps.git (this will work)
+
+in git every repository will have 
+User as git
+HostName not Host as git@github.com
+Example SSH URL of My Join-DevOps Repo is git@github.com:ishahulahmed/Join-DevOps.git
+
+But for SSH Authentication we have to provide User@Host not User@HostName
+siva gave Host as github.com because for easy cloning and making changes to repository as we are beginners. we need to be careful provide Host not HostName.
+
+Don't give same key to multiple github accounts.
+
+Here, Advantage is you can manage multiple Accounts using config file. For Example.
+# joindevops
+Host  github.com
+     HostName github.com
+     User git
+     PreferredAuthentications publickey
+     IdentityFile ~/.ssh/daws-76s-github
+
+# joindevops
+Host  bitbucket.org
+     HostName bitbucket.org
+     User git
+     PreferredAuthentications publickey
+     IdentityFile ~/.ssh/daws-76s-github
+
+# msivakmreddy
+Host  github.com-m
+     HostName github.com
+     User git
+     PreferredAuthentications publickey
+     IdentityFile ~/.ssh/msivakmrreddy
+
+# techworldwithsiva
+Host  github.com-j
+     HostName github.com
+     User git
+     PreferredAuthenticatios publickey
+     IdentityFile ~/.ssh/techworldwithsiva
+
+If in a instance in aws you want to add some file in your repostiory of github.
+in ~/.ssh folder set config file (with host and hostname etc as above) and place your private key
+set author identity if not set
+git clone git@github.com:ishahulahmed/practice-git.git (this is ssh url it will automatically go to .ssh folder and check config file)
+if you want to add files just normally add files and do changes 
+use command git add .; git commit -m "some-message"; git push origin main --> this will work since you cloned using ssh automatically it will push with your private key.
+
+54.172.31.172 | 172.31.24.99 | t2.micro | git@github.com:ishahulahmed/practice-git.git  --> this is ssh url
+[ ec2-user@ip-172-31-24-99 ~/practice-git ]$
+
+you can easily see the repository is showing the SSH url.
+
+Tommorow we will learn
+------------------------	
+branches
+merge
+rebase
+conflicts
+branching strategy
+
+SonarQube covers both static code analysis and SAST.
+DAST tools is not free and high cost so we will not cover but sonarqube and sast we will discuss.
+
+Do not initialise git in sub directories again if you have initialised git in main directory already.
+rm -rf .git
+git init
+git remote add origin <url>

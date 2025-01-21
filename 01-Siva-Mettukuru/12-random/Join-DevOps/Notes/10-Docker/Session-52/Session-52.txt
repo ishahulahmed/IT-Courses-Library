@@ -1,0 +1,281 @@
+Session Overview
+-----------------
+a) Expense project completed
+b) Quiz
+
+curl https://raw.githubusercontent.com/ishahulahmed/expense-docker/main/install-docker.sh | sudo bash
+(To Install Docker Use Raw File Url)
+
+df -hT
+The df -hT command, when executed, displays disk usage statistics for all mounted filesystems in a human-readable format along with their respective filesystem types.
+
+yum install -y yum-utils
+-y flag in command is for auto approval
+
+Docker Home Directory 
+/var/lib/docker
+
+CIS hardening the server... 
+(Center for Internet Security Benchmarks) (as CIS Benchmarks Diskspace as per Security Best Practises)
+
+https://github.com/daws-78s/concepts/blob/main/resizeDisk.MD
+(run this commands for extending volume)
+
+docker run -d -p 3306:3306 mysql:v1.0.0 
+(here docker will give random name to container by selecting any two words from dictionary and combining them using underscore)
+docker run -d -p 3306:3306 --name mysql mysql:v1.0.0 
+(here we are settign our own name. if you give --name mysql at the after image tag it will think it as an argument for ENTRYPOINT or CMD it should come before image name always rember only arguments should come at the end of image)
+docker exec -it mysql bash
+(no need to give container id since we have set a name for the container)
+
+mysql -u root -pExpenseApp@1 
+(To Connect to Database)
+show databases;
+(To Show Databases)
+
+Schema download in backend not necessary because we already set that schema in last video
+
+docker run -d -p 8080:8080 --name backend backend:v1.0
+(running a container and setting its name as backend)
+docker logs backend 
+(To get logs of backend container)
+
+As per expense documentation of backend we need to setup a new service in systemd so systemctl can manage this service. but systemctl service will not work in docker. it will work only in main servers but not in containerisation.
+
+in that we are setting evnironment variable Environment=DB_HOST="<MYSQL-SERVER-IPADDRESS>". Even in TransactionService.js file They are referring to DB_HOST in order establish connection with DB. So, In Docker File Use ENV Instruction to Set Environment Variable.
+
+if you want containers to communicate with each setting names is mandatory otherwise you will get random names. Even if you give ip address they also change so container names are mandatory.
+
+ifconfig
+(The ifconfig command (short for "interface configuration") is used in Unix and Unix-like operating systems (including Linux) to display and configure network interfaces on your system)
+
+Result of ifconfig Command
+---------------------------
+docker0: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet 172.17.0.1  netmask 255.255.0.0  broadcast 172.17.255.255
+        inet6 fe80::42:aeff:fe21:744b  prefixlen 64  scopeid 0x20<link>
+        ether 02:42:ae:21:74:4b  txqueuelen 0  (Ethernet)
+        RX packets 2424  bytes 290393 (283.5 KiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 2759  bytes 8274549 (7.8 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+ens5: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 9001
+        inet 172.31.40.48  netmask 255.255.240.0  broadcast 172.31.47.255
+        inet6 fe80::cbd:9dff:fe37:8def  prefixlen 64  scopeid 0x20<link>
+        ether 0e:bd:9d:37:8d:ef  txqueuelen 1000  (Ethernet)
+        RX packets 554838  bytes 789949073 (753.3 MiB)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 57465  bytes 6667012 (6.3 MiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+lo: flags=73<UP,LOOPBACK,RUNNING>  mtu 65536
+        inet 127.0.0.1  netmask 255.0.0.0
+        inet6 ::1  prefixlen 128  scopeid 0x10<host>
+        loop  txqueuelen 1000  (Local Loopback)
+        RX packets 0  bytes 0 (0.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 0  bytes 0 (0.0 B)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+veth7c453e6: flags=4163<UP,BROADCAST,RUNNING,MULTICAST>  mtu 1500
+        inet6 fe80::ec2a:eeff:fe58:116e  prefixlen 64  scopeid 0x20<link>
+        ether ee:2a:ee:58:11:6e  txqueuelen 0  (Ethernet)
+        RX packets 6  bytes 504 (504.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 27  bytes 1906 (1.8 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+		
+ethernet
+-----------
+in datacenter servers connect witheach other obiviously through ethernet cables not wifi as our home.
+enx --> details about ethernet interface
+veth --> ipv6 format details
+lo --> local
+
+172.31.40.48 --> created by aws 
+
+docker0: --> docker default network --> 172.17.0.1 == modem
+docker0 is like a modem
+
+mysql --> 172.17.0.2
+backend --> 172.17.0.3
+it will create like 172.17.0.254 
+
+using default docker network, you cannot communicate between containers
+
+in our dockerfile of backend we had an instruction ENV which is for connecting to other container but in default network we cannot do that so when even we try run docker run command for running container after that use docker ps command it will not show in running containers list.
+
+when you check docker logs backend there will be an error in order to resolve that we need to create user defined docker network.
+
+so, for our expense project we need create a virutal network using docker network command
+docker network
+docker generally uses bridge network. But, there is an option you can connect your containers directly to the host. 
+Bridge network means communication usullay go through docker0. So, docker acting as a bridge between containers. host network means containers directly connecting to the host.
+
+docker networks create expense
+ifconfig
+br-c4f03fd1c4fa: flags=4099<UP,BROADCAST,MULTICAST>  mtu 1500
+        inet 172.18.0.1  netmask 255.255.0.0  broadcast 172.18.255.255
+        ether 02:42:24:4a:38:f9  txqueuelen 0  (Ethernet)
+        RX packets 8  bytes 432 (432.0 B)
+        RX errors 0  dropped 0  overruns 0  frame 0
+        TX packets 30  bytes 1956 (1.9 KiB)
+        TX errors 0  dropped 0 overruns 0  carrier 0  collisions 0
+
+new bridge network is created. this is expense network containers inside this network will communicate through this network.
+
+now i want to send my containes into this network when i run containers
+so remove existing containers in default network. in order to remove first stop running containers then remove
+docker stop mysql
+docker rm backend mysql
+
+docker network ls (To list existing networks)
+
+docker run -d -p 3306:3306 --name mysql --network expense mysql:v1.0.0
+(To run a container name mysql in expense network)
+
+docker run -d -p 8080:8080 --name backend --network expense backend:v1.0
+(To run a container name backend in expense network)
+
+docker ps 
+now backend container will run 
+
+when you run docker logs backend you will get log as
+{ "timestamp" : 1721907142, "msg" : "App Started on Port 8080" }
+
+docker inspect mysql
+(The docker inspect command in Docker is used to obtain detailed information about Docker objects such as containers, images, volumes, networks, and more)
+
+ChatGPT
+-------
+The docker0 bridge network, also known as the Docker bridge network, is the default bridge network Docker sets up when it starts. This network is primarily designed for outbound traffic from containers to the external network (e.g., internet access) rather than for direct container-to-container communication within the same host. Here are some reasons why docker0 is not ideal for direct communication between containers:
+
+1) NAT (Network Address Translation):
+
+   a) Containers connected to docker0 are assigned IP addresses by Docker's built-in DHCP server. These IP addresses are private and often require NAT to  
+      communicate with the external network.
+   b) Container-to-container communication via docker0 involves NAT traversal, which adds overhead and complexity to network traffic.
+
+2) Performance Overhead:
+
+   a) NAT introduces additional processing overhead, potentially impacting network performance, especially in scenarios involving high data throughput or  
+      low-latency requirements.
+
+3) Isolation and Security:
+
+   a) By default, containers connected to docker0 are isolated from each other unless specific port mappings are configured. This isolation helps in  
+      preventing unintended communication between containers, but it complicates direct container-to-container communication.
+
+4) Alternative Networking Options:
+
+   a) Docker provides several other networking options, such as user-defined bridge networks, overlay networks (for swarm mode), and host networks.
+   b) User-defined bridge networks are generally preferred for container-to-container communication within a single host. They offer better control over IP   
+      addressing, DNS resolution, and connectivity between containers.
+
+5) Scalability and Management:
+
+   a) docker0 is a single bridge network per Docker daemon, which can become a scalability bottleneck when managing large numbers of containers.
+   b) User-defined bridge networks allow for creating multiple isolated networks, each with its own subnet and IP address range, providing better  
+      scalability and management of container communication.
+
+User-defined Bridge Networks:
+------------------------------
+To facilitate better container-to-container communication within the same host, Docker supports user-defined bridge networks. These networks offer advantages like:
+
+a) Container Isolation: Containers on the same user-defined bridge network can communicate with each other using their IP addresses directly, without 
+   needing port mappings or NAT.
+b) Custom IP Addressing: You can define custom IP address ranges and subnets for user-defined bridge networks, making it easier to manage and understand 
+   network configurations.
+c) Improved Performance: User-defined bridge networks typically have lower overhead compared to docker0 because they avoid NAT for internal container 
+   communication.
+
+Conclusion:
+-----------
+While docker0 serves its purpose for outbound traffic and connectivity to the external network, it is not optimized for efficient container-to-container communication within the same host due to NAT and isolation considerations. User-defined bridge networks provide a more flexible and efficient solution for facilitating direct communication between containers on a Docker host. Therefore, when designing Docker architectures that require containers to communicate with each other, consider using user-defined bridge networks rather than relying on the default docker0 bridge network.
+
+expense
+---------
+br-32300d271b26
+172.18.0.1
+
+172.18.0.1 --> Gateway (Gateway is nothing but Modem which providing ip address to containers)
+
+"172.18.0.2"  --> Mysql
+"172.18.0.3"  --> Backend
+
+cat /etc/*release --> To know which OS of container when connected to container using exec -it since in docker file instruction FROM node:20 
+(We don't know what is underlying OS used by node here)
+
+it is debian an Ubuntu flavour
+apt update 
+(Before installing mysql client don't need to install mysql client we are installing mysql client here just to ensure connection is successfully established)
+
+apt install -y default-mysql-client
+
+mysql -h mysql -u root -pExpenseApp@1
+-h is hostname here mysql is our container name
+
+
+-p 8080:8080 (docker run -d -p 8080:8080 --name backend --network expense backend:v1.0)
+host-port:container-port
+
+curl http://localhost:8080/transaction --> here localhost is our linux machine i.e V.M
+{"result":[]} --> Output (Successfully got response from backend)
+
+now go into container use above curl http://localhost:8080/transaction 
+docker exec -it backend bash
+curl http://localhost:8080/transaction 
+{"result":[]} --> Output 
+
+http://54.204.234.38:8080/transaction
+you can connect through browser since we have expose our host port of backend
+
+When you use docker run -p 8080:8080 my-container-image, you are indicating that any service running inside the container on port 8080 should be accessible from the host machine on port 8080.
+
+However, the URL part /transaction (54.204.234.38:8080/transaction) does not directly relate to Docker's port mapping (-p 8080:8080). Instead, it typically refers to a specific endpoint or path handled by the application or service running inside the container.
+
+But this is not secure. so we need remove present container and create new one using docker run -d --name backend --network expense backend:v1.0
+docker rm -f backend
+docker run -d --name backend --network expense backend:v1.0 (here we are not exposing host port)
+
+curl http://localhost:8080/transaction 
+curl: (7) Failed to connect to localhost port 8080: Connection refused
+(Now this will not work in VM host machine but will work inside a container and you cannot access through browser)
+
+frontend
+--------
+docker build -t frontend:v1.0 .
+docker run -d -p 80:80 --name frontend --network expense frontend:v1.0
+docker exec -it frontend bash
+in container
+cd /etc/nginx/
+ls -l 
+cat nginx.conf
+it will also be in conf.d 
+cd conf.d
+cat default.conf
+
+These two configuration in our images will cause weird behaviour since we know container images are light weight so remove them while building an image from nginx. so, we can keep our own configuration.
+
+nginx.conf is defualt name it will pick only when it is nginx.conf
+
+After putting your config file and frontend code build and run your image in expense network
+
+docker logs -f frontend (-f to follow logs)
+
+since developers have written code in such a way that /api/ endpoint request (CRUD) goes to backend. so, we have configured our expense.conf file in a such a way that /api/ requests (CRUD) goes to backend.
+
+location /api/ { 
+        proxy_pass http://backend:8080/;
+    }
+
+
+139.5.248.162 - - [21/Jun/2024:02:56:12 +0000] "GET /static/css/main.b20b6ac4.css HTTP/1.1" 404 188 "http://52.91.44.21/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36 Edg/126.0.0.0"
+2024/06/21 02:56:12 [error] 20#20: *8 open() "/usr/share/nginx/html/static/js/main.bcd36112.js" failed (2: No such file or directory), client: 139.5.248.162, server: localhost, request: "GET /static/js/main.bcd36112.js HTTP/1.1", host: "52.91.44.21", referrer: "http://52.91.44.21/"
+(this is just a log when frontend was not working)
+
+Connection Pool is a good approach in programming. (already connection will be established and it will be ready and in sleep mode if requested it will be fast since connection is already established not like connection getting established after requesting)
+instead of resolving issues at run time in production we can resolve issues earlier if there is connection already established
+
+connection pool is a crucial optimization technique for database-driven applications, aiming to minimize the overhead associated with establishing and closing database connections, thus improving overall application performance and scalability.

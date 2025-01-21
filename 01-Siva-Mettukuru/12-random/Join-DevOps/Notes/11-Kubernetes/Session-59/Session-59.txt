@@ -1,0 +1,565 @@
+cluster creation with eksctl
+namespaces
+pods 
+services
+    clusterIP
+    nodePort
+    LoadBalancer
+Sets
+    ReplicaSet
+    Deployment
+    StatefulSet	
+expense using deployment
+     how to use configmap as volume
+static provisioning
+    EBS
+dynamic provisioning
+    EBS
+EBS vs EFS
+
+EBS vs EFS
+----------
+1) EBS is Elastic Block Store. it should be in the same availability zone as the server.
+2) EFS is the network file sharing protocol. EFS can be anywhere in the internet.
+3) EBS is used for database applications. so, less latency.
+4) EFS is useful to keep the shared files like images etc. Except Database.
+5) EBS is a fixed storage. EFS is elastic until 47.9 TB. 
+   (While the maximum size of an EBS volume can be up to 16 TB, EFS volume sizes are practically unlimited. The maximum size of a file in EFS is 47.9 TB)
+
+EBS
+----
+1. first create volume
+2. install ebs csi drivers
+3. EC2 nodes should have role to access EBS
+4. create PV equivalent to EBS volume --> admin, cluster level
+5. create PVC --> namespace, user
+6. use PVC in pod
+
+dynamic
+---------
+SC (Storage Class) --> admin level, this creates volume and pv automatically.
+pvc, mention sc name
+
+EBS is like a hard disk. it doesn't require any kind of networking. it is beside you system only (like hardisk connected to system analogy) so firewall is not needed for EBS.
+
+EFS means Network file sharing when means it will go through network. So, EFS will also have a Security Group.
+
+EFS (for documentation of yaml files see drivers github)
+----
+1. create EFS volume (By default security groups are created when you create an EFS Volume)
+Kubernetes Cluster might Create --> 2 VPCs --> Control Plane VPC --> Worker Nodes VPC
+Create EFS -->  In the Same VPC where your worker nodes reside.
+Reasons for two VPCs 
+a. Control Plane and Worker Nodes Separation
+b. Network Isolation
+c. High Availability and Fault Tolerance
+d. Complliance and Governance --> Some Organizatios have Compilance or Governance Requirements that necessiate network segregation.
+c. Networking and Security Configurations.
+2. Allow EC2 instances on NFS protocol in EFS SG (For the created security group in EFS allow EC2 instances by making changes in it's inbound rules)
+Open EFS --> Select Your File System --> View Details (Click on Network) --> Note the Security Group ID
+Open EC2 --> Navigate to Security Groups --> Find the Security Group (Use the security group ID you recorded use search to filter) --> Select SG
+Add rule --> NFS (Select NFS Protocol) --> attach node instances security group
+3. install drivers, EFS drivers
+https://github.com/kubernetes-sigs/aws-efs-csi-driver
+in Readme.md
+To install the driver using images stored in the private Amazon ECR registry
+Download the manifest. Replace release-X.X with your desired branch. We recommend using the latest released version. For a list of active branches, see Branches.
+kubectl kustomize \
+    "github.com/kubernetes-sigs/aws-efs-csi-driver/deploy/kubernetes/overlays/stable/ecr/?ref=release-2.0" > private-ecr-driver.yaml
+
+here it is directed to private-ecr-driver.yaml but in video he has directed them to public-ecr-driver.yaml
+vim private-ecr-driver.yaml (just no of yaml files in this yaml file)
+Apply the manifest (i.e. install the drivers)
+kubectl apply -f private-ecr-driver.yaml
+4. check IAM access to the instances
+AmazonEFSCSIDriverPolicy
+select the instance --> click on iam role --> it will direct to the iam role --> Attach AmazonEFSCSIDriverPolicy
+
+cd k8-resources/storage/
+kubectl apply -f 03-efs-static.yaml
+persistentvolume/efs-static created
+kubectl get pv
+NAME         CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   VOLUMEATTRIBUTESCLASS   REASON   AGE
+efs-static   5Gi        RWO            Retain           Available                          <unset>                          34s
+
+kubectl apply -f 03-efs-static.yaml
+persistentvolume/efs-static configured
+persistentvolumeclaim/efs-static-claim created
+
+kubectl get pvc
+NAME               STATUS   VOLUME       CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+efs-static-claim   Bound    efs-static   5Gi        RWO                           <unset>                 43s
+
+kubectl apply -f 03-efs-static.yaml
+persistentvolume/efs-static configured
+persistentvolumeclaim/efs-static-claim unchanged
+pod/efs-app created
+
+kubectl apply -f 03-efs-static.yaml
+persistentvolume/efs-static configured
+persistentvolumeclaim/efs-static-claim unchanged
+pod/efs-app configured
+service/efs-static created
+
+kubectl get svc
+NAME         TYPE           CLUSTER-IP     EXTERNAL-IP                                                               PORT(S)        AGE
+efs-static   LoadBalancer   10.100.80.12   a549a00d84da2426f803e61354ac691d-1160647644.us-east-1.elb.amazonaws.com   80:30534/TCP   24s
+kubernetes   ClusterIP      10.100.0.1     <none>                                                                    443/TCP        3h8m
+
+kubectl get pods
+NAME      READY   STATUS    RESTARTS   AGE
+efs-app   1/1     Running   0          2m47s
+
+kubectl exec -it efs-app -- bash
+root@efs-app:/# cd /usr/share/nginx/html/
+root@efs-app:/usr/share/nginx/html# echo "Hi, I am using EFS Static">index.html
+
+for siva this content was not generating while he was hitting load balancer dns. for me it was coming siva did something wrong. so he is creating another pod from that pod he is trying to know what is the issue his content is not coming from pod
+
+How Request Will Go
+LB --> Node on Particular Port --> Node should allow traffic from LB --> nodeport --> cluster ip --> pod
+
+cd .. (go back to k8-resources folder)
+kubectl apply -f 02-pod.yaml
+pod/nginx created
+
+kubectl get pods
+NAME      READY   STATUS    RESTARTS   AGE
+efs-app   1/1     Running   0          12m
+nginx     1/1     Running   0          7s
+
+kubectl exec -it nginx -- bash
+root@nginx:/# curl efs-static
+Hi, I am using EFS Static
+
+we are getting content. so, there is no problem in cluster.
+Finally issue resolved now for him also content is coming network slow might be the issue.
+
+cd storage
+kubectl delete -f 03-efs-static.yaml
+persistentvolume "efs-static" deleted
+persistentvolumeclaim "efs-static-claim" deleted
+pod "efs-app" deleted
+service "efs-static" deleted
+
+now delete the pod but data should not go any where since it is efs volume. we know pods are ephemeral.
+let us reapply and see whether our content is coming or not.
+kubectl apply -f 03-efs-static.yaml
+persistentvolume/efs-static created
+persistentvolumeclaim/efs-static-claim created
+pod/efs-app created
+service/efs-static created
+
+kubectl exec -it nginx -- bash
+root@nginx:/# curl efs-static
+Hi, I am using EFS Static
+
+so, data has not gone anywhere. so our data is there.
+
+delete existing EFS Volume to start learning dynamic EFS.
+
+Your entire project will have only one EFS because it has huge storage.
+
+EFS dynamic (for documentation of yaml files see drivers github)
+-----------
+1. installing drivers
+kubectl kustomize \
+    "github.com/kubernetes-sigs/aws-efs-csi-driver/deploy/kubernetes/overlays/stable/ecr/?ref=release-2.0" > private-ecr-driver.yaml
+kubectl apply -f private-ecr-driver.yaml
+
+2. Check EC2 instance role have access or not
+3. create EFS volume
+4. check EFS SG allowing EC2 SG
+5. create SC 
+
+kubectl apply -f efs-dynamic-sc.yaml
+storageclass.storage.k8s.io/efs-dynamic created
+
+kubectl get sc
+NAME          PROVISIONER             RECLAIMPOLICY   VOLUMEBINDINGMODE      ALLOWVOLUMEEXPANSION   AGE
+efs-dynamic   efs.csi.aws.com         Delete          Immediate              false                  32s
+gp2           kubernetes.io/aws-ebs   Delete          WaitForFirstConsumer   false                  101m
+
+
+for every project (like expense, roboshop) etc administrative team will create a new storage class with basePath /expense or /roboshop etc
+here EFS  is same volume no new EFS volume is created in the same volume base path for every project is changed.
+EFS has huge storage if you create a new EFS Volume for every project huge resources consumption will be done
+
+
+Adminstrators will create EFS volume and storage a class. With the storage class given to us we can claim required storage.
+
+kubectl apply -f 04-efs-dynamic.yaml
+persistentvolumeclaim/efs-dynamic created
+
+kubectl get pvc
+NAME               STATUS    VOLUME       CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+efs-dynamic        Pending                                          efs-dynamic    <unset>                 35s
+efs-static-claim   Bound     efs-static   5Gi        RWO                           <unset>                 43m
+
+efs-dynamic pending let us see why?
+kubectl describe pvc efs-dynamic
+error: code = Internal desc = Failed to create Access point in File System fs-0aa2a87945f5bf3a8 : Failed to create access point: InvalidParameter: 1 validation error(s) found. (at root directory it is failing to create access point)
+
+added directoryPerms: "700" in parameter of efs-dynamic-sc.yaml
+
+kubectl delete -f 04-efs-dynamic.yaml
+persistentvolumeclaim "efs-dynamic" deleted
+
+kubectl delete -f efs-dynamic-sc.yaml
+storageclass.storage.k8s.io/efs-dynamic deleted
+
+kubectl apply -f efs-dynamic-sc.yaml
+storageclass.storage.k8s.io/efs-dynamic created
+
+kubectl apply -f 04-efs-dynamic.yaml
+persistentvolumeclaim/efs-dynamic created
+
+kubectl get pvc
+NAME               STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+efs-dynamic        Bound    pvc-3f850965-5e47-4908-82ff-6b8923c0d8e2   5Gi        RWX            efs-dynamic    <unset>                 42s
+efs-static-claim   Bound    efs-static                                 5Gi        RWO                           <unset>                 58m
+
+now status is Bound
+
+Since PVC is created now let us use it in Pod.
+
+let us access from other pod and see whether our pvc (claimed storage) is working or not.
+
+kubectl get pods
+ kubectl get pods
+NAME          READY   STATUS    RESTARTS   AGE
+efs-app       1/1     Running   0          71m
+efs-dynamic   1/1     Running   0          8s
+nginx         1/1     Running   0          79m
+
+kubectl get svc
+NAME          TYPE           CLUSTER-IP      EXTERNAL-IP                                                              PORT(S)        AGE
+efs-dynamic   ClusterIP      10.100.23.227   <none>                                                                   80/TCP         38s
+efs-static    LoadBalancer   10.100.78.107   a46a366b63da44243a8997fd6143018d-861187811.us-east-1.elb.amazonaws.com   80:31518/TCP   72m
+kubernetes    ClusterIP      10.100.0.1      <none>                                                                   443/TCP        142m
+
+kubectl exec -it efs-dynamic -- bash
+root@efs-dynamic:/# cd /usr/share/nginx/html
+root@efs-dynamic:/usr/share/nginx/html# echo "Hello form EFS dynamic">index.html
+
+kubectl apply -f ../02-pod.yaml
+pod/nginx unchanged
+
+kubectl exec -it nginx -- bash
+root@nginx:/# curl efs-dynamic
+Hello form EFS dynamic
+
+EFS --> Go to Access Point --> You will see a access point generated dynamically.
+/expense/pvc-3f850965-5e47-4908-82ff-6b8923c0d8e2 (Root Directory Path)
+
+for our expense project we will this volumes concept for database. frontend and backend or stateless. volumes are used for stateful applications
+for our expense project let us delete all the old pvc and other
+kubectl delete -f 04-efs-dynamic.yaml
+kubectl delete -f ../02-pod.yaml
+kubectl delete -f 03-efs-static.yaml
+kubectl delete -f efs-dynamic-sc.yaml
+
+what ever we did manually (volume creation, sg inbound rules) those all should be removed manually (all dependencies should be removed) for our eks cluster to get deleted completed. 
+
+when we create a EFS volume in nodes vpc-id automatically one default-sg of nodes will be assigned for this volume. we will put ec2 instance sg-id inside EFSs volume sg inbound rule selecting type as NFS to allows ec2 instances to access EFS volume. once, you delete and create another efs volume the same default sg will be given to new volume also with inbound rules already edited.
+
+but when you decide delete kluster complete you need to delete this dependecy which you created manually. even though EFS volume is deleted but this inbound rule of this security group is not deleted. 
+
+since this EFS Volume sg (inbound rules is dependent on nodes sg_id) has ec2-instance sg-id as depenedecy. so, ec2-instance sg will not get deleted until this dependency is removed.
+so security groups will not get deleted resulting --> vpc not delete --> cluster not getting deleted completely.
+
+so whatever you created manually remove them all manually to get our cluster get deleted completely.
+
+In projects they will not delete clusters and volumes. here we are deleting to save cost.
+
+MySQL
+-----
+EBS (We decided we will use EBS)
+
+1. install EBS CSI drivers
+kubectl apply -k "github.com/kubernetes-sigs/aws-ebs-csi-driver/deploy/kubernetes/overlays/stable/?ref=release-1.33"
+2. check ebs csi permissions to node.
+AmazonEBSCSIDriverPolicy
+3. create expense storage class (this is administrative activity)
+
+cd k8-expense-volumes
+kubectl apply -f namespace.yaml
+namespace/expense created
+
+kubectl apply -f ebs-expense-sc.yaml
+storageclass.storage.k8s.io/expense-ebs created
+
+inform application team that sc and namespace created. drivers installed, permission given to nodes... (this is done by administration people)
+
+cd mysql
+kubectl apply -f manifest.yaml
+persistentvolumeclaim/mysql created
+
+kubectl get pvc -n expense
+NAME    STATUS    VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   VOLUMEATTRIBUTESCLASS   AGE
+mysql   Pending                                      expense-ebs    <unset>                 14s
+
+kubectl describe pvc mysql -n expense
+Name:          mysql
+Namespace:     expense
+StorageClass:  expense-ebs
+Status:        Pending
+Volume:
+Labels:        <none>
+Annotations:   <none>
+Finalizers:    [kubernetes.io/pvc-protection]
+Capacity:
+Access Modes:
+VolumeMode:    Filesystem
+Used By:       <none>
+Events:
+  Type    Reason                Age                From                         Message
+  ----    ------                ----               ----                         -------
+  Normal  WaitForFirstConsumer  8s (x8 over 100s)  persistentvolume-controller  waiting for first consumer to be created before binding
+
+status is pending because it waiting for the creation of pod.
+
+Install Kubens
+sudo git clone https://github.com/ahmetb/kubectx /opt/kubectx
+sudo ln -s /opt/kubectx/kubectx /usr/local/bin/kubectx
+sudo ln -s /opt/kubectx/kubens /usr/local/bin/kubens
+
+
+kubens expense
+Context "i-004d50756726a5e72@expense-1.us-east-1.eksctl.io" modified.
+Active namespace is "expense".
+
+StatefulSet --> used for stateful applications i.e which should have some storage.
+Deployment --> used for stateless applications i.e usually frontend and backend
+
+kuberentes was designed for stateless applications. but, since kubernetes got too much popualar for placing databases also in kubernetes they designe StatefulSet. but, in reality now also we don't use databases in kubernetes.
+
+DB Cluster --> MyQL Master --> MySQL Node --> CUD Operation(here Read no need) --> Node Should be aware of other nodes (See Diagram)
+
+while dealing db clusters, one node should be aware of other nodes
+
+cd k8-resources
+kubens default
+kubectl apply -f 17-deployment.yaml
+deployment.apps/nginx created
+service/nginx created
+
+kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx-68fcf7b7bf-2ddkp   1/1     Running   0          29s
+nginx-68fcf7b7bf-44bql   1/1     Running   0          29s
+nginx-68fcf7b7bf-8b8zd   1/1     Running   0          29s
+nginx-68fcf7b7bf-s8lc6   1/1     Running   0          29s
+nginx-68fcf7b7bf-zmh4b   1/1     Running   0          29s
+
+kubectl get svc
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.100.0.1      <none>        443/TCP   4h12m
+nginx        ClusterIP   10.100.32.135   <none>        80/TCP    52s
+
+kubectl apply -f 02-pod.yaml
+pod/nginx created
+
+nginx pod --> nginx service --> multiple replicas (see diagram)
+
+kubectl exec -it nginx -- bash
+root@nginx:/# curl nginx (from here to nginx service --> form service to pod)
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+html { color-scheme: light dark; }
+body { width: 35em; margin: 0 auto;
+font-family: Tahoma, Verdana, Arial, sans-serif; }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+root@nginx:/# apt update
+root@nginx:/# apt install dnsutils
+root@nginx:/# nslookup nginx
+;; Got recursion not available from 10.100.0.10
+Server:         10.100.0.10
+Address:        10.100.0.10#53
+
+Name:   nginx.default.svc.cluster.local
+Address: 10.100.32.135 --> service IP
+;; Got recursion not available from 10.100.0.10
+
+nslookup nginx (here we will get ip of service with name nginx)
+
+kuectl get svc
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)   AGE
+kubernetes   ClusterIP   10.100.0.1      <none>        443/TCP   4h26m
+nginx        ClusterIP   10.100.32.135   <none>        80/TCP    15m
+
+kubectl get pods
+NAME                     READY   STATUS    RESTARTS   AGE
+nginx                    1/1     Running   0          14m
+nginx-68fcf7b7bf-2ddkp   1/1     Running   0          15m
+nginx-68fcf7b7bf-44bql   1/1     Running   0          15m
+nginx-68fcf7b7bf-8b8zd   1/1     Running   0          15m
+nginx-68fcf7b7bf-s8lc6   1/1     Running   0          15m
+nginx-68fcf7b7bf-zmh4b   1/1     Running   0          15m
+
+kubectl exec -it nginx-68fcf7b7bf-2ddkp -- bash
+root@nginx-68fcf7b7bf-2ddkp:/# apt update
+root@nginx-68fcf7b7bf-2ddkp:/# apt install dnsutils -y
+root@nginx-68fcf7b7bf-2ddkp:/# nslookup nginx
+;; Got recursion not available from 10.100.0.10
+Server:         10.100.0.10
+Address:        10.100.0.10#53
+
+Name:   nginx.default.svc.cluster.local
+Address: 10.100.32.135
+;; Got recursion not available from 10.100.0.10
+
+Remember for database we have to give StatefulSet not Deployment
+
+cd ../k8-expense-volumes
+kubens expense
+kubectl apply -f mysql/manifest.yaml
+persistentvolumeclaim/mysql unchanged
+statefulset.apps/mysql created
+
+kubectl get pods
+NAME      READY   STATUS              RESTARTS   AGE
+mysql-0   1/1     Running             0          55s
+mysql-1   0/1     ContainerCreating   0          35s
+
+watch kubectl get pods (it will watch)
+
+pods are created with -0, -1 in statefulset. because statefulset should keep the pod indentiy
+pods in deployment are created at a time. but pods in sateful will be created in orderly manner
+(it will create pods after the 1st one comes ito running then next one is created)
+
+statefulset must have headless service, what is headless service?
+
+a service which will not have cluster ip is called headless.
+
+while dealing db clusters, one node should be aware of other nodes
+
+kubectl get pods
+NAME      READY   STATUS              RESTARTS   AGE
+mysql-0   1/1     Running             0          9m20s
+mysql-1   0/1     ContainerCreating   0          9m
+(here mysql-1 pod is Strill Creating we need to look into issue)
+
+kubectl describe pod mysql-1
+Events:
+  Type     Reason              Age   From                     Message
+  ----     ------              ----  ----                     -------
+  Warning  FailedAttachVolume  12m   attachdetach-controller  Multi-Attach error for volume "pvc-4a5191d3-5443-4a5f-9f92-ccb36798350d" Volume is already 
+                                                              used by pod(s) mysql-0
+
+  Normal   Scheduled           12m   default-scheduler        Successfully assigned expense/mysql-1 to ip-192-168-29-18.ec2.internal
+
+kubectl get pods -o wide
+NAME      READY   STATUS              RESTARTS   AGE   IP               NODE                            NOMINATED NODE   READINESS GATES
+mysql-0   1/1     Running             0          16m   192.168.18.202   ip-192-168-4-5.ec2.internal     <none>           <none>
+mysql-1   0/1     ContainerCreating   0          15m   <none>           ip-192-168-29-18.ec2.internal   <none>           <none>
+
+here second went to ip-192-168-29-18.ec2.internal. In EBS Condition is Availability Zone of Pod and Volume Should be Same. That is why it is not Running.
+we need to use nodeSelectors
+nodeSelector: 
+  topology.kubernetes.io/zone: us-east-1a
+
+let us do cleanup to for creating again
+
+kubectl delete -f mysql/manifest.yaml
+persistentvolumeclaim "mysql" deleted
+statefulset.apps "mysql" deleted
+
+here EBS Volumes will not be delete automatically. since it is Retain Policy. We need to delete them manually. so, delete them manually.
+
+kubectl delete pv pvc-4a5191d3-5443-4a5f-9f92-ccb36798350d
+persistentvolume "pvc-4a5191d3-5443-4a5f-9f92-ccb36798350d" deleted
+
+now delete manually the volume in aws EBS (delete volumes whose Volume state is Available)
+
+kubectl get nodes --show-labels
+(used for nodeSelector in YAML file)
+
+kubectl apply -f mysql/manifest.yaml
+persistentvolumeclaim/mysql created
+statefulset.apps/mysql created
+service/mysql created
+
+watch kubectl get pods
+
+kubectl get pods
+NAME      READY   STATUS              RESTARTS   AGE
+mysql-0   1/1     Running             0          2m59s
+mysql-1   0/1     ContainerCreating   0          2m47s
+
+
+still issue not resolved
+
+kubectl describe pod mysql-1 (same error again)
+Events:
+  Type     Reason              Age   From                     Message
+  ----     ------              ----  ----                     -------
+  Warning  FailedAttachVolume  12m   attachdetach-controller  Multi-Attach error for volume "pvc-4a5191d3-5443-4a5f-9f92-ccb36798350d" Volume is already 
+                                                              used by pod(s) mysql-0
+
+  Normal   Scheduled           12m   default-scheduler        Successfully assigned expense/mysql-1 to ip-192-168-29-18.ec2.internal
+
+
+Diagram
+--------
+One Node --> 2 Pods in One Node --> But 2 Different Volumes for Pod in same node --> it is not possible  --> we need to create different node
+This is the issue he said but don't know. in next class he will explain.
+
+But Mulit-Attach Error Means Pods in the same node are trying to attach to same volume. it seems pods from different nodes can connect to same volume but not but not pods in same node can attach to same volume. (My-Analogy)
+
+StatefulSet Vs Deployment
+--------------------------
+a) Statefu/Stateless applications:
+    i) StatefulSet - Stateful
+   ii) Deployment - Stateless
+
+b) Pod Interchangeability:
+    i) StatefulSet - Pods in a StatefulSet are not interchangeable. it's expected that each Pod has a specific role. such as always running as a primary or     
+                     read-only replica for a database application.
+   ii) Deployment - All Pods are indentical. so they're interchangeable and can be replaced at any time.
+
+c) Rollout ordering:
+    i) StatefulSet - Pods are guaranteed to be created and removed in sequence. When you scale down the StatefulSet. Kubernetes will terminate the most 
+                     recently created Pod.
+   ii) Deployment - No ordering is supported. When you scale down the Deployment Kubernetes will terminate a random Pod
+
+d) Storage access:
+    i) Stateful Set - Each Pod in the StatefulSet is assigned its own Persistent Volume (PV) and Persitent Volume Claim (PVC).
+   ii) Deployment - All Pods share the same PV  and PVC
+
+Issue
+-----
+a) He gave one analogy
+b) I too predicted one analogy
+c) In differences as per sorage access point. we have not created different PV and PVC for each pod. we created only one.
+
+In next class we will know what is the issue?
+
+
+In real projects we will not place databases like mysql etc in kubernetes. Mostly, we will keep Elastic Search, rabbitMQ, Prometheus etc main database containing details like user data, mobile no, email address, user transactios etc we will not keep in kubernetes it is highly risky.
+
+
+
+
+ 
+
+
+
+
